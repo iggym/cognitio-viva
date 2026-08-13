@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Adenosine Ledger — Why Coffee Never Actually Wakes You Up</title>
+<style>
+/* ============================================================
+   THE ADENOSINE LEDGER
+   Palette arc: espresso-dark lab → FLOOD → dawn cream → night indigo
+   Type: Palatino/Georgia display · system sans body · mono data
+   ============================================================ */
+:root{
+  --bg0:#150d08; --bg1:#1e130b; --panel:#251a10; --panel2:#2d1f13;
+  --line:#43301d; --cream:#f3e6d2; --dim:#bda88d; --faint:#8a745c;
+  --amber:#e8a24b; --amber2:#ffbf69; --teal:#4fd1b0; --teal2:#8ff0d8;
+  --red:#ff6b4a; --indigo:#131736; --lav:#93a4ff;
+  --disp:"Palatino Linotype","Palatino","Georgia",serif;
+  --body:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); color:var(--cream); background:var(--bg0);
+  background-image:
+    radial-gradient(1100px 600px at 85% -5%, rgba(232,162,75,.10), transparent 60%),
+    radial-gradient(900px 700px at -10% 30%, rgba(79,209,176,.06), transparent 55%),
+    radial-gradient(1200px 900px at 50% 115%, rgba(19,23,54,.55), transparent 70%);
+  background-attachment:fixed;
+  overflow-x:hidden; line-height:1.6;
+}
+body::after{ /* grain */
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:3; opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+::selection{background:var(--amber);color:#1c1108}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+.mono{font-family:var(--mono)}
+button{font-family:inherit;cursor:pointer}
+kbd{font-family:var(--mono);font-size:.8em;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--dim)}
+
+/* ---------- ambient drifting molecules ---------- */
+.ambient{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient span{position:absolute;border-radius:50%;filter:blur(1px);opacity:.5;
+  animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(0) translateX(0)}50%{transform:translateY(-46vh) translateX(30px)}to{transform:translateY(-92vh) translateX(-20px)}}
+
+/* ---------- header ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:14px;
+  padding:10px 18px;background:rgba(21,13,8,.72);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(67,48,29,.6);transition:background .6s,color .6s}
+body.light-ui header{background:rgba(253,244,227,.8);border-color:rgba(42,28,16,.15)}
+.mark{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--amber)}
+body.light-ui .mark{color:#a4571b}
+.mark b{color:var(--cream);font-weight:600} body.light-ui .mark b{color:#2a1c10}
+.hd-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);
+  border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+body.light-ui .badge{color:#7a5a3a;border-color:#d9c4a4}
+.insight{font-family:var(--mono);font-size:10px;color:var(--teal)}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--cream);
+  border-radius:8px;padding:7px 14px;font-size:13px;transition:.2s;position:relative}
+.btn:hover{border-color:var(--amber);transform:translateY(-1px)}
+.btn.amber{background:var(--amber);color:#241303;border-color:var(--amber);font-weight:700}
+.btn.amber:hover{background:var(--amber2)}
+
+/* ---------- open loops tray ---------- */
+#tray{position:fixed;left:14px;bottom:14px;z-index:45;display:flex;flex-direction:column;gap:6px}
+.loop{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;
+  color:var(--dim);background:rgba(21,13,8,.85);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px 5px 8px;backdrop-filter:blur(6px);transition:.4s;max-width:280px}
+.loop i{width:8px;height:8px;border-radius:50%;background:var(--red);flex:none;
+  box-shadow:0 0 8px var(--red);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.loop.resolved{color:var(--teal2);border-color:rgba(79,209,176,.5)}
+.loop.resolved i{background:var(--teal);box-shadow:0 0 8px var(--teal);animation:none}
+.loop.resolved{transform:translateX(4px)}
+@media(max-width:640px){#tray{display:none}}
+
+/* ---------- sections ---------- */
+section{position:relative;z-index:2;padding:110px 0}
+.sec-tag{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--faint);
+  text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.sec-tag::after{content:"";height:1px;width:80px;background:var(--line)}
+h2{font-family:var(--disp);font-weight:700;font-size:clamp(28px,4.4vw,44px);line-height:1.12;margin-bottom:14px}
+.lede{color:var(--dim);font-size:17px;max-width:640px}
+
+/* scroll reveal */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- OPEN (no title card) ---------- */
+#open{min-height:100vh;display:flex;align-items:center;padding-top:130px}
+.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--red);
+  box-shadow:0 0 10px var(--red);animation:pulse 1.2s infinite;margin-right:8px;vertical-align:1px}
+.ticker{font-family:var(--mono);font-size:12.5px;color:var(--teal);letter-spacing:.06em;
+  border:1px solid rgba(79,209,176,.35);display:inline-block;padding:8px 16px;border-radius:999px;
+  background:rgba(79,209,176,.06);margin-bottom:34px}
+.claim{font-family:var(--disp);font-size:clamp(40px,7.2vw,84px);line-height:1.04;font-weight:700}
+.claim .strike{position:relative;white-space:nowrap}
+.claim .strike::after{content:"";position:absolute;left:-2%;top:52%;height:.09em;width:0;
+  background:var(--red);transform:rotate(-2deg);animation:strike 1s 1.4s forwards cubic-bezier(.7,0,.3,1)}
+@keyframes strike{to{width:104%}}
+.claim .truth{display:block;opacity:0;transform:translateY(14px);animation:rise .9s 2.6s forwards;color:var(--amber)}
+@keyframes rise{to{opacity:1;transform:none}}
+.subclaim{margin-top:26px;max-width:620px;color:var(--dim);font-size:18px;opacity:0;animation:rise .9s 3.4s forwards}
+.subclaim b{color:var(--cream)}
+.loop-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px;opacity:0;animation:rise .9s 4s forwards}
+.pill{font-family:var(--mono);font-size:11.5px;color:var(--amber2);border:1px dashed rgba(232,162,75,.5);
+  border-radius:999px;padding:7px 15px;background:rgba(232,162,75,.05)}
+.pill::before{content:"⏳ unresolved — ";color:var(--faint)}
+.skim-link{margin-top:40px;opacity:0;animation:rise .9s 4.4s forwards}
+.skim-link a{color:var(--teal);font-family:var(--mono);font-size:13px;text-decoration:none;
+  border-bottom:1px dotted var(--teal)}
+.scrollcue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--faint);animation:bob 2s infinite}
+@keyframes bob{50%{transform:translateX(-50%) translateY(7px)}}
+
+/* ---------- SCENE ---------- */
+#scene .moment{font-family:var(--mono);color:var(--red);font-size:13px;letter-spacing:.2em;margin-bottom:20px}
+#scene p.big{font-family:var(--disp);font-size:clamp(21px,3vw,30px);line-height:1.5;max-width:760px}
+#scene p.big em{color:var(--amber);font-style:italic}
+#scene .small{margin-top:26px;color:var(--dim);max-width:640px;font-size:15.5px}
+
+/* ---------- LAB ---------- */
+#lab .panelbox{background:linear-gradient(180deg,var(--panel),var(--bg1));
+  border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 30px 60px rgba(0,0,0,.45)}
+#labcv{width:100%;height:470px;display:block;border-radius:10px;background:rgba(12,7,4,.5);cursor:crosshair}
+.ctrl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
+.ctrl label{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.08em}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;
+  background:var(--line);outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--amber);border:2px solid #241303;cursor:grab;box-shadow:0 0 10px rgba(232,162,75,.6)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--amber);
+  border:2px solid #241303;cursor:grab}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;border:none;color:var(--dim);font-family:var(--mono);
+  font-size:11px;padding:7px 13px;transition:.2s;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--amber);color:#241303;font-weight:700}
+.pour{display:flex;flex-wrap:wrap;gap:8px}
+.pour button{background:var(--panel2);border:1px solid var(--line);color:var(--cream);
+  border-radius:8px;padding:8px 12px;font-size:12.5px;transition:.15s}
+.pour button:hover{border-color:var(--amber);transform:translateY(-2px)}
+.pour button small{color:var(--faint);font-family:var(--mono)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:30px}
+.chip{font-family:var(--mono);font-size:11px;background:rgba(232,162,75,.12);color:var(--amber2);
+  border:1px solid rgba(232,162,75,.4);border-radius:999px;padding:4px 6px 4px 12px;display:flex;gap:8px;align-items:center}
+.chip button{background:none;border:none;color:var(--amber);font-size:13px;line-height:1}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.tile{background:rgba(12,7,4,.45);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+.tile .v{font-family:var(--mono);font-size:21px;margin-top:4px;transition:color .3s}
+.tile .v.hot{color:var(--red)} .tile .v.cool{color:var(--teal)} .tile .v.warm{color:var(--amber2)}
+.hint{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px}
+
+/* ---------- PREDICT ---------- */
+.pcards{display:grid;gap:26px;margin-top:34px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px;position:relative;overflow:hidden}
+.pcard .qno{font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--faint)}
+.pcard h3{font-family:var(--disp);font-size:clamp(19px,2.6vw,25px);margin:8px 0 16px;line-height:1.3}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--cream);
+  border-radius:9px;padding:11px 15px;font-size:14.5px;transition:.18s}
+.opt:hover{border-color:var(--amber);transform:translateX(5px)}
+.opt.good{border-color:var(--teal);background:rgba(79,209,176,.12);color:var(--teal2)}
+.opt.bad{border-color:var(--red);opacity:.55}
+.opt:disabled{cursor:default;transform:none}
+.reveal{max-height:0;opacity:0;overflow:hidden;transition:max-height .8s ease,opacity .6s}
+.reveal.open{max-height:640px;opacity:1;margin-top:18px}
+.reveal .inner{border-top:1px dashed var(--line);padding-top:16px;color:var(--dim);font-size:14.5px}
+.reveal .inner b{color:var(--cream)} .reveal .inner .teal{color:var(--teal2)}
+.revs{display:flex;gap:6px;justify-content:center;margin:10px 0 14px}
+.rev{width:26px;height:34px} .rev path{stroke:var(--faint);fill:none;stroke-width:2.4;stroke-linecap:round}
+.rev.extra{opacity:0;transform:scale(.2) translateY(8px);transform-origin:bottom center}
+.reveal.open .rev.extra{animation:sprout .7s forwards cubic-bezier(.3,1.6,.5,1)}
+.reveal.open .rev.extra:nth-of-type(7){animation-delay:.3s}
+.reveal.open .rev.extra:nth-of-type(8){animation-delay:.55s}
+.reveal.open .rev.extra:nth-of-type(9){animation-delay:.8s}
+@keyframes sprout{to{opacity:1;transform:none}}
+.barbox{background:rgba(12,7,4,.5);border:1px solid var(--line);border-radius:8px;height:34px;position:relative;overflow:hidden;margin:10px 0}
+.barfill{height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--red));transition:width 1.8s cubic-bezier(.2,.8,.2,1);
+  display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-family:var(--mono);font-size:12px;color:#241303;font-weight:700}
+.napline{display:flex;align-items:center;gap:0;margin:14px 0;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.napline .st{flex:1;text-align:center;position:relative;padding-top:26px}
+.napline .st::before{content:"";position:absolute;top:8px;left:0;right:0;height:2px;background:var(--line)}
+.napline .st i{position:absolute;top:2px;left:50%;transform:translateX(-50%);width:13px;height:13px;border-radius:50%;
+  background:var(--faint);font-style:normal}
+.reveal.open .napline .st:nth-child(1) i{background:var(--amber);animation:ping 1s .2s}
+.reveal.open .napline .st:nth-child(2) i{background:var(--teal);animation:ping 1s 1s}
+.reveal.open .napline .st:nth-child(3) i{background:var(--amber2);animation:ping 1s 1.8s;box-shadow:0 0 14px var(--amber2)}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(232,162,75,.7)}100%{box-shadow:0 0 0 18px rgba(232,162,75,0)}}
+
+/* ---------- FLOOD / PEAK ---------- */
+#flood{background:linear-gradient(180deg,transparent,rgba(255,107,74,.05) 30%,transparent);overflow:hidden}
+.dam{display:flex;gap:6px;justify-content:center;margin:34px 0;flex-wrap:wrap}
+.soc{width:34px;height:44px;position:relative}
+.soc::before,.soc::after{content:"";position:absolute;bottom:0;width:3px;height:26px;background:var(--faint);border-radius:3px}
+.soc::before{left:8px;transform:rotate(-16deg)} .soc::after{right:8px;transform:rotate(16deg)}
+.soc b{position:absolute;top:0;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:4px;
+  background:var(--amber);box-shadow:0 0 10px rgba(232,162,75,.7);transition:.6s cubic-bezier(.5,-.4,.6,1)}
+#flood.flooded .soc b{transform:translate(-50%,-60px) rotate(120deg);opacity:0}
+#flood.flooded .soc:nth-child(odd) b{transition-delay:.12s}
+#flood.flooded .soc:nth-child(3n) b{transition-delay:.26s}
+.wave{height:0;overflow:hidden}
+#flood.flooded .wave{height:14px}
+.wave i{display:block;height:14px;border-radius:8px;background:linear-gradient(90deg,transparent,var(--teal),var(--teal2),transparent);
+  transform:translateX(-100%);}
+#flood.flooded .wave i{animation:sweep 1.3s .5s forwards cubic-bezier(.3,.7,.2,1)}
+@keyframes sweep{to{transform:translateX(100%)}}
+.holdbtn{margin:8px auto;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:none;color:var(--cream)}
+.holdbtn .ring{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;font-size:11px;
+  font-family:var(--mono);letter-spacing:.1em;border:2px solid var(--line);transition:.2s;
+  background:conic-gradient(var(--red) calc(var(--p,0)*1%), var(--panel) 0)}
+.holdbtn .ring span{width:60px;height:60px;border-radius:50%;background:var(--panel);display:grid;place-items:center;
+  font-size:10px;text-align:center;line-height:1.3;color:var(--dim)}
+.holdbtn:hover .ring{border-color:var(--red)}
+.steps{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:34px}
+.stepbtn{font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--line);
+  color:var(--dim);border-radius:999px;padding:9px 16px;transition:.2s}
+.stepbtn.on{background:var(--red);border-color:var(--red);color:#fff}
+.stepview{margin:22px auto 0;max-width:640px;min-height:150px;background:rgba(12,7,4,.5);
+  border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center}
+.stepview .anim{height:84px;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px}
+.stepview p{color:var(--dim);font-size:14px}
+.stepview p b{color:var(--cream)}
+.halfstair{display:flex;align-items:flex-end;gap:8px;height:80px}
+.halfstair i{width:34px;background:var(--amber);border-radius:4px 4px 0 0;transform-origin:bottom;transform:scaleY(0)}
+.stepview.play .halfstair i{animation:grow .5s forwards}
+.halfstair i:nth-child(2){animation-delay:.2s!important;background:#d18f3e}
+.halfstair i:nth-child(3){animation-delay:.4s!important;background:#b37832}
+.halfstair i:nth-child(4){animation-delay:.6s!important;background:#8f5f28}
+@keyframes grow{to{transform:scaleY(1)}}
+.pool{width:200px;height:70px;border:2px solid var(--teal);border-top:none;border-radius:0 0 12px 12px;position:relative;overflow:hidden}
+.pool i{position:absolute;bottom:0;left:0;right:0;background:rgba(79,209,176,.4);height:0}
+.stepview.play .pool i{animation:fill 2.2s forwards}
+@keyframes fill{to{height:88%}}
+.floodmini{width:220px;height:70px;position:relative;overflow:hidden;border-radius:8px}
+.floodmini i{position:absolute;inset:0;background:linear-gradient(90deg,transparent 20%,var(--teal) 50%,transparent 80%);transform:translateX(-110%)}
+.stepview.play .floodmini i{animation:sweep 1.4s forwards}
+.oneidea{margin-top:60px;text-align:center;opacity:0;transform:translateY(30px);transition:1.2s}
+.oneidea.in{opacity:1;transform:none}
+.oneidea .big{font-family:var(--disp);font-style:italic;font-size:clamp(28px,5vw,52px);line-height:1.18;color:var(--cream)}
+.oneidea .big b{color:var(--teal);font-style:normal}
+.oneidea .sub{margin-top:16px;color:var(--dim);font-size:17px}
+
+/* ---------- dawn veil (THE pattern break) ---------- */
+#veil{position:fixed;inset:0;background:#fdf4e3;z-index:60;opacity:0;pointer-events:none}
+#veil.go{animation:veil 1.6s forwards}
+@keyframes veil{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+/* ---------- DAWN zone ---------- */
+.dawn{background:linear-gradient(180deg,#ffe9c4,#fdf4e3 30%);color:#2a1c10}
+.dawn .sec-tag{color:#a4571b}.dawn .sec-tag::after{background:#e2c69c}
+.dawn h2{color:#241303}
+.dawn .lede{color:#6d4f2e}
+.levers{display:grid;gap:22px;margin-top:38px}
+.lever{background:#fffaf0;border:1px solid #e5cfa8;border-radius:14px;padding:24px;
+  box-shadow:0 14px 34px rgba(122,74,26,.10);display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+@media(max-width:720px){.lever{grid-template-columns:1fr}}
+.lever h3{font-family:var(--disp);font-size:21px;color:#241303;margin-bottom:6px}
+.lever p{color:#6d4f2e;font-size:14.5px;max-width:560px}
+.lever p b{color:#241303}
+.lever .widget{min-width:220px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.toggle{width:64px;height:32px;border-radius:999px;background:#e2c69c;position:relative;border:none;transition:.3s}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;
+  background:#fff;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.toggle.on{background:#e07a2e}
+.toggle.on::after{left:35px}
+.spark{background:#fff;border:1px solid #e5cfa8;border-radius:8px}
+.deltalabel{font-family:var(--mono);font-size:12px;color:#a4571b;font-weight:700}
+.clockface{width:120px;height:120px;border-radius:50%;background:#fff;border:2px solid #e5cfa8;position:relative}
+.clockface .hand{position:absolute;bottom:50%;left:50%;width:3px;height:44px;background:#e07a2e;
+  transform-origin:bottom center;transition:transform 1s cubic-bezier(.3,1.4,.4,1);border-radius:3px}
+.clockface::after{content:"";position:absolute;top:50%;left:50%;width:9px;height:9px;border-radius:50%;background:#241303;transform:translate(-50%,-50%)}
+.napbtn{background:#e07a2e;color:#fff;border:none;border-radius:999px;padding:12px 22px;font-weight:700;font-size:14px}
+.napreadout{font-family:var(--mono);font-size:12px;color:#6d4f2e;min-height:18px}
+
+/* ---------- LEDGER receipt ---------- */
+.receipt{max-width:520px;margin:44px auto 0;background:#fffdf6;color:#241303;border-radius:6px;
+  padding:34px 30px 26px;font-family:var(--mono);position:relative;
+  box-shadow:0 24px 60px rgba(122,74,26,.22);
+  background-image:radial-gradient(120px 120px at 88% 6%, rgba(160,110,50,.14), transparent 70%)}
+.receipt::before,.receipt::after{content:"";position:absolute;left:0;right:0;height:10px;
+  background:repeating-linear-gradient(45deg,#fffdf6 0 8px,transparent 8px 16px)}
+.receipt::before{top:-9px;transform:scaleY(-1)} .receipt::after{bottom:-9px}
+.receipt h3{text-align:center;font-size:15px;letter-spacing:.3em;border-bottom:1px dashed #b9986b;padding-bottom:14px}
+.receipt .row{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dotted #e0cdb0}
+.receipt .row span:last-child{font-weight:700}
+.receipt .hero{ text-align:center;padding:18px 0 10px}
+.receipt .hero .k{font-size:10px;letter-spacing:.28em;color:#8a6a42}
+.receipt .hero .v{font-family:var(--disp);font-size:46px;font-weight:700;color:#b1490e;line-height:1.1}
+.receipt .hero .u{font-size:12px;color:#6d4f2e}
+.stamp{position:absolute;right:18px;top:44%;transform:rotate(-14deg);border:3px solid;border-radius:8px;
+  padding:6px 14px;font-weight:700;letter-spacing:.15em;font-size:14px;opacity:.85}
+.stamp.gA{color:#2e7d32;border-color:#2e7d32}.stamp.gB{color:#7a8a1e;border-color:#7a8a1e}
+.stamp.gC{color:#c07a12;border-color:#c07a12}.stamp.gD{color:#c94f1d;border-color:#c94f1d}.stamp.gE{color:#b3261e;border-color:#b3261e}
+.fineprint{margin-top:14px;font-size:9.5px;color:#8a6a42;text-align:center;line-height:1.7}
+
+/* ---------- share bar ---------- */
+.sharebar{margin-top:44px;text-align:center}
+.sharebar h3{font-family:var(--disp);font-size:24px;color:#241303}
+.sharebar .why{color:#6d4f2e;font-size:14px;margin:6px 0 20px}
+.sharebtns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.share{display:flex;align-items:center;gap:9px;border:1.5px solid #d9bd92;background:#fff;color:#241303;
+  border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;transition:.18s}
+.share:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(122,74,26,.18)}
+.share .gl{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;color:#fff;
+  font-family:var(--mono);font-size:11px;font-weight:700}
+.gx{background:#111}.glw{background:#21a65a}.gin{background:#0a66c2}.gre{background:#ff4500}.gth{background:#111}
+.copyall{margin-top:16px;background:none;border:1px dashed #b9986b;color:#6d4f2e;border-radius:8px;
+  padding:8px 16px;font-family:var(--mono);font-size:12px}
+
+/* ---------- NIGHT ---------- */
+#night{background:linear-gradient(180deg,#fdf4e3 0%,#20264f 14%,#0d1030 45%);padding-bottom:60px}
+#night .sec-tag{color:#7483d8}#night .sec-tag::after{background:#2c3568}
+#night h2{color:#e8ecff}
+#night .lede{color:#9aa6d9}
+.rinsebox{margin:40px auto;max-width:620px;background:rgba(255,255,255,.04);border:1px solid #2c3568;
+  border-radius:16px;padding:34px;text-align:center}
+.neurons{display:flex;justify-content:center;gap:14px;margin:18px 0;transition:gap 2s ease}
+.neurons i{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#93a4ff,#3d4a9e);
+  box-shadow:0 0 24px rgba(147,164,255,.35)}
+.rinsebox.rinsed .neurons{gap:58px}
+.rinsebox .fluid{height:8px;border-radius:6px;background:#2c3568;overflow:hidden;margin:12px 0 20px}
+.rinsebox .fluid i{display:block;height:100%;width:0;background:linear-gradient(90deg,#4fd1b0,#93a4ff);transition:width .1s linear}
+.meter{font-family:var(--mono);font-size:11px;color:#9aa6d9;letter-spacing:.15em}
+.doneline{margin-top:18px;font-family:var(--disp);font-style:italic;font-size:22px;color:#8ff0d8;
+  opacity:0;transition:1s} .rinsebox.rinsed .doneline{opacity:1}
+.returncard{margin:56px auto 0;max-width:620px;border:1px dashed #4a58a8;border-radius:14px;padding:26px;text-align:center}
+.returncard h3{font-family:var(--disp);color:#e8ecff;font-size:22px;margin-bottom:8px}
+.returncard p{color:#9aa6d9;font-size:14px}
+.returncard .plan{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap;align-items:center}
+.returncard select{background:#1a2048;color:#e8ecff;border:1px solid #4a58a8;border-radius:8px;padding:8px 12px;font-family:var(--mono)}
+.credits{margin-top:80px;text-align:center;font-family:var(--mono);font-size:10.5px;color:#5b6699;line-height:2}
+.credits a{color:#93a4ff}
+
+/* ---------- rain ---------- */
+.rain{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.rain b{position:absolute;top:-20px;border-radius:50%;opacity:0}
+.rain.go b{animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh);opacity:.7}}
+
+/* ---------- skim overlay ---------- */
+#skim{position:fixed;inset:0;z-index:80;background:rgba(12,7,4,.96);display:none;place-items:center}
+#skim.open{display:grid}
+.sku{max-width:720px;width:92%;text-align:center;position:relative}
+.skcount{width:66px;height:66px;border-radius:50%;margin:0 auto 26px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:15px;color:var(--amber);
+  background:conic-gradient(var(--amber) calc(var(--p,0)*1%), rgba(67,48,29,.6) 0)}
+.skcount span{width:54px;height:54px;border-radius:50%;background:#150d08;display:grid;place-items:center}
+.skslide{font-family:var(--disp);font-size:clamp(22px,4vw,38px);line-height:1.3;min-height:150px;
+  display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(14px);transition:.5s}
+.skslide.show{opacity:1;transform:none}
+.skbar{height:3px;background:var(--line);border-radius:3px;margin:26px auto;width:70%;overflow:hidden}
+.skbar i{display:block;height:100%;width:0;background:var(--amber)}
+.sknav{display:flex;gap:12px;justify-content:center;margin-top:18px}
+.skclose{position:absolute;top:-8px;right:0}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);z-index:90;
+  background:var(--amber);color:#241303;font-family:var(--mono);font-size:12.5px;font-weight:700;
+  padding:11px 22px;border-radius:999px;transition:.4s cubic-bezier(.3,1.4,.4,1);box-shadow:0 12px 30px rgba(0,0,0,.4);max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:680px){
+  section{padding:80px 0}
+  #labcv{height:430px}
+  .receipt{padding:26px 18px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.15s!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient" id="ambient" aria-hidden="true"></div>
+<div id="veil" aria-hidden="true"></div>
+
+<header>
+  <div class="mark">ADENOSINE <b>LAB</b> · FIELD GUIDE TO BORROWED ENERGY</div>
+  <div class="hd-right">
+    <span class="insight mono" id="insightCount">INSIGHTS 0/3</span>
+    <span class="badge" id="dayBadge">DAY 1</span>
+    <button class="btn" id="skimBtn">⚡ 30-SEC SKIM</button>
+  </div>
+</header>
+
+<div id="tray" aria-label="open questions">
+  <div class="loop" id="loop1"><i></i>why cup #1 feels weaker every year</div>
+  <div class="loop" id="loop2"><i></i>a 20-min trick that beats coffee <em>and</em> naps</div>
+  <div class="loop" id="loop3"><i></i>why your 3 PM coffee dies by 5</div>
+</div>
+
+<main>
+
+<!-- ================= OPEN ================= -->
+<section id="open">
+  <div class="wrap">
+    <div class="ticker"><span class="live-dot"></span><span id="tickerTxt">calibrating your sleep pressure…</span></div>
+    <h1 class="claim">
+      <span class="strike">Coffee gives you energy.</span>
+      <span class="truth">Coffee gives you <em>silence</em>.</span>
+    </h1>
+    <p class="subclaim">Every hour you're awake, a molecule called <b>adenosine</b> docks into receptors across your brain and turns the volume down on you. Caffeine doesn't clear it. It just <b>parks in the same receptors</b> so you can't hear the alarm. The tiredness keeps accumulating — silently — behind the blockade.</p>
+    <div class="loop-pills">
+      <span class="pill">why cup #1 feels weaker every year</span>
+      <span class="pill">a 20-minute trick that beats coffee and naps</span>
+      <span class="pill">why your 3 PM coffee dies by 5</span>
+    </div>
+    <p class="skim-link"><a href="#lab" id="skimLink2">In a hurry? Take the ⚡ 30-second skim →</a> &nbsp;·&nbsp; or scroll into the lab ↓</p>
+  </div>
+  <div class="scrollcue">SCROLL</div>
+</section>
+
+<!-- ================= SCENE ================= -->
+<section id="scene">
+  <div class="wrap">
+    <div class="sec-tag rv">TRANSMISSION · 15:07</div>
+    <p class="moment rv">IT'S 3:07 PM.</p>
+    <p class="big rv">Your cursor hovers over row 47 of a spreadsheet, and the numbers have started to <em>breathe</em>. Your eyelids feel dusted with fine sand. Somewhere behind your eyes, a dimmer switch is being turned down by something you had for breakfast.</p>
+    <p class="big rv" style="margin-top:22px">You reach for the 3 PM cup. It works — for two hours. Then it doesn't. <em>You assume the coffee got weaker.</em></p>
+    <p class="small rv">It didn't. You're about to watch exactly what that cup was doing while you felt great. Below is a working model of your adenosine system. Set your real wake time, pour your real cups, and watch the debt assemble itself hour by hour.</p>
+  </div>
+</section>
+
+<!-- ================= LAB ================= -->
+<section id="lab">
+  <div class="wrap">
+    <div class="sec-tag rv">STAGE II · THE SIMULATOR</div>
+    <h2 class="rv">Pour your actual day into the lab.</h2>
+    <p class="lede rv">Teal molecules are adenosine — sleep pressure docking into receptors. Amber is caffeine, squatting in the same sockets. Scrub the playhead, pour cups, change your metabolism. Everything downstream recalculates.</p>
+    <div class="panelbox rv" style="margin-top:30px">
+      <canvas id="labcv"></canvas>
+      <div class="ctrl">
+        <button class="btn amber" id="playBtn">▶ Run my day</button>
+        <input type="range" id="scrub" min="7" max="24" step="0.05" style="flex:1;min-width:160px" aria-label="time of day scrubber">
+        <span class="mono" id="clockRead" style="font-size:19px;color:var(--amber2);min-width:88px">3:07 PM</span>
+      </div>
+      <div class="ctrl">
+        <label>WAKE <input type="range" id="wakeR" min="5" max="10" step="0.25" value="7"> <span class="mono" id="wakeLbl">7:00 AM</span></label>
+        <label>BED <input type="range" id="bedR" min="20" max="26" step="0.25" value="23"> <span class="mono" id="bedLbl">11:00 PM</span></label>
+        <label style="margin-left:auto">METABOLIZER</label>
+        <div class="seg" id="metSeg">
+          <button data-m="fast">FAST · t½ 3.5h</button>
+          <button data-m="standard" class="on">STANDARD · 5h</button>
+          <button data-m="slow">SLOW · 7.5h</button>
+        </div>
+      </div>
+      <div class="ctrl pour">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--faint);align-self:center">POUR AT PLAYHEAD →</span>
+        <button data-cup="63">+ Espresso <small>63mg</small></button>
+        <button data-cup="95">+ Mug <small>95mg</small></button>
+        <button data-cup="150">+ Double <small>150mg</small></button>
+        <button data-cup="45">+ Tea <small>45mg</small></button>
+      </div>
+      <div class="chips" id="cupChips"></div>
+      <div class="tiles" id="tiles"></div>
+      <p class="hint">TIP: park the playhead at a time, pour a cup, then hit ▶ and watch the sockets fight for it. Hover the chart for exact readings.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PREDICT ================= -->
+<section id="predict">
+  <div class="wrap">
+    <div class="sec-tag rv">STAGE III · PREDICT, THEN SEE</div>
+    <h2 class="rv">Three predictions. Your brain will fight you on all of them.</h2>
+    <div class="pcards">
+
+      <div class="pcard rv">
+        <div class="qno">PREDICTION 1 / 3</div>
+        <h3>Ten days of daily coffee. What has your brain physically done about it?</h3>
+        <div class="opts" data-correct="a">
+          <button class="opt" data-v="a">It grows <b>extra adenosine receptors</b> — more seats for the same molecule</button>
+          <button class="opt" data-v="b">It learns to burn adenosine faster</button>
+          <button class="opt" data-v="c">Nothing — caffeine just stops mattering</button>
+        </div>
+        <div class="reveal" id="rev1"><div class="inner">
+          <div class="revs">
+            <svg class="rev" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8"/></svg>
+            <svg class="rev" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8"/></svg>
+            <svg class="rev" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8"/></svg>
+            <svg class="rev" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8"/></svg>
+            <svg class="rev" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8"/></svg>
+            <svg class="rev extra" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8" style="stroke:var(--teal)"/></svg>
+            <svg class="rev extra" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8" style="stroke:var(--teal)"/></svg>
+            <svg class="rev extra" viewBox="0 0 26 34"><path d="M4 32 V14 Q4 6 9 8 M22 32 V14 Q22 6 17 8" style="stroke:var(--teal)"/></svg>
+          </div>
+          <b>It builds new seats.</b> Chronic caffeine triggers <span class="teal">adenosine-receptor upregulation</span> — within ~7–12 days your brain sprouts extra A₁ receptors. Same cup, smaller fraction of seats blocked: that's tolerance. Quit for about a week and the extra seats quietly retract — which is why withdrawal feels like the tiredness was always waiting. <b>Loop #1: closed.</b>
+        </div></div>
+      </div>
+
+      <div class="pcard rv">
+        <div class="qno">PREDICTION 2 / 3</div>
+        <h3>A mug at 4 PM, lights-out at 11 PM. How much of it is <em>still locked onto your receptors</em> at midnight?</h3>
+        <div class="opts" data-correct="b">
+          <button class="opt" data-v="a">About 0% — it's long gone</button>
+          <button class="opt" data-v="b">Roughly 20–45% — a ghost dose, still gripping</button>
+          <button class="opt" data-v="c">About 70% — still fully wired</button>
+        </div>
+        <div class="reveal" id="rev2"><div class="inner">
+          <div class="barbox"><div class="barfill" id="bar2">0%</div></div>
+          Caffeine's half-life averages <b>~5 hours</b> (yours: <span class="teal" id="hl2">5h</span>). Eight hours after a mug, a substantial fraction is still occupying receptors at midnight — enough to blunt deep sleep even when you <b>fall asleep fine</b>. Falling asleep is not the same as sleeping.
+        </div></div>
+      </div>
+
+      <div class="pcard rv">
+        <div class="qno">PREDICTION 3 / 3</div>
+        <h3>The 2:30 PM slump hits hard. Which move fights it best?</h3>
+        <div class="opts" data-correct="c">
+          <button class="opt" data-v="a">An espresso, taken at my desk</button>
+          <button class="opt" data-v="b">A 20-minute nap</button>
+          <button class="opt" data-v="c">Espresso <b>immediately followed</b> by a 20-minute nap</button>
+        </div>
+        <div class="reveal" id="rev3"><div class="inner">
+          <div class="napline">
+            <div class="st"><i></i>t=0 · drink</div>
+            <div class="st"><i></i>0–20 min · nap clears adenosine</div>
+            <div class="st"><i></i>t=20 · caffeine lands on clean sockets</div>
+          </div>
+          The <b>caffeine nap</b>: caffeine takes ~20 minutes to reach the brain, and sleep is actively evicting adenosine in that window. You wake exactly as the caffeine arrives — <span class="teal">to empty receptors</span>. Driving-simulator studies found the combo beats coffee alone or nap alone; NASA's pilot work showed a ~26-min nap lifted performance <b>34%</b> and alertness <b>54%</b>. <b>Loop #2: closed.</b>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOD / PEAK ================= -->
+<section id="flood">
+  <div class="wrap">
+    <div class="sec-tag rv">STAGE IV · THE RECKONING</div>
+    <h2 class="rv">Now watch what the 3 PM cup was hiding.</h2>
+    <p class="lede rv">Each socket below holds a caffeine molecule. The day's adenosine has been pooling behind them since your alarm went off. Lift the blockade.</p>
+    <button class="holdbtn rv" id="holdBtn"><span class="ring" id="holdRing"><span>HOLD TO LIFT THE BLOCKADE</span></span></button>
+    <div class="dam rv" id="dam" aria-hidden="true"></div>
+    <div class="wave"><i></i></div>
+    <div class="steps rv" id="stepsWrap" style="opacity:.35;pointer-events:none">
+      <button class="stepbtn" data-s="0">① the blockade halves every ~5h</button>
+      <button class="stepbtn" data-s="1">② the pool kept filling all day</button>
+      <button class="stepbtn" data-s="2">③ the flood — your 5 PM wall</button>
+    </div>
+    <div class="stepview rv" id="stepview">
+      <div class="anim" id="stepAnim"></div>
+      <p id="stepText">Trigger the flood, then step through why it happens.</p>
+    </div>
+    <div class="oneidea" id="oneIdea">
+      <div class="big">You were never deleting tiredness.<br>You were <b>deferring it</b>.</div>
+      <div class="sub">And the interest is paid in deep sleep.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DAWN ================= -->
+<section class="dawn" id="dawn">
+  <div class="wrap">
+    <div class="sec-tag rv">STAGE V · SUNRISE PROTOCOLS</div>
+    <h2 class="rv">Keep the loan. Fire the loan shark.</h2>
+    <p class="lede rv">Three levers turn caffeine from a debt instrument back into a tool. Each one is live — pull them.</p>
+    <div class="levers">
+      <div class="lever rv">
+        <div>
+          <h3>Lever 1 — Delay the first cup 90 minutes</h3>
+          <p>Right after waking, your cortisol is already climbing and residual adenosine is low. Caffeine spent there is wasted — and it tends to deepen the afternoon hole. Let the natural rise crest first. Toggle to compare the two afternoons.</p>
+        </div>
+        <div class="widget">
+          <button class="toggle" id="lev1" aria-label="delay first cup toggle"></button>
+          <canvas class="spark" id="spark1" width="220" height="70"></canvas>
+          <div class="deltalabel" id="lev1delta">first cup: right at waking</div>
+        </div>
+      </div>
+      <div class="lever rv">
+        <div>
+          <h3>Lever 2 — Respect your last-call cutoff</h3>
+          <p>Your cutoff is bedtime minus roughly two half-lives — the point where a mug would still be ~30% receptor-bound at lights-out. Drag your bedtime; the clock obeys your metabolism setting from the lab.</p>
+        </div>
+        <div class="widget">
+          <input type="range" id="lev2bed" min="20" max="26" step="0.25" value="23" style="width:190px">
+          <div class="clockface"><div class="hand" id="clockHand"></div></div>
+          <div class="deltalabel" id="lev2lbl">LAST CALL: —</div>
+        </div>
+      </div>
+      <div class="lever rv">
+        <div>
+          <h3>Lever 3 — Run a caffeine nap</h3>
+          <p>For the real dips: drink fast, lie down immediately, set a 20-minute alarm. Sleep evicts adenosine while caffeine is still in transit. Press run to watch the handoff.</p>
+        </div>
+        <div class="widget">
+          <button class="napbtn" id="napRun">▶ RUN THE NAP</button>
+          <div class="napreadout" id="napRead">idle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LEDGER ================= -->
+<section class="dawn" id="ledger" style="padding-top:30px">
+  <div class="wrap">
+    <div class="sec-tag rv" style="justify-content:center">STAGE VI · YOUR RECEIPT</div>
+    <h2 class="rv" style="text-align:center">The Adenosine Ledger</h2>
+    <p class="lede rv" style="margin:0 auto;text-align:center">Computed live from your lab settings. It updates as you tune.</p>
+    <div class="receipt rv">
+      <h3>ADENOSINE LEDGER</h3>
+      <div class="row" style="margin-top:12px"><span>DATE</span><span id="rDate">—</span></div>
+      <div class="row"><span>TIME AWAKE</span><span id="rAwake">—</span></div>
+      <div class="row"><span>CAFFEINE POURED</span><span id="rCups">—</span></div>
+      <div class="row"><span>BLOCKADE AT BEDTIME</span><span id="rResid">—</span></div>
+      <div class="row"><span>DEEP SLEEP AT RISK</span><span id="rSleep">—</span></div>
+      <div class="row"><span>FIRST-CUP WINDOW</span><span id="rWindow">—</span></div>
+      <div class="hero">
+        <div class="k">TIME BORROWED FROM TOMORROW</div>
+        <div class="v" id="rBorrow">0h 00m</div>
+        <div class="u">of alertness, pre-spent</div>
+      </div>
+      <div class="row"><span>LAST-CALL CUTOFF</span><span id="rCut">—</span></div>
+      <div class="stamp gB" id="rStamp">GRADE B</div>
+      <div class="fineprint" id="rGradeLine">—</div>
+      <div class="fineprint">Estimates from a standard pharmacokinetic model (half-life ~5h ± individual variation). Not medical advice — your liver writes its own rules.</div>
+    </div>
+
+    <div class="sharebar rv">
+      <h3>Hand someone their own wake-up call.</h3>
+      <p class="why">Your numbers are baked into every post below.</p>
+      <div class="sharebtns">
+        <button class="share" id="shX"><span class="gl gx">𝕏</span>Post on X</button>
+        <button class="share" id="shLI"><span class="gl gin">in</span>LinkedIn</button>
+        <button class="share" id="shWA"><span class="gl glw">✆</span>WhatsApp</button>
+        <button class="share" id="shRD"><span class="gl gre">◉</span>Reddit</button>
+        <button class="share" id="shTH"><span class="gl gth">@</span>Threads</button>
+      </div>
+      <button class="copyall" id="copyAll">⧉ copy my full ledger as text</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NIGHT / END ================= -->
+<section id="night">
+  <div class="rain" id="rain" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sec-tag rv">FINALE · 02:00 AM</div>
+    <h2 class="rv">Tonight, around 2 AM,<br>your brain will shrink.</h2>
+    <p class="lede rv">In deep sleep, the gaps between your brain's cells widen by roughly <b style="color:#8ff0d8">60%</b>, and cerebrospinal fluid floods through, rinsing the day's metabolic residue — including the very adenosine you muted all day long. Afternoon caffeine clips deep sleep, and the rinse shortens with it. This is the part of the loan nobody mentions: <em>you don't just owe energy. You owe cleaning.</em></p>
+
+    <div class="rinsebox rv" id="rinsebox">
+      <div class="meter">GLYPHATIC RINSE · HOLD TO RUN</div>
+      <div class="neurons"><i></i><i></i></div>
+      <div class="fluid"><i id="fluidBar"></i></div>
+      <button class="holdbtn" id="rinseBtn" style="margin:0 auto"><span class="ring" id="rinseRing"><span>HOLD<br>3s</span></span></button>
+      <div class="doneline">Rinse complete. Tomorrow's pressure starts at zero.</div>
+    </div>
+
+    <div class="returncard rv">
+      <h3>Come back tomorrow.</h3>
+      <p>Your ledger resets with every sleep — and compounds with every cup. Re-run the lab after your first cup and watch the numbers drift. Lock in tomorrow's plan:</p>
+      <div class="plan">
+        <label class="mono" style="font-size:11px;color:#9aa6d9">I WAKE AT</label>
+        <select id="planWake"></select>
+        <button class="btn amber" id="planBtn">Lock in my window</button>
+      </div>
+      <p class="mono" id="planOut" style="margin-top:12px;font-size:12px;color:#8ff0d8"></p>
+    </div>
+
+    <div class="credits">
+      SOURCES &amp; SHOULDERS · Porkka-Heiskanen et al., <i>Science</i> 1997 (adenosine accumulates with waking) · Drake et al., <i>J Clin Sleep Med</i> 2013 (caffeine 6h pre-bed ≈ 1h of sleep lost) · Xie et al., <i>Science</i> 2013 (glymphatic space widens ~60% in sleep) · Rosekind et al., NASA 1994 (naps &amp; performance) · Horne &amp; Reyner 1996 (coffee-nap advantage)<br>
+      Built as a single self-contained file · no trackers, no frameworks — just receptors.<br>
+      <a href="#open">↑ re-run the lab</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= SKIM OVERLAY ================= -->
+<div id="skim" role="dialog" aria-label="30 second skim">
+  <div class="sku">
+    <button class="btn skclose" id="skimClose">✕ close</button>
+    <div class="skcount" id="skCount"><span id="skSecs">30</span></div>
+    <div class="skslide" id="skSlide"></div>
+    <div class="skbar"><i id="skBarFill"></i></div>
+    <div class="sknav">
+      <button class="btn" id="skPrev">← prev</button>
+      <button class="btn" id="skNext">next →</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* ================= 0 · UTILITIES & STATE ================= */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const SHARE_URL=(location.protocol==="file:")?"https://your-site.example/artifacts/adenosine-ledger.html":location.href;
+function fmt12(h){h=((h%24)+24)%24;let hh=Math.floor(h),mm=Math.round((h-hh)*60);if(mm===60){mm=0;hh=(hh+1)%24;}const ap=hh>=12?"PM":"AM";let h12=hh%12;if(h12===0)h12=12;return h12+":"+(mm<10?"0":"")+mm+" "+ap;}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+
+const KEY="adenosine-ledger-v1";
+let store={n:1,last:new Date().toDateString(),plan:null};
+try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);if(p.last===new Date().toDateString())store=p;else store={n:(p.n||0)+1,last:new Date().toDateString(),plan:p.plan};}localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}
+$("dayBadge").textContent=store.n===1?"DAY 1 · FIRST DOSE OF TRUTH":"DAY "+store.n+" · ADENOSINE RESET ✓";
+
+const S={wake:7,bed:23,met:"standard",cups:[{t:8,mg:95,label:"mug"},{t:15.5,mg:95,label:"mug"}]};
+const HL={fast:3.5,standard:5,slow:7.5};
+
+/* ================= 1 · PHARMACOKINETIC MODEL ================= */
+const KA=4, EC50=55;
+function cafRaw(t,cups,hl){const ke=Math.log(2)/hl;let c=0;for(const k of cups){const dt=t-k.t;if(dt<=0)continue;c+=k.mg*(KA/(KA-ke))*(Math.exp(-ke*dt)-Math.exp(-KA*dt));}return Math.max(0,c);}
+function occAt(t,cups,hl){const c=cafRaw(t,cups,hl);return c/(c+EC50);}
+function pressureAt(t,wake){const aw=t-wake;if(aw<0)return .06;if(aw<=16)return aw/16;return Math.min(1.25,1+(aw-16)*.015);}
+function findCrash(cups,hl,wake,bed){if(!cups.length)return null;let po=occAt(wake,cups,hl);for(let t=wake+.05;t<=bed;t+=.05){const o=occAt(t,cups,hl);if(po>=.22&&o<.22&&pressureAt(t,wake)>.4)return t;po=o;}return null;}
+function cutoffFor(bed,hl){for(let t=bed-.5;t>=bed-18;t-=.25){if(occAt(bed,[{t,mg:95}],hl)<.30)return t;}return bed-18;}
+function borrowedHours(cups,hl,wake,bed){let s=0;for(let t=wake;t<=bed;t+=.1){s+=occAt(t,cups,hl)*pressureAt(t,wake)*.1;}return s;}
+
+function computeLedger(){
+  const hl=HL[S.met], nowH=new Date().getHours()+new Date().getMinutes()/60;
+  const occBed=S.cups.length?occAt(S.bed,S.cups,hl):0;
+  const minutes=occBed<=.02?0:Math.min(80,Math.round(70*occBed/(occBed+.22)));
+  const crash=findCrash(S.cups,hl,S.wake,S.bed);
+  const borrow=borrowedHours(S.cups,hl,S.wake,S.bed);
+  const cutoff=cutoffFor(S.bed,hl);
+  const totalMg=S.cups.reduce((a,c)=>a+c.mg,0);
+  const afterCut=S.cups.filter(c=>c.t>cutoff).length;
+  const first=S.cups.length?Math.min.apply(null,S.cups.map(c=>c.t)):null;
+  const early=first!==null&&(first-S.wake)<0.5;
+  let score=100-minutes*.45-borrow*9-afterCut*10-(early?8:0)-(totalMg>400?6:0);
+  score=clamp(Math.round(score),4,99);
+  const g=score>=85?["A","CLEAN BURN","gA"]:score>=70?["B","SUSTAINABLE","gB"]:score>=55?["C","ACCUMULATING DEBT","gC"]:score>=40?["D","HEAVY INTEREST","gD"]:["E","LOAN-SHARK TERRITORY","gE"];
+  const awakeH=clamp(nowH-S.wake,0,S.bed-S.wake);
+  return {hl,occBed,minutes,crash,borrow,cutoff,totalMg,score,grade:g[0],gradeLine:g[1],gclass:g[2],awakeH,pressureNow:pressureAt(nowH,S.wake),early};
+}
+
+/* ================= 2 · AMBIENT BACKGROUND ================= */
+(function(){const amb=$("ambient");const cols=["#4fd1b0","#e8a24b","#8ff0d8"];
+for(let i=0;i<26;i++){const s=document.createElement("span");const sz=3+Math.random()*6;
+s.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+(Math.random()*100)+"%;top:"+(60+Math.random()*50)+"%;background:"+cols[i%3]+";animation-duration:"+(16+Math.random()*26)+"s;animation-delay:-"+(Math.random()*30)+"s;opacity:"+(0.15+Math.random()*.35);amb.appendChild(s);}})();
+
+/* ================= 3 · LIVE TICKER ================= */
+const pageOpen=Date.now();
+function tickTicker(){
+  const now=new Date();const nowH=now.getHours()+now.getMinutes()/60;
+  const awake=Math.max(0,nowH-S.wake);const p=Math.min(125,awake/16*100);
+  const since=((Date.now()-pageOpen)/1000);
+  const gain=(since*(100/57600)).toFixed(5);
+  $("tickerTxt").textContent="You've been awake "+Math.floor(awake)+"h "+Math.round((awake%1)*60)+"m · sleep pressure "+p.toFixed(1)+"% · since you opened this page: +"+gain+"% and climbing";
+}
+setInterval(tickTicker,1000);tickTicker();
+
+/* ================= 4 · LAB CANVAS ================= */
+const cv=$("labcv"),ctx=cv.getContext("2d");
+let CW=0,CH=0,DPR=1;
+function sizeCanvas(){DPR=Math.min(2,window.devicePixelRatio||1);const r=cv.getBoundingClientRect();CW=r.width;CH=r.height;cv.width=CW*DPR;cv.height=CH*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+window.addEventListener("resize",sizeCanvas);
+
+const NSOCK=22;
+let ph=0,playing=false,lastTs=0,hover=null;
+let sockets=[];for(let i=0;i<NSOCK;i++)sockets.push({type:"free",tSwitch:0});
+let floaters=[];
+
+function chartGeom(){const t0=S.wake-.5,t1=S.bed+2.5;const x0=40,x1=CW-14,y0=190,y1=CH-26;
+return{t0,t1,x0,x1,y0,y1,X:t=>x0+(t-t0)/(t1-t0)*(x1-x0),Y:v=>y1-v*(y1-y0)};}
+
+function drawLab(ts){
+  const dt=Math.min(50,ts-lastTs);lastTs=ts;
+  if(playing){ph+=dt/1000*1.35;if(ph>S.bed+2){ph=S.bed+2;playing=false;$("playBtn").textContent="▶ Run my day";}}
+  $("scrub").value=ph;$("clockRead").textContent=fmt12(ph);
+  ctx.clearRect(0,0,CW,CH);
+  const hl=HL[S.met],P=pressureAt(ph,S.wake),O=occAt(ph,S.cups,hl);
+  const cafN=Math.round(O*NSOCK),adeN=Math.round((1-O)*Math.min(P,1)*NSOCK);
+  const freeTarget=Math.max(0,Math.round(P*30)-adeN);
+
+  /* sockets */
+  const sw=CW-60,sx0=30,sy=138,step=sw/(NSOCK-1);
+  ctx.font="10px ui-monospace,monospace";ctx.fillStyle="rgba(189,168,141,.55)";
+  ctx.fillText("RECEPTOR FIELD — live at "+fmt12(ph),sx0,26);
+  ctx.fillText("blockade "+Math.round(O*100)+"%  ·  pressure "+Math.round(P*100)+"%",sx0,40);
+  for(let i=0;i<NSOCK;i++){
+    const want=i<cafN?"caf":i<cafN+adeN?"ade":"free";
+    const s=sockets[i];if(s.type!==want){s.type=want;s.tSwitch=ts;}
+    const x=sx0+i*step;
+    ctx.strokeStyle="rgba(138,116,92,.8)";ctx.lineWidth=2.4;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(x-7,sy);ctx.lineTo(x-4,sy-16);ctx.moveTo(x+7,sy);ctx.lineTo(x+4,sy-16);ctx.stroke();
+    if(want!=="free"){
+      const k=RM?1:clamp((ts-s.tSwitch)/350,0,1);
+      const sc=k<1?1.25-Math.cos(k*Math.PI/2)*.25-((1-k)*.0):1;
+      const pop=RM?1:(k<1?0.6+0.55*Math.sin(k*Math.PI):1);
+      ctx.save();ctx.translate(x,sy-24);ctx.scale(pop,pop);
+      if(want==="caf"){ctx.fillStyle="#e8a24b";ctx.shadowColor="rgba(232,162,75,.8)";ctx.shadowBlur=9;
+        ctx.beginPath();ctx.roundRect(-6,-6,12,12,3);ctx.fill();}
+      else{ctx.fillStyle="#4fd1b0";ctx.shadowColor="rgba(79,209,176,.8)";ctx.shadowBlur=9;
+        ctx.beginPath();ctx.arc(0,0,6,0,7);ctx.fill();}
+      ctx.restore();
+    }
+  }
+  /* free-floating adenosine */
+  while(floaters.length<freeTarget)floaters.push({x:30+Math.random()*(CW-60),y:54+Math.random()*52,seed:Math.random()*7});
+  if(floaters.length>freeTarget)floaters.length=freeTarget;
+  for(const f of floaters){
+    if(!RM){f.x+=Math.sin(ts/900+f.seed)*.35;f.y+=Math.cos(ts/700+f.seed*2)*.28;}
+    f.y=clamp(f.y,50,110);f.x=clamp(f.x,24,CW-24);
+    ctx.fillStyle="rgba(79,209,176,.65)";ctx.beginPath();ctx.arc(f.x,f.y,3.4,0,7);ctx.fill();
+  }
+
+  /* ---- chart ---- */
+  const g=chartGeom();
+  ctx.strokeStyle="rgba(67,48,29,.9)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(g.x0,g.y1);ctx.lineTo(g.x1,g.y1);ctx.stroke();
+  for(let t=Math.ceil(g.t0/2)*2;t<=g.t1;t+=2){const x=g.X(t);
+    ctx.strokeStyle="rgba(67,48,29,.45)";ctx.beginPath();ctx.moveTo(x,g.y0);ctx.lineTo(x,g.y1);ctx.stroke();
+    if(t%4===0){ctx.fillStyle="rgba(138,116,92,.8)";ctx.font="9.5px ui-monospace,monospace";ctx.textAlign="center";
+      ctx.fillText(fmt12(t).replace(" ",""),x,g.y1+14);}}
+  ctx.textAlign="left";
+  /* sleep zone */
+  ctx.fillStyle="rgba(19,23,54,.5)";ctx.fillRect(g.X(S.bed),g.y0,g.x1-g.X(S.bed),g.y1-g.y0);
+  ctx.fillStyle="rgba(147,164,255,.8)";ctx.font="9.5px ui-monospace,monospace";
+  ctx.fillText("SLEEP",g.X(S.bed)+6,g.y0+12);
+  /* felt-pressure fill */
+  ctx.beginPath();ctx.moveTo(g.X(S.wake),g.Y(0));
+  for(let t=S.wake;t<=Math.min(S.bed+2,g.t1);t+=(g.t1-g.t0)/240){const v=pressureAt(t,S.wake)*(1-occAt(t,S.cups,hl));ctx.lineTo(g.X(t),g.Y(v));}
+  ctx.lineTo(g.X(Math.min(S.bed+2,g.t1)),g.Y(0));ctx.closePath();
+  ctx.fillStyle="rgba(255,107,74,.16)";ctx.fill();
+  ctx.strokeStyle="rgba(255,107,74,.85)";ctx.lineWidth=1.5;ctx.stroke();
+  /* pressure curve */
+  ctx.beginPath();
+  for(let i=0;i<=240;i++){const t=g.t0+i*(g.t1-g.t0)/240;let v;if(t<S.bed)v=pressureAt(t,S.wake);else v=pressureAt(S.bed,S.wake)*Math.exp(-(t-S.bed)/2.2)+.05;
+    i?ctx.lineTo(g.X(t),g.Y(v)):ctx.moveTo(g.X(t),g.Y(v));}
+  ctx.strokeStyle="#4fd1b0";ctx.lineWidth=2.2;ctx.stroke();
+  /* caffeine occupancy */
+  ctx.beginPath();
+  for(let i=0;i<=240;i++){const t=g.t0+i*(g.t1-g.t0)/240;const v=occAt(t,S.cups,hl);
+    i?ctx.lineTo(g.X(t),g.Y(v)):ctx.moveTo(g.X(t),g.Y(v));}
+  ctx.strokeStyle="#e8a24b";ctx.lineWidth=2.2;ctx.stroke();
+  /* crash band */
+  const L=computeLedger();
+  if(L.crash){ctx.fillStyle="rgba(255,107,74,.18)";ctx.fillRect(g.X(L.crash-.6),g.y0,g.X(L.crash+.8)-g.X(L.crash-.6),g.y1-g.y0);
+    ctx.fillStyle="#ff6b4a";ctx.font="9.5px ui-monospace,monospace";ctx.fillText("THE WALL",g.X(L.crash-.6)+4,g.y0+12);}
+  /* cutoff */
+  ctx.setLineDash([4,4]);ctx.strokeStyle="rgba(243,230,210,.6)";ctx.beginPath();
+  ctx.moveTo(g.X(L.cutoff),g.y0);ctx.lineTo(g.X(L.cutoff),g.y1);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="rgba(243,230,210,.75)";ctx.fillText("LAST CALL "+fmt12(L.cutoff),g.X(L.cutoff)-30,g.y0-6);
+  /* cups */
+  for(const c of S.cups){const x=g.X(c.t);ctx.strokeStyle="rgba(232,162,75,.5)";ctx.setLineDash([2,4]);
+    ctx.beginPath();ctx.moveTo(x,g.y0);ctx.lineTo(x,g.y1);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle="#ffbf69";ctx.beginPath();ctx.roundRect(x-5,g.y0-16,10,9,2);ctx.fill();
+    ctx.strokeStyle="#ffbf69";ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x+7,g.y0-11.5,3,-1.2,1.2);ctx.stroke();}
+  /* playhead */
+  const px=g.X(clamp(ph,g.t0,g.t1));
+  ctx.strokeStyle="rgba(255,191,105,.9)";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(px,g.y0);ctx.lineTo(px,g.y1);ctx.stroke();
+  ctx.fillStyle="#ffbf69";ctx.beginPath();ctx.moveTo(px-5,g.y0-4);ctx.lineTo(px+5,g.y0-4);ctx.lineTo(px,g.y0+4);ctx.closePath();ctx.fill();
+  /* legend */
+  ctx.font="10px ui-monospace,monospace";
+  const lg=[["#4fd1b0","adenosine pressure"],["#e8a24b","caffeine blockade"],["#ff6b4a","what you actually feel"]];
+  lg.forEach((d,i)=>{ctx.fillStyle=d[0];ctx.fillRect(g.x0+i*158,g.y1+22,10,3);
+    ctx.fillStyle="rgba(189,168,141,.8)";ctx.fillText(d[1],g.x0+i*158+15,g.y1+27);});
+  /* hover crosshair */
+  if(hover&&hover.x>g.x0&&hover.x<g.x1){
+    const t=g.t0+(hover.x-g.x0)/(g.x1-g.t0)*(g.t1-g.t0);
+    ctx.strokeStyle="rgba(243,230,210,.35)";ctx.beginPath();ctx.moveTo(hover.x,g.y0);ctx.lineTo(hover.x,g.y1);ctx.stroke();
+    const box="t "+fmt12(t)+" · pressure "+Math.round(pressureAt(t,S.wake)*100)+"% · blockade "+Math.round(occAt(t,S.cups,hl)*100)+"%";
+    ctx.font="10.5px ui-monospace,monospace";const w=ctx.measureText(box).width+16;
+    const bx=clamp(hover.x-w/2,g.x0,g.x1-w);
+    ctx.fillStyle="rgba(21,13,8,.92)";ctx.fillRect(bx,g.y0+8,w,22);
+    ctx.strokeStyle="rgba(232,162,75,.5)";ctx.strokeRect(bx,g.y0+8,w,22);
+    ctx.fillStyle="#f3e6d2";ctx.fillText(box,bx+8,g.y0+23);
+  }
+  updateTiles(L);
+  requestAnimationFrame(drawLab);
+}
+cv.addEventListener("pointermove",e=>{const r=cv.getBoundingClientRect();hover={x:e.clientX-r.left,y:e.clientY-r.top};});
+cv.addEventListener("pointerleave",()=>hover=null);
+
+let tileCache="";
+function updateTiles(L){
+  const key=[Math.round(L.occBed*100),Math.round(L.borrow*12),L.crash?L.crash.toFixed(2):"x",Math.round(pressureAt(ph,S.wake)*100),Math.round(occAt(ph,S.cups,L.hl)*100),L.minutes].join("|");
+  if(key===tileCache)return;tileCache=key;
+  const nowO=occAt(ph,S.cups,L.hl);
+  $("tiles").innerHTML=
+   '<div class="tile"><div class="k">Blockade now</div><div class="v warm">'+Math.round(nowO*100)+'%</div></div>'+
+   '<div class="tile"><div class="k">Pressure now</div><div class="v cool">'+Math.round(pressureAt(ph,S.wake)*100)+'%</div></div>'+
+   '<div class="tile"><div class="k">Residual at bed</div><div class="v '+(L.occBed>.2?"hot":"cool")+'">'+Math.round(L.occBed*100)+'%</div></div>'+
+   '<div class="tile"><div class="k">Crash window</div><div class="v '+(L.crash?"hot":"cool")+'">'+(L.crash?fmt12(L.crash-.6)+"–"+fmt12(L.crash+.8):(S.cups.length?"after bedtime":"no cups"))+'</div></div>'+
+   '<div class="tile"><div class="k">Last-call cutoff</div><div class="v warm">'+fmt12(L.cutoff)+'</div></div>'+
+   '<div class="tile"><div class="k">Sleep at risk tonight</div><div class="v '+(L.minutes>30?"hot":"cool")+'">≈'+L.minutes+' min</div></div>';
+}
+
+/* controls */
+const scrub=$("scrub");
+scrub.addEventListener("input",()=>{ph=parseFloat(scrub.value);playing=false;$("playBtn").textContent="▶ Run my day";});
+$("playBtn").addEventListener("click",()=>{playing=!playing;$("playBtn").textContent=playing?"❚❚ Pause":"▶ Run my day";if(playing&&ph>=S.bed+1.9)ph=S.wake;});
+function rebuildScrub(){scrub.min=S.wake;scrub.max=S.bed+2;ph=clamp(ph,S.wake,S.bed+2);}
+$("wakeR").addEventListener("input",e=>{S.wake=parseFloat(e.target.value);$("wakeLbl").textContent=fmt12(S.wake);if(S.bed<=S.wake+6)S.bed=S.wake+9,$("bedR").value=S.bed,$("bedLbl").textContent=fmt12(S.bed);rebuildScrub();renderReceipt();tickTicker();});
+$("bedR").addEventListener("input",e=>{S.bed=parseFloat(e.target.value);$("bedLbl").textContent=fmt12(S.bed);rebuildScrub();renderReceipt();});
+$("metSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.met=b.dataset.m;
+  [...$("metSeg").children].forEach(x=>x.classList.toggle("on",x===b));
+  toast("Metabolism set: half-life "+HL[S.met]+"h — everything recalculated");renderReceipt();drawLever2();});
+document.querySelectorAll(".pour button").forEach(b=>b.addEventListener("click",()=>{
+  const mg=parseInt(b.dataset.cup,10);const labels={63:"espresso",95:"mug",150:"double",45:"tea"};
+  S.cups.push({t:Math.round(ph*2)/2,mg,label:labels[mg]});S.cups.sort((a,c)=>a.t-c.t);
+  renderChips();renderReceipt();toast("Poured "+labels[mg]+" at "+fmt12(ph));}));
+function renderChips(){
+  $("cupChips").innerHTML=S.cups.map((c,i)=>'<span class="chip">'+fmt12(c.t)+' · '+c.label+' <button data-i="'+i+'" aria-label="remove">✕</button></span>').join("")||'<span class="hint">no cups — the pressure is telling the truth today</span>';
+  $("cupChips").querySelectorAll("button").forEach(x=>x.addEventListener("click",()=>{S.cups.splice(+x.dataset.i,1);renderChips();renderReceipt();}));
+}
+
+/* ================= 5 · RECEIPT ================= */
+function borrowTxt(b){const h=Math.floor(b),m=Math.round((b-h)*60);return h+"h "+(m<10?"0":"")+m+"m";}
+function renderReceipt(){
+  const L=computeLedger();
+  $("rDate").textContent=new Date().toDateString()+" · DAY "+store.n;
+  $("rAwake").textContent=Math.floor(L.awakeH)+"h "+Math.round((L.awakeH%1)*60)+"m ("+Math.round(L.pressureNow*100)+"% pressure)";
+  $("rCups").textContent=S.cups.length+" cups · "+L.totalMg+" mg"+(L.early?" · ⚠ too-early first cup":"");
+  $("rResid").textContent=Math.round(L.occBed*100)+"% still bound";
+  $("rSleep").textContent="≈"+L.minutes+" min deep sleep";
+  $("rWindow").textContent=fmt12(S.wake+1.5)+" (wake + 90 min)";
+  $("rBorrow").textContent=S.cups.length?borrowTxt(L.borrow):"0h 00m";
+  $("rCut").textContent=fmt12(L.cutoff);
+  const st=$("rStamp");st.textContent="GRADE "+L.grade;st.className="stamp "+L.gclass;
+  $("rGradeLine").textContent="ASSESSMENT: "+L.gradeLine+(L.crash?" · predicted wall near "+fmt12(L.crash):"");
+  $("hl2").textContent=HL[S.met]+"h";
+}
+renderChips();renderReceipt();
+
+/* ================= 6 · PREDICT CARDS ================= */
+let insights=0;
+function resolveLoop(n,msg){const el=$("loop"+n);if(el&&!el.classList.contains("resolved")){el.classList.add("resolved");el.querySelector("i").style.background="";toast(msg);}}
+document.querySelectorAll(".pcard").forEach(card=>{
+  const opts=card.querySelector(".opts"),correct=opts.dataset.correct;
+  opts.querySelectorAll(".opt").forEach(btn=>btn.addEventListener("click",()=>{
+    opts.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(o.dataset.v===correct)o.classList.add("good");else if(o===btn)o.classList.add("bad");});
+    const rev=card.querySelector(".reveal");rev.classList.add("open");
+    if(card.querySelector("#rev2")){const L=computeLedger();const pct=Math.round(occAt(24,[{t:16,mg:95}],L.hl)*100);
+      setTimeout(()=>{const b=$("bar2");b.style.width=pct+"%";b.textContent="~"+pct+"% at midnight";},150);}
+    insights++;$("insightCount").textContent="INSIGHTS "+insights+"/3";
+    if(card.querySelector("#rev1"))resolveLoop(1,"LOOP CLOSED · receptor upregulation");
+    if(card.querySelector("#rev3"))resolveLoop(2,"LOOP CLOSED · the caffeine nap");
+    card.scrollIntoView({behavior:RM?"auto":"smooth",block:"nearest"});
+  }));
+});
+
+/* ================= 7 · FLOOD / PEAK ================= */
+(function(){const dam=$("dam");for(let i=0;i<16;i++){const d=document.createElement("div");d.className="soc";d.innerHTML="<b></b>";dam.appendChild(d);}})();
+let holdP=0,holding=false,holdRAF=null;
+function holdLoop(){if(!holding)return;if(holdP<100)holdP+=2.4;$("holdRing").style.setProperty("--p",holdP);
+  if(holdP>=100){holding=false;triggerFlood();return;}holdRAF=requestAnimationFrame(holdLoop);}
+const hb=$("holdBtn");
+hb.addEventListener("pointerdown",()=>{holding=true;holdLoop();});
+["pointerup","pointerleave"].forEach(ev=>hb.addEventListener(ev,()=>{if(holding){holding=false;cancelAnimationFrame(holdRAF);
+  if(holdP<100){holdP=0;$("holdRing").style.setProperty("--p",0);}}}));
+function triggerFlood(){
+  $("holdRing").style.setProperty("--p",100);hb.style.display="none";
+  $("flood").classList.add("flooded");
+  const w=$("stepsWrap");w.style.opacity=1;w.style.pointerEvents="auto";
+  setTimeout(()=>$("oneIdea").classList.add("in"),RM?100:1400);
+  setTimeout(()=>resolveLoop(3,"LOOP CLOSED · why the 3 PM cup dies"),900);
+  toast("The dam is down. Watch the pool arrive.");
+}
+const stepData=[
+ {html:'<div class="halfstair"><i style="height:78px"></i><i style="height:39px"></i><i style="height:20px"></i><i style="height:10px"></i></div>',
+  txt:"Caffeine clears on a half-life: 100% → 50% in ~5h → 25% five hours later. The blockade was always a countdown, not a wall."},
+ {html:'<div class="pool"><i></i></div>',
+  txt:"Behind it, adenosine never stopped accumulating — roughly one full day's pressure every 16 hours awake. The cup silenced it. It did not remove it."},
+ {html:'<div class="floodmini"><i></i></div>',
+  txt:"When occupancy falls, the whole masked pool reaches the receptors at once. That is your 5 PM wall — not a dip in energy, but the arrival of the day's unpaid bill."}
+];
+document.querySelectorAll(".stepbtn").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".stepbtn").forEach(x=>x.classList.toggle("on",x===b));
+  const i=+b.dataset.s,sv=$("stepview");
+  sv.classList.remove("play");void sv.offsetWidth;
+  $("stepAnim").innerHTML=stepData[i].html;$("stepText").innerHTML=stepData[i].txt;
+  sv.classList.add("play");
+}));
+
+/* ================= 8 · DAWN LEVERS ================= */
+$("lev1").addEventListener("click",()=>{
+  const on=$("lev1").classList.toggle("on");drawSpark(on);
+  $("lev1delta").textContent=on?"first cup: wake + 90 min → softer afternoon":"first cup: right at waking";
+});
+function drawSpark(delay){
+  const c=$("spark1").getContext("2d"),w=220,h=70;c.clearRect(0,0,w,h);
+  const curve=off=>{let pts=[];for(let i=0;i<=60;i++){const t=S.wake+ (13-S.wake)*i/60 + (13-S.wake)*0; const tt=13+(18-13)*i/60;
+    const occ=occAt(tt,[{t:S.wake+off,mg:95}],HL[S.met]);pts.push([w*i/60,h-8-(pressureAt(tt,S.wake)*(1-occ))*(h-16)]);}return pts;};
+  const draw=(pts,col,lw)=>{c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.strokeStyle=col;c.lineWidth=lw;c.stroke();};
+  draw(curve(.2),delay?"rgba(160,120,80,.35)":"#e07a2e",delay?1.5:2.5);
+  draw(curve(1.5),delay?"#e07a2e":"rgba(160,120,80,.35)",delay?2.5:1.5);
+  c.fillStyle="#8a6a42";c.font="9px ui-monospace,monospace";c.fillText("1 PM",4,h-1);c.fillText("6 PM",w-26,h-1);
+}
+drawSpark(false);
+function drawLever2(){
+  const bed=parseFloat($("lev2bed").value),cut=cutoffFor(bed,HL[S.met]);
+  const mins=((cut%24)*60);$("clockHand").style.transform="rotate("+(mins/720*360)+"deg)";
+  $("lev2lbl").textContent="LAST CALL: "+fmt12(cut)+" (bed "+fmt12(bed)+")";
+}
+$("lev2bed").addEventListener("input",drawLever2);drawLever2();
+let napTimer=null;
+$("napRun").addEventListener("click",()=>{
+  if(napTimer)return;const out=$("napRead");let m=0;
+  const stages=["drinking… cup empty in 90 seconds","asleep-ish… adenosine being evicted","caffeine arriving… clean receptors","⚡ awake — both mechanisms stacked (+34% perf, if you're a NASA pilot)"];
+  napTimer=setInterval(()=>{m+=2;out.textContent="T+"+(m<10?"0":"")+m+" min · "+stages[m<8?0:m<16?1:m<20?2:3];
+    if(m>=20){clearInterval(napTimer);napTimer=null;toast("Nap complete. Receptors: freshly swept.");}},300);
+});
+
+/* ================= 9 · SHARE ENGINE ================= */
+function sharePayload(){
+  const L=computeLedger();
+  const borrow=S.cups.length?borrowTxt(L.borrow):"zero (a rare, honest day)";
+  const resid=Math.round(L.occBed*100);
+  return {L,borrow,resid,
+    core:"Coffee never gave me energy — it muted the tiredness alarm while the debt grew. My Adenosine Ledger: "+borrow+" of tomorrow already borrowed; true caffeine cutoff "+fmt12(L.cutoff)+".",
+    url:SHARE_URL};
+}
+function copyText(txt,msg){
+  const done=()=>toast(msg||"Copied to clipboard");
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));}
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();done();}
+function openWin(u){const w=window.open(u,"_blank","noopener");if(!w)toast("Popup blocked — text copied instead");}
+$("shX").addEventListener("click",()=>{const p=sharePayload();
+  const txt=(p.core+" Run yours ⚗️ "+p.url+" #neuroscience #caffeine #sleep").slice(0,278);
+  openWin("https://twitter.com/intent/tweet?text="+encodeURIComponent(txt));});
+$("shLI").addEventListener("click",()=>{const p=sharePayload();
+  const txt="The most misunderstood productivity tool is the coffee cup.\n\nCaffeine is an adenosine antagonist: it doesn't clear fatigue, it blocks its detection — while sleep pressure keeps compounding underneath.\n\nThree implications for knowledge work:\n1) The afternoon cup is a loan against tonight's deep sleep (half-life ≈ "+HL[S.met]+"h).\n2) Daily use physically adds adenosine receptors — tolerance is structural, not motivational.\n3) My personal cutoff came out at "+fmt12(p.L.cutoff)+", with "+p.borrow+" of tomorrow's alertness already borrowed today.\n\nFull interactive lab (single HTML file, no signup):\n"+p.url;
+  copyText(txt,"LinkedIn post copied — paste it in a new post");setTimeout(()=>openWin("https://www.linkedin.com/feed/"),400);});
+$("shWA").addEventListener("click",()=>{const p=sharePayload();
+  const txt="☕ I just ran my coffee habit through an adenosine simulator. Apparently coffee doesn't add energy — it just mutes the tiredness alarm 😅\n\nMy result: "+p.resid+"% of my afternoon cup is still gripping receptors at bedtime, and I've borrowed "+p.borrow+" of tomorrow. My real cutoff time: "+fmt12(p.L.cutoff)+".\n\nCompute yours (takes ~1 min): "+p.url;
+  openWin("https://wa.me/?text="+encodeURIComponent(txt));});
+$("shRD").addEventListener("click",()=>{const p=sharePayload();
+  const title="Honest question: does anyone actually time their last coffee? Adenosine half-life math says my cutoff is "+fmt12(p.L.cutoff)+" — mine had "+p.resid+"% receptor occupancy at bedtime";
+  openWin("https://www.reddit.com/submit?url="+encodeURIComponent(p.url)+"&title="+encodeURIComponent(title));});
+$("shTH").addEventListener("click",()=>{const p=sharePayload();
+  const txt="My coffee has been lying to me:\n\n· it doesn't add energy — it mutes tiredness\n· my afternoon cup was "+p.resid+"% active at bedtime\n· the interest is paid in deep sleep\n\nMy ledger: "+p.borrow+" of tomorrow, pre-spent. Cutoff: "+fmt12(p.L.cutoff)+".\n\n"+p.url;
+  copyText(txt,"Threads text copied as backup");openWin("https://www.threads.net/intent/post?text="+encodeURIComponent(txt));});
+$("copyAll").addEventListener("click",()=>{const p=sharePayload();
+  copyText("THE ADENOSINE LEDGER — "+new Date().toDateString()+"\n"+p.core+"\nDeep sleep at risk: ≈"+p.L.minutes+" min · Grade "+p.L.grade+" ("+p.L.gradeLine+")\n"+p.url);});
+
+/* ================= 10 · SKIM ================= */
+function skimSlides(){const L=computeLedger();return[
+ "Coffee doesn't give you energy. It blocks adenosine — the molecule that tells your brain it's tired.",
+ "The tiredness doesn't vanish. It keeps accumulating behind the blockade, like water behind a dam.",
+ "Half-life ≈ "+HL[S.met]+" hours. A 4 PM cup is still gripping receptors past midnight.",
+ "Daily use makes your brain grow EXTRA adenosine receptors. Cup #1 gets weaker because there are more seats to fill.",
+ "Deep sleep is when your brain rinses itself — the gaps between cells widen ~60%. Afternoon caffeine clips the rinse.",
+ "The fix: first cup ~90 min after waking · last cup by "+fmt12(L.cutoff)+" · nap 20 min after a fast espresso. Your current debt: "+(S.cups.length?borrowTxt(L.borrow):"0m")+"."
+];}
+let skI=0,skTimer=null,skStart=0;
+function skShow(i,arr){skI=(i+arr.length)%arr.length;const el=$("skSlide");el.classList.remove("show");
+  setTimeout(()=>{el.textContent=arr[skI];el.classList.add("show");},180);skStart=Date.now();}
+function startSkim(){const arr=skimSlides();$("skim").classList.add("open");skShow(0,arr);
+  clearInterval(skTimer);skTimer=setInterval(()=>{const el=(Date.now()-skStart)/5000;
+    $("skBarFill").style.width=Math.min(100,el*100)+"%";
+    const total=30-(skI*5+el*5);$("skSecs").textContent=Math.max(0,Math.ceil(total));
+    $("skCount").style.setProperty("--p",Math.min(100,(skI+el)/arr.length*100));
+    if(el>=1)skShow(skI+1,arr);},80);}
+function stopSkim(){$("skim").classList.remove("open");clearInterval(skTimer);}
+$("skimBtn").addEventListener("click",startSkim);
+$("skimLink2").addEventListener("click",e=>{e.preventDefault();startSkim();});
+$("skimClose").addEventListener("click",stopSkim);
+$("skNext").addEventListener("click",()=>skShow(skI+1,skimSlides()));
+$("skPrev").addEventListener("click",()=>skShow(skI-1,skimSlides()));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")stopSkim();});
+
+/* ================= 11 · NIGHT: RINSE + PLAN ================= */
+let rp=0,rHold=false,rRAF=null;
+function rinseLoop(){if(!rHold)return;if(rp<100)rp+=1.1;$("rinseRing").style.setProperty("--p",rp);$("fluidBar").style.width=rp+"%";
+  if(rp>=100){rHold=false;$("rinsebox").classList.add("rinsed");makeRain();toast("GLYPHATIC RINSE COMPLETE");return;}rRAF=requestAnimationFrame(rinseLoop);}
+const rb=$("rinseBtn");
+rb.addEventListener("pointerdown",()=>{if($("rinsebox").classList.contains("rinsed"))return;rHold=true;rinseLoop();});
+["pointerup","pointerleave"].forEach(ev=>rb.addEventListener(ev,()=>{if(rHold){rHold=false;cancelAnimationFrame(rRAF);
+  if(rp<100&&!$("rinsebox").classList.contains("rinsed")){rp=Math.max(0,rp-20);$("rinseRing").style.setProperty("--p",rp);$("fluidBar").style.width=rp+"%";}}}));
+function makeRain(){const r=$("rain");r.innerHTML="";r.classList.remove("go");
+  const cols=["#93a4ff","#4fd1b0","#e8ecff"];
+  for(let i=0;i<50;i++){const b=document.createElement("b");const sz=3+Math.random()*5;
+    b.style.cssText="left:"+(Math.random()*100)+"%;width:"+sz+"px;height:"+sz+"px;background:"+cols[i%3]+";animation-duration:"+(2.5+Math.random()*3)+"s;animation-delay:"+(Math.random()*1.5)+"s";r.appendChild(b);}
+  void r.offsetWidth;r.classList.add("go");}
+const sel=$("planWake");
+for(let h=5;h<=10;h+=0.25){const o=document.createElement("option");o.value=h;o.textContent=fmt12(h);sel.appendChild(o);}
+if(store.plan)sel.value=store.plan.wake;
+$("planBtn").addEventListener("click",()=>{
+  const wake=parseFloat(sel.value);store.plan={wake,first:wake+1.5};
+  try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}
+  $("planOut").textContent="✓ LOCKED IN · tomorrow your first-cup window opens at "+fmt12(wake+1.5)+" — come back and see what the ledger says.";
+  toast("Plan locked. See you tomorrow.");
+});
+if(store.plan)$("planOut").textContent="YESTERDAY'S PLAN · window opened at "+fmt12(store.plan.first)+" — re-run the lab and compare.";
+
+/* ================= 12 · OBSERVERS & INIT ================= */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in");}),{threshold:.18});
+document.querySelectorAll(".rv").forEach(el=>io.observe(el));
+const dawnIO=new IntersectionObserver(es=>{
+  document.body.classList.toggle("light-ui",es.some(e=>e.isIntersecting));
+  es.forEach(e=>{if(e.isIntersecting&&!dawnIO._veiled){dawnIO._veiled=true;$("veil").classList.add("go");}});
+},{threshold:.12});
+dawnIO.observe($("dawn"));dawnIO.observe($("ledger"));
+
+/* init */
+sizeCanvas();
+const nowH=new Date().getHours()+new Date().getMinutes()/60;
+ph=clamp(nowH,S.wake+.2,S.bed);
+rebuildScrub();
+requestAnimationFrame(t=>{lastTs=t;requestAnimationFrame(drawLab);});
+</script>
+</body>
+</html>
