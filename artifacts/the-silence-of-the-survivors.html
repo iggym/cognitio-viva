@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Silence of the Survivors — Wald's Bullet Hole Paradox</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --bg-elev: #14171b;
+    --bg-deep: #06080a;
+    --fg: #e6e6e6;
+    --fg-dim: #8b8d92;
+    --fg-mute: #4a4c51;
+    --alert: #ff453a;
+    --alert-glow: rgba(255, 69, 58, 0.2);
+    --safe: #32d74b;
+    --safe-glow: rgba(50, 215, 75, 0.15);
+    --steel: #8a8f6b;
+    --line: #22262c;
+    --line-bright: #3a3f47;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 69, 58, 0.06), transparent 60%);
+    min-height: 100vh;
+  }
+
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+  }
+
+  section {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+
+  h1, h2, h3, .serif {
+    font-family: "Iowan Old Style", "Apple Garamond", Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    color: var(--steel);
+    font-family: -apple-system, sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.72rem;
+    margin-bottom: 24px;
+    display: inline-block;
+  }
+
+  p { margin-bottom: 18px; }
+
+  .lead {
+    font-size: 1.18rem;
+    line-height: 1.55;
+    color: var(--fg);
+    max-width: 720px;
+  }
+
+  .muted { color: var(--fg-dim); }
+  .alert { color: var(--alert); }
+  .safe { color: var(--safe); }
+  .num {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* === Progress === */
+  .progress-rail {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 220px;
+    background: var(--line);
+    z-index: 100;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, var(--alert), var(--steel));
+    height: 0%;
+    transition: height 0.15s;
+  }
+
+  /* === Open === */
+  #open {
+    padding-top: 60px;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stack-line {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.7rem, 5vw, 3rem);
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.9s forwards;
+    margin-bottom: 14px;
+  }
+  .stack-line:nth-child(1) { animation-delay: 0.3s; }
+  .stack-line:nth-child(2) { animation-delay: 1.5s; }
+  .stack-line:nth-child(3) {
+    animation-delay: 2.7s;
+    color: var(--alert);
+    font-style: italic;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .scroll-hint {
+    margin-top: 60px;
+    color: var(--fg-mute);
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.9s 4s forwards;
+  }
+
+  /* === Loops === */
+  .loop {
+    display: flex;
+    gap: 28px;
+    align-items: baseline;
+    margin: 18px 0;
+    padding: 26px 28px;
+    background: var(--bg-elev);
+    border-left: 2px solid var(--steel);
+    border-radius: 0 6px 6px 0;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .loop:hover {
+    transform: translateX(6px);
+    border-left-color: var(--alert);
+  }
+  .loop-num {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 2.4rem;
+    color: var(--steel);
+    line-height: 1;
+    min-width: 56px;
+    font-style: italic;
+  }
+  .loop-text {
+    font-size: 1.15rem;
+    line-height: 1.45;
+  }
+  .loop-text em { color: var(--alert); font-style: italic; }
+
+  /* === Transport === */
+  #transport .narrative {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+    line-height: 1.5;
+    max-width: 700px;
+  }
+  #transport .narrative em { color: var(--alert); font-style: italic; }
+
+  /* === Agency (Armor Allocator) === */
+  .allocator-frame {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 36px;
+    margin: 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .allocator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .armor-counter {
+    font-family: monospace;
+    font-size: 1.2rem;
+    color: var(--alert);
+  }
+  .armor-counter .safe { color: var(--safe); }
+  .plane-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    aspect-ratio: 600/400;
+  }
+  .plane-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .plane-zone {
+    fill: rgba(255,255,255,0.03);
+    stroke: var(--line-bright);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    cursor: pointer;
+    transition: fill 0.2s, stroke 0.2s;
+  }
+  .plane-zone:hover {
+    fill: rgba(255, 69, 58, 0.1);
+    stroke: var(--alert);
+  }
+  .plane-zone.armored {
+    fill: rgba(50, 215, 75, 0.25);
+    stroke: var(--safe);
+    stroke-dasharray: none;
+  }
+  .bullet-hole {
+    fill: #1a1a1a;
+    stroke: #000;
+    pointer-events: none;
+  }
+  .zone-label {
+    fill: var(--fg-mute);
+    font-size: 10px;
+    font-family: monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+  .deploy-btn {
+    display: block;
+    margin: 28px auto 0;
+    padding: 14px 40px;
+    background: var(--alert);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+  }
+  .deploy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--alert-glow);
+  }
+  .deploy-btn:disabled {
+    background: var(--line-bright);
+    color: var(--fg-mute);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* === Hypermedia Sim === */
+  #sim { border-bottom: none; }
+  .sim-canvas-wrap {
+    background: var(--bg-deep);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    width: 100%;
+    position: relative;
+    margin-bottom: 32px;
+  }
+  #simCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .sim-results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .result-cell {
+    background: var(--bg-elev);
+    padding: 24px;
+    border-radius: 8px;
+    border-top: 2px solid var(--steel);
+    text-align: center;
+  }
+  .result-cell.bad { border-top-color: var(--alert); }
+  .result-cell.good { border-top-color: var(--safe); }
+  .result-cell .label {
+    color: var(--fg-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+  }
+  .result-cell .value {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--fg);
+  }
+  .result-cell.bad .value { color: var(--alert); }
+  .result-cell.good .value { color: var(--safe); }
+
+  /* === Peak === */
+  #peak {
+    text-align: center;
+    padding: 140px 0;
+    background: radial-gradient(ellipse at center, rgba(255, 69, 58, 0.08), transparent 60%);
+    position: relative;
+    overflow: hidden;
+  }
+  #peak::before {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(255, 69, 58, 0.05), transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: pulse 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
+  }
+  .peak-statement {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    line-height: 1.25;
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .peak-statement em { color: var(--alert); font-style: italic; }
+  .peak-statement .highlight {
+    display: block;
+    margin-top: 24px;
+    font-size: 0.8em;
+    color: var(--fg-dim);
+    font-style: italic;
+  }
+
+  /* === Pattern Break === */
+  #break {
+    background: #000;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: none;
+    padding: 100px 24px;
+  }
+  .break-grid {
+    display: grid;
+    gap: 40px;
+  }
+  .break-text {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    line-height: 1.4;
+    color: var(--fg);
+    font-style: italic;
+  }
+  .break-text .lever {
+    color: var(--safe);
+    font-weight: 500;
+    font-style: normal;
+  }
+  .modern-examples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 600px;
+  }
+  .example-card {
+    border: 1px solid var(--line-bright);
+    padding: 24px;
+    text-align: left;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+  .example-card .title { color: var(--alert); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.1em; }
+  .example-card .text { font-size: 0.95rem; line-height: 1.4; color: var(--fg-dim); }
+
+  /* === Artifact === */
+  #artifact { text-align: center; }
+  .artifact-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line-bright);
+    border-radius: 16px;
+    padding: 48px 32px;
+    margin: 40px auto;
+    max-width: 600px;
+    position: relative;
+    overflow: hidden;
+  }
+  .artifact-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--alert), var(--steel));
+  }
+  .artifact-title {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  .artifact-sub {
+    color: var(--fg-dim);
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+  }
+  .artifact-score {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .artifact-grade {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 24px;
+  }
+
+  /* === Share === */
+  #share { text-align: center; border-bottom: none; }
+  .share-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 32px 0;
+  }
+  .share-btn {
+    padding: 12px 22px;
+    background: var(--bg-elev);
+    color: var(--fg);
+    border: 1px solid var(--line-bright);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .share-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--safe);
+    background: var(--safe);
+    color: var(--bg);
+  }
+  .share-btn svg { width: 14px; height: 14px; }
+
+  /* === End === */
+  #end {
+    text-align: center;
+    padding: 120px 0 160px;
+  }
+  .end-quote {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    line-height: 1.5;
+    max-width: 700px;
+    margin: 0 auto 60px;
+  }
+  .end-quote .source {
+    display: block;
+    font-style: normal;
+    font-size: 0.78rem;
+    color: var(--fg-dim);
+    margin-top: 24px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+  }
+  .return-hook {
+    background: var(--bg-elev);
+    padding: 28px 36px;
+    border-radius: 12px;
+    max-width: 520px;
+    margin: 0 auto;
+    border-left: 2px solid var(--alert);
+    text-align: left;
+  }
+  .return-hook .label {
+    color: var(--alert);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .return-hook .text {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.15rem;
+    line-height: 1.5;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-elev);
+    color: var(--fg);
+    padding: 14px 26px;
+    border-radius: 8px;
+    border: 1px solid var(--safe);
+    font-size: 0.88rem;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  [data-reveal].in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    .sim-results { grid-template-columns: 1fr; gap: 16px; }
+    .modern-examples { grid-template-columns: 1fr; }
+    section { padding: 64px 0; }
+    .progress-rail { display: none; }
+    main { padding: 0 20px; }
+    .allocator-frame { padding: 24px 16px; }
+    .loop { padding: 20px 22px; gap: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+<div class="toast" id="toast"></div>
+
+<main>
+
+  <section id="open">
+    <div>
+      <div class="stack-line">1943. Bombers are falling out of the sky.</div>
+      <div class="stack-line">The surviving planes return covered in bullet holes.</div>
+      <div class="stack-line">The military wants to put armor where the holes are.</div>
+    </div>
+    <div class="scroll-hint">↓ scroll to command</div>
+  </section>
+
+  <section id="loops">
+    <div class="eyebrow" data-reveal>Three open loops</div>
+    <h2 data-reveal>Three questions about<br>what is missing.</h2>
+    <div class="loop" data-reveal>
+      <div class="loop-num">01</div>
+      <div class="loop-text">Why is putting armor over the bullet holes a <em>fatal</em> mistake?</div>
+    </div>
+    <div class="loop" data-reveal>
+      <div class="loop-num">02</div>
+      <div class="loop-text">Where did the mathematician say the armor <em>actually</em> needed to go?</div>
+    </div>
+    <div class="loop" data-reveal>
+      <div class="loop-num">03</div>
+      <div class="loop-text">How is this exact logic silently ruining your <em>current</em> decisions?</div>
+    </div>
+  </section>
+
+  <section id="transport">
+    <div class="eyebrow" data-reveal>The theater of the visible</div>
+    <div class="narrative" data-reveal>
+      <p>You are the Allied Command. Your bombers are critical to the war effort, but German anti-aircraft fire is tearing them apart. You have a finite amount of heavy armor — you cannot cover the whole plane.</p>
+      <p>You study the returning planes. They are <em>riddled</em> with holes along the fuselage, the outer wings, and the tail. The data is clear. The enemy fire hits the body and the wings. The cockpit and the engines, strangely, seem untouched.</p>
+      <p>The generals look at the map of bullet holes and say: "Armor the body. Armor the wings."</p>
+    </div>
+  </section>
+
+  <section id="agency">
+    <div class="eyebrow" data-reveal>Question 01 — interactive</div>
+    <h2 data-reveal>You have 5 armor plates.<br>Place them.</h2>
+    <p class="lead" data-reveal">Click the zones on the plane to allocate your armor. When you're ready, deploy the mission.</p>
+
+    <div class="allocator-frame" data-reveal>
+      <div class="allocator-header">
+        <span class="eyebrow" style="margin:0">Mission: Operation Counterweight</span>
+        <div class="armor-counter">
+          Armor Remaining: <span id="armorCount" class="safe">5</span> / 5
+        </div>
+      </div>
+
+      <div class="plane-container">
+        <svg class="plane-svg" viewBox="0 0 600 400" id="planeSvg">
+          <!-- Fuselage -->
+          <path d="M 150 200 L 380 200 L 430 200 L 440 190 L 440 210 L 430 200 L 380 200 L 150 200 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          
+          <!-- Cockpit -->
+          <path d="M 440 190 L 490 190 L 510 200 L 490 210 L 440 210 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          
+          <!-- Wings -->
+          <path d="M 220 200 L 300 50 L 330 50 L 280 200 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          <path d="M 220 200 L 300 350 L 330 350 L 280 200 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          
+          <!-- Tail -->
+          <path d="M 150 200 L 120 100 L 150 100 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          <path d="M 150 200 L 120 300 L 150 300 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          <path d="M 150 200 L 100 200 L 100 180 L 150 180 Z" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+
+          <!-- Engines -->
+          <rect x="240" y="60" width="40" height="20" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+          <rect x="240" y="320" width="40" height="20" fill="#2a2a2a" stroke="#444" stroke-width="2"/>
+
+          <!-- Interactive Zones -->
+          <!-- Cockpit (Lethal) -->
+          <rect class="plane-zone" id="zone-cockpit" x="440" y="180" width="80" height="40" data-zone="cockpit" data-lethal="true"/>
+          <!-- Engines (Lethal) -->
+          <rect class="plane-zone" id="zone-eng1" x="230" y="50" width="60" height="40" data-zone="eng1" data-lethal="true"/>
+          <rect class="plane-zone" id="zone-eng2" x="230" y="310" width="60" height="40" data-zone="eng2" data-lethal="true"/>
+          
+          <!-- Fuselage (Non-Lethal, heavily holed) -->
+          <rect class="plane-zone" id="zone-fuselage" x="150" y="180" width="280" height="40" data-zone="fuselage" data-lethal="false"/>
+          
+          <!-- Wings (Non-Lethal, heavily holed) -->
+          <polygon class="plane-zone" id="zone-wing1" points="220,200 300,50 330,50 280,200" data-zone="wing1" data-lethal="false"/>
+          <polygon class="plane-zone" id="zone-wing2" points="220,200 300,350 330,350 280,200" data-zone="wing2" data-lethal="false"/>
+          
+          <!-- Tail (Non-Lethal, heavily holed) -->
+          <polygon class="plane-zone" id="zone-tail1" points="150,200 120,100 150,100" data-zone="tail1" data-lethal="false"/>
+          <polygon class="plane-zone" id="zone-tail2" points="150,200 120,300 150,300" data-zone="tail2" data-lethal="false"/>
+          <rect class="plane-zone" id="zone-tail3" x="100" y="180" width="50" height="20" data-zone="tail3" data-lethal="false"/>
+
+          <!-- Labels -->
+          <text class="zone-label" x="480" y="235">COCKPIT</text>
+          <text class="zone-label" x="260" y="45">ENGINE 1</text>
+          <text class="zone-label" x="260" y="355">ENGINE 2</text>
+          <text class="zone-label" x="290" y="225">FUSELAGE</text>
+          <text class="zone-label" x="265" y="125">WING 1</text>
+          <text class="zone-label" x="265" y="275">WING 2</text>
+          <text class="zone-label" x="135" y="150">TAIL 1</text>
+          <text class="zone-label" x="135" y="250">TAIL 2</text>
+          <text class="zone-label" x="125" y="215">TAIL 3</text>
+
+          <!-- Bullet Holes (Generated via JS) -->
+          <g id="bulletHoles"></g>
+        </svg>
+      </div>
+
+      <button class="deploy-btn" id="deployBtn" disabled>Deploy Mission</button>
+    </div>
+  </section>
+
+  <section id="sim">
+    <div class="eyebrow" data-reveal>Question 02 — animated</div>
+    <h2 data-reveal>The mission runs.</h2>
+    <p class="lead" data-reveal>Watch your fleet return. The enemy fires randomly, but where they hit determines who makes it home.</p>
+
+    <div class="sim-canvas-wrap" data-reveal>
+      <canvas id="simCanvas"></canvas>
+    </div>
+
+    <div class="sim-results" id="simResults" data-reveal style="display: none;">
+      <div class="result-cell" id="cellDeployed">
+        <div class="label">Planes Deployed</div>
+        <div class="value num">12</div>
+      </div>
+      <div class="result-cell bad" id="cellLost">
+        <div class="label">Planes Lost</div>
+        <div class="value num">0</div>
+      </div>
+      <div class="result-cell good" id="cellReturned">
+        <div class="label">Planes Returned</div>
+        <div class="value num">0</div>
+      </div>
+    </div>
+
+    <div id="waldReveal" style="display: none; margin-top: 40px;" data-reveal>
+      <div class="loop" style="border-left-color: var(--safe);">
+        <div class="loop-num" style="color: var(--safe);">!</div>
+        <div class="loop-text">Abraham Wald's reframe: <em style="color: var(--safe);">"The holes you are looking at are on the planes that made it back. They survived those hits. Armor the places with NO holes — those are the hits that brought the others down."</em></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="peak">
+    <div class="peak-statement">
+      You cannot optimize a system by studying only the things that <em>survived</em> it.
+      <span class="highlight">The most critical data is always invisible, buried in the silence of what didn't make it back.</span>
+    </div>
+  </section>
+
+  <section id="break">
+    <div class="break-grid">
+      <div class="break-text">
+        This isn't just a WWII story.<br>
+        It is the <span class="lever">fundamental flaw</span> of modern decision-making.
+      </div>
+      <div class="modern-examples">
+        <div class="example-card">
+          <div class="title">Startup Advice</div>
+          <div class="text">We study billionaires who dropped out of Harvard. We don't see the millions who dropped out and went bankrupt.</div>
+        </div>
+        <div class="example-card">
+          <div class="title">Health & Diets</div>
+          <div class="text">We look at 90-year-olds who smoked and drank daily. We don't see the millions who died at 50 doing the same thing.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="artifact">
+    <div class="eyebrow" data-reveal>Your command audit</div>
+    <div class="artifact-card" data-reveal>
+      <div class="artifact-title">Survivor Bias Score</div>
+      <div class="artifact-sub">Based on your armor allocation</div>
+      
+      <div class="artifact-score num" id="scoreValue">0</div>
+      <div class="artifact-grade" id="scoreGrade">TACTICAL AUDIT</div>
+      
+      <p class="muted" style="font-size: 0.88rem; margin-top: 24px; line-height: 1.5;">
+        You armored the <strong id="armoredZones" style="color: var(--safe);">--</strong>. 
+        <br><br>
+        <span id="critiqueText">--</span>
+      </p>
+    </div>
+  </section>
+
+  <section id="share">
+    <div class="eyebrow" data-reveal>Share the audit</div>
+    <h2 class="serif" style="font-size: 1.8rem; margin-bottom: 36px; font-style: italic;" data-reveal>Challenge your peers' tactics.</h2>
+    <div class="share-bar" data-reveal id="shareBar">
+      <a class="share-btn" data-platform="x" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </a>
+      <a class="share-btn" data-platform="linkedin" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+        LinkedIn
+      </a>
+      <a class="share-btn" data-platform="whatsapp" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        WhatsApp
+      </a>
+      <a class="share-btn" data-platform="reddit" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318m-17.224 1.816c0-.868.708-1.575 1.582-1.575.872 0 1.581.707 1.581 1.575s-.709 1.574-1.581 1.574-1.582-.706-1.582-1.574m9.061 4.438c-1.097 1.098-3.276 1.181-3.861 1.181-.584 0-2.765-.083-3.861-1.181-.166-.165-.166-.434 0-.599.165-.166.435-.166.6 0 .692.693 2.167.939 3.261.939 1.094 0 2.57-.246 3.261-.939.166-.166.436-.166.601 0 .165.165.165.434-.001.599m-.291-2.864c-.873 0-1.581-.706-1.581-1.574 0-.868.708-1.575 1.581-1.575.874 0 1.582.707 1.582 1.575s-.708 1.574-1.582 1.574"/></svg>
+        Reddit
+      </a>
+      <a class="share-btn" data-platform="threads" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.781 3.631 2.695 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.36-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142c-.126-.742-.375-1.332-.74-1.757-.502-.578-1.278-.87-2.309-.87h-.026c-.815 0-1.918.225-2.626 1.258l-1.692-1.14c.95-1.415 2.488-2.193 4.323-2.193h.04c3.078.02 4.908 1.899 5.103 5.177.105.046.207.094.31.143 1.435.679 2.418 1.702 2.927 3.026.725 1.894.393 4.434-1.418 6.21-1.78 1.742-4.093 2.523-7.232 2.523h-.011zm.964-11.55c-.247 0-.494.012-.74.036-1.837.106-2.98.946-2.916 2.143.067 1.256 1.452 1.838 2.784 1.764 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 00-2.214-.233z"/></svg>
+        Threads
+      </a>
+    </div>
+  </section>
+
+  <section id="end">
+    <div class="end-quote" data-reveal>
+      "If you want to know how a system works, look at what it does when it fails. Look at the crashes. Look at the dropouts. Look at the dead."
+      <span class="source">— The Anti-Survivor's Creed</span>
+    </div>
+
+    <div class="return-hook" data-reveal>
+      <div class="label">Why return</div>
+      <div class="text">
+        Reset the board and deploy a new configuration. Can you achieve a 100% survival rate by armoring the <span style="color: var(--safe);">silence</span>?
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ============================================
+  // STATE & CONFIG
+  // ============================================
+  let armorRemaining = 5;
+  const MAX_ARMOR = 5;
+  const armoredZones = new Set();
+  
+  // Pre-defined bullet hole positions on the plane SVG (visible damage)
+  const bulletHolePositions = [
+    {x: 200, y: 195}, {x: 220, y: 185}, {x: 250, y: 205}, 
+    {x: 280, y: 190}, {x: 320, y: 195}, {x: 350, y: 210},
+    {x: 260, y: 140}, {x: 270, y: 110}, {x: 265, y: 260}, {x: 275, y: 290}, 
+    {x: 130, y: 130}, {x: 140, y: 270}, {x: 110, y: 190}
+  ];
+
+  // ============================================
+  // SVG BULLET HOLES RENDERING
+  // ============================================
+  const holesGroup = document.getElementById('bulletHoles');
+  bulletHolePositions.forEach(p => {
+    const hole = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    hole.setAttribute('cx', p.x);
+    hole.setAttribute('cy', p.y);
+    hole.setAttribute('r', 4);
+    hole.setAttribute('class', 'bullet-hole');
+    holesGroup.appendChild(hole);
+  });
+
+  // ============================================
+  // ARMOR ALLOCATION LOGIC
+  // ============================================
+  const planeZones = document.querySelectorAll('.plane-zone');
+  const armorCountSpan = document.getElementById('armorCount');
+  const deployBtn = document.getElementById('deployBtn');
+
+  planeZones.forEach(zone => {
+    zone.addEventListener('click', () => {
+      const id = zone.id;
+      
+      if (armoredZones.has(id)) {
+        // Remove armor
+        armoredZones.delete(id);
+        zone.classList.remove('armored');
+        armorRemaining++;
+      } else {
+        // Add armor
+        if (armorRemaining <= 0) {
+          showToast("No armor remaining! Click a green zone to remove it.");
+          return;
+        }
+        armoredZones.add(id);
+        zone.classList.add('armored');
+        armorRemaining--;
+      }
+
+      armorCountSpan.textContent = armorRemaining;
+      armorCountSpan.className = armorRemaining === 0 ? "" : "safe";
+      
+      deployBtn.disabled = armoredZones.size === 0;
+    });
+  });
+
+  deployBtn.addEventListener('click', () => {
+    runSimulation();
+  });
+
+  // ============================================
+  // CANVAS SIMULATION
+  // ============================================
+  const canvas = document.getElementById('simCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  function resizeCanvas() {
+    const wrap = document.querySelector('.sim-canvas-wrap');
+    canvas.width = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function runSimulation() {
+    document.getElementById('simResults').style.display = 'grid';
+    document.getElementById('waldReveal').style.display = 'block';
+    
+    // Scroll to sim
+    document.getElementById('sim').scrollIntoView({ behavior: 'smooth' });
+
+    const planes = [];
+    const totalPlanes = 12;
+    
+    // Spawn planes
+    for (let i = 0; i < totalPlanes; i++) {
+      planes.push({
+        id: i,
+        x: -50,
+        y: 30 + (i * (canvas.height - 60) / totalPlanes) + Math.random() * 20,
+        speed: 1.5 + Math.random() * 1.5,
+        alive: true,
+        hitLethal: false,
+        hitNonLethal: false,
+        crashing: false,
+        crashY: 0,
+        opacity: 1
+      });
+    }
+
+    let frame = 0;
+    let deployed = 0;
+    let lost = 0;
+    let returned = 0;
+    let simActive = true;
+
+    function drawPlane(p) {
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      
+      // Simple plane shape
+      ctx.fillStyle = p.crashing ? "#ff453a" : "#8a8f6b";
+      ctx.beginPath();
+      ctx.moveTo(0, 0); // Nose
+      ctx.lineTo(-20, -10);
+      ctx.lineTo(-15, 0);
+      ctx.lineTo(-20, 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // Wings
+      ctx.fillRect(-15, -2, 20, 4);
+      // Tail
+      ctx.fillRect(-18, -5, 4, 10);
+
+      // Damage indicators
+      if (p.hitNonLethal) {
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(-5, 0, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function animate() {
+      if (!simActive) return;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Background grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 1;
+      for(let x=0; x<canvas.width; x+=40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for(let y=0; y<canvas.height; y+=40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Spawn enemy fire randomly
+      if (frame % 8 === 0 && deployed < totalPlanes) {
+        deployed++;
+      }
+
+      planes.forEach((p, idx) => {
+        if (p.id >= deployed) return;
+
+        if (p.alive) {
+          p.x += p.speed;
+          
+          // Random hit chance around middle of screen
+          if (!p.hitLethal && !p.hitNonLethal && p.x > canvas.width * 0.3 && p.x < canvas.width * 0.7) {
+            if (Math.random() < 0.04) {
+              // Determine hit type
+              // 30% chance of lethal hit (cockpit/engine), 70% non-lethal (wings/tail/fuselage)
+              const isLethal = Math.random() < 0.3;
+              
+              if (isLethal) {
+                // Check if armored
+                const lethalArmored = armoredZones.has('zone-cockpit') || armoredZones.has('zone-eng1') || armoredZones.has('zone-eng2');
+                if (lethalArmored) {
+                  p.hitNonLethal = true; // Survived due to armor
+                } else {
+                  p.hitLethal = true;
+                  p.crashing = true;
+                  p.alive = false;
+                }
+              } else {
+                // Non-lethal hit (wings/tail) - always survives
+                p.hitNonLethal = true;
+              }
+            }
+          }
+        } else if (p.crashing) {
+          p.y += 4; // Fall
+          p.x += 1;
+          p.opacity -= 0.02;
+          
+          if (p.opacity <= 0) {
+            p.crashing = false;
+            if (!p.counted) { lost++; p.counted = true; }
+          }
+        }
+
+        // Check completion
+        if (p.alive && p.x > canvas.width + 50) {
+          if (!p.counted) { returned++; p.counted = true; }
+        }
+
+        if (p.opacity > 0) drawPlane(p);
+      });
+
+      // Update results
+      document.getElementById('cellLost').querySelector('.value').textContent = lost;
+      document.getElementById('cellReturned').querySelector('.value').textContent = returned;
+
+      // End condition
+      const allDone = planes.every(p => p.counted || (p.crashing && p.opacity <= 0));
+      if (returned + lost === totalPlanes) {
+        simActive = false;
+        generateArtifact();
+      } else {
+        frame++;
+        requestAnimationFrame(animate);
+      }
+    }
+
+    animate();
+  }
+
+  // ============================================
+  // ARTIFACT GENERATION
+  // ============================================
+  function generateArtifact() {
+    const scoreDiv = document.getElementById('scoreValue');
+    const gradeDiv = document.getElementById('scoreGrade');
+    const zonesDiv = document.getElementById('armoredZones');
+    const critiqueDiv = document.getElementById('critiqueText');
+
+    let score = 0;
+    let critique = "";
+
+    const armoredLethal = armoredZones.has('zone-cockpit') || armoredZones.has('zone-eng1') || armoredZones.has('zone-eng2');
+    const armoredNonLethal = armoredZones.has('zone-fuselage') || armoredZones.has('zone-wing1') || armoredZones.has('zone-wing2') || armoredZones.has('zone-tail1') || armoredZones.has('zone-tail2') || armoredZones.has('zone-tail3');
+
+    if (armoredLethal && !armoredNonLethal) {
+      score = 100;
+      gradeDiv.textContent = "WALD-LEVEL MASTERY";
+      gradeDiv.style.color = "var(--safe)";
+      critique = "You armored the silence. You recognized that the visible data was a map of survivable damage. You are immune to survivorship bias.";
+    } else if (armoredLethal && armoredNonLethal) {
+      score = 60;
+      gradeDiv.textContent = "HEDGED BETS";
+      gradeDiv.style.color = "var(--steel)";
+      critique = "You split your resources. You protected some critical points but wasted plates on zones that were already proven to survive hits.";
+    } else if (!armoredLethal && armoredNonLethal) {
+      score = 20;
+      gradeDiv.textContent = "BIAS VICTIM";
+      gradeDiv.style.color = "var(--alert)";
+      critique = "You fell for the trap. You armored the exact zones the enemy was already failing to destroy, leaving the engines and cockpit totally exposed. The invisible data killed your fleet.";
+    } else {
+      score = 0;
+      gradeDiv.textContent = "NO ACTION";
+      critique = "You deployed without armor.";
+    }
+
+    zonesDiv.textContent = Array.from(armoredZones).map(z => z.replace('zone-', '').toUpperCase()).join(', ') || 'NOTHING';
+    
+    // Animate score
+    let currentScore = 0;
+    const scoreInterval = setInterval(() => {
+      currentScore += 2;
+      if (currentScore >= score) {
+        currentScore = score;
+        clearInterval(scoreInterval);
+      }
+      scoreDiv.textContent = currentScore;
+    }, 20);
+
+    updateShareURLs(score, gradeDiv.textContent);
+  }
+
+  // ============================================
+  // SHARE URLS
+  // ============================================
+  let currentMessages = {};
+
+  function updateShareURLs(score, grade) {
+    const url = encodeURIComponent(window.location.href);
+    
+    currentMessages = {
+      x: `I scored ${score}/100 on the Survivor Bias tactical audit.\n\nCan you spot the trap?\n`,
+      linkedin: `Survivorship Bias in Decision Making:\n\nI just took an interactive tactical audit based on Abraham Wald's WWII armor analysis. I scored ${score}/100 (${grade}).\n\nThe insight: You cannot optimize a system by studying only the things that survived it. How often do we make this mistake in business and life?\n\nTry it yourself:`,
+      whatsapp: `Check this out — I scored ${score}/100 on the bullet hole armor puzzle. It's a brilliant test of survivorship bias. See if you can do better:`,
+      reddit: `I scored ${score}/100 on this interactive survivorship bias test. It perfectly illustrates Abraham Wald's WWII armor paradox. What did you get?`,
+      threads: `The most critical data is always invisible.\n\nI scored ${score}/100 on the Survivor Bias audit. ${grade}. Can you spot the trap?`
+    };
+
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      const platform = btn.dataset.platform;
+      const text = encodeURIComponent(currentMessages[platform]);
+      let href = '';
+      switch (platform) {
+        case 'x': href = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+        case 'linkedin': href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`; break;
+        case 'whatsapp': href = `https://wa.me/?text=${text}%20${url}`; break;
+        case 'reddit': href = `https://www.reddit.com/submit?title=${text}&url=${url}`; break;
+        case 'threads': href = `https://threads.net/intent/post?text=${text}%20${url}`; break;
+      }
+      btn.href = href;
+    });
+  }
+
+  document.querySelectorAll('.share-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const platform = btn.dataset.platform;
+      if (navigator.clipboard && currentMessages[platform]) {
+        navigator.clipboard.writeText(currentMessages[platform]).then(() => {
+          showToast(`✓ Message copied for ${platform}`);
+        }).catch(() => {});
+      }
+    });
+  });
+
+  // ============================================
+  // UI HELPERS
+  // ============================================
+  function showToast(text) {
+    const toast = document.getElementById('toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  window.addEventListener('scroll', () => {
+    const max = document.body.scrollHeight - window.innerHeight;
+    const scrollPercent = max > 0 ? (window.scrollY / max) * 100 : 0;
+    document.getElementById('progressFill').style.height = scrollPercent + '%';
+  }, { passive: true });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+</script>
+</body>
+</html>
