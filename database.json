@@ -50,6 +50,21 @@
     "theOneIdea": "Light does not stream out of the Sun; energy undergoes a 100,000-year quantum pinball random walk before escaping in a 8-minute dash across space.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "kelly-criterion-edge-sizing",
+  "title": "The Bet That Wins Every Time and Still Ruins You",
+  "subtitle": "Why the same positive-EV edge can compound into a fortune or a guaranteed zero, depending only on bet size",
+  "slug": "kelly-criterion-edge-sizing",
+  "topic": "The Kelly Criterion & Optimal Bet Sizing",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/kelly-criterion-edge-sizing.html",
+  "tags": ["kelly-criterion", "risk-sizing", "decision-theory", "game-theory", "personal-finance-math"],
+  "readTimeMinutes": 4,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "The exact same edge compounds into a fortune or a guaranteed zero — depending only on how much of your stack you risk each time.",
+    "peakEmotion": "Awe / Cognitive Reframe"
+  }
 }
 
 
