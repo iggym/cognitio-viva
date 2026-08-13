@@ -263,6 +263,21 @@
     "theOneIdea": "You don't get more working memory slots with practice — you get better boxes to put things in. The same four slots, holding more per slot.",
     "peakEmotion": "Surprise / Reframe"
   }
+},{
+  "id": "adenosine-ledger",
+  "title": "The Adenosine Ledger: Why Your Coffee Never Actually Wakes You Up",
+  "subtitle": "Caffeine doesn't clear tiredness — it mutes the alarm while the debt grows, and the interest is paid in deep sleep.",
+  "slug": "adenosine-ledger",
+  "topic": "The Adenosine Accumulation Curve (#31)",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/adenosine-ledger.html",
+  "tags": ["neuroscience", "caffeine", "sleep", "interactive-lab", "behavioral-science"],
+  "readTimeMinutes": 6,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "You were never deleting tiredness — you were deferring it, and the interest is paid in deep sleep.",
+    "peakEmotion": "Awe, with a side of guilty recognition"
+  }
 }
 
 
