@@ -86,6 +86,21 @@
     "theOneIdea": "Subjective time is logarithmic: age 20 is the perceptual midpoint of an 80-year life because our brains measure duration relative to total accumulated experience and frame-rate capture.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "brain-wash-cycle-glymphatic",
+  "title": "Your Brain Shrinks 60% Every Night",
+  "subtitle": "How the glymphatic system washes toxic waste from your brain while you sleep — and why missing the deep-sleep window costs you.",
+  "slug": "brain-wash-cycle-glymphatic",
+  "topic": "Glymphatic Cleansing: How the brain shrinks 60% during deep sleep to pump out metabolic waste.",
+  "publishedAt": "2025-01-15",
+  "artifactUrl": "artifacts/brain-wash-cycle-glymphatic.html",
+  "tags": ["neuroscience", "sleep", "glymphatic-system", "alzheimers", "interactive"],
+  "readTimeMinutes": 4,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "You don't sleep to rest. You sleep so your brain can be washed — consciousness is a state of controlled pollution.",
+    "peakEmotion": "Awe"
+  }
 }
 
 
