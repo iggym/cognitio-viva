@@ -29,7 +29,29 @@
     "theOneIdea": "Sunlight warming your skin is ancient energy carrying a 100,000-year history of core-scattering.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "photospheric-voyage-100k-year-photon-answers",
+  "title": "The Photospheric Voyage: The 100,000-Year Quantum Journey",
+  "subtitle": "How photons spend 100,000 years executing a random walk inside the Sun before hitting your eyes in 8 minutes.",
+  "slug": "photospheric-voyage-100k-year-photon",
+  "topic": "The Photospheric Voyage: Why photons take 100,000 years to exit the sun but 8 minutes to hit Earth.",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/photospheric-voyage-100k-year-photon-answers.html",
+  "tags": [
+    "neuroscience",
+    "physics",
+    "astronomy",
+    "quantum-mechanics",
+    "interactive-simulation"
+  ],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "tune",
+    "theOneIdea": "Light does not stream out of the Sun; energy undergoes a 100,000-year quantum pinball random walk before escaping in a 8-minute dash across space.",
+    "peakEmotion": "Awe"
+  }
 }
+
 
 
 ]
