@@ -116,6 +116,21 @@
     "theOneIdea": "Your brain remaps time proportionally — each new year is a smaller fraction of your life, so it feels shorter.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "the-half-life-of-time",
+  "title": "The Half-Life of Time",
+  "subtitle": "By age 20, you've already lived half your perceived lifetime — the math behind why time accelerates as you age, and the lever that slows it back down.",
+  "slug": "the-half-life-of-time",
+  "topic": "The Anisotropy of Time",
+  "publishedAt": "2025-01-15",
+  "artifactUrl": "artifacts/the-half-life-of-time.html",
+  "tags": ["time-perception", "memory-density", "novelty"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Time doesn't accelerate because the clock speeds up — it accelerates because each year is a smaller fraction of your total lived experience, and the lever that slows it back down is novelty encoded as memory density.",
+    "peakEmotion": "Awe"
+  }
 }
 
 
