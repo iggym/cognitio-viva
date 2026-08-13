@@ -146,7 +146,29 @@
     "theOneIdea": "You cannot optimize a system by studying only the things that survived it — the most critical data is invisible, buried in the silence of what didn't make it back.",
     "peakEmotion": "Surprise"
   }
+},{
+  "id": "default-mode-network-creative-synthesis",
+  "title": "The Default Mode Network: The Neural Engine of Non-Action",
+  "subtitle": "How daydreaming and unstructured downtime burn 95% of baseline neural energy to cross-link distant memories into eureka insights.",
+  "slug": "default-mode-network-creative-synthesis",
+  "topic": "The Default Mode Network: How daydreaming and non-action fuel creative synthesis.",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/default-mode-network-creative-synthesis.html",
+  "tags": [
+    "neuroscience",
+    "cognition",
+    "creativity",
+    "brain-networks",
+    "interactive-simulation"
+  ],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "tune",
+    "theOneIdea": "Non-action is not cognitive rest; it is an energy-intensive, unconstrained neural search across distant memory domains that powers structural eureka breakthroughs.",
+    "peakEmotion": "Awe"
+  }
 }
+
 
 
 
