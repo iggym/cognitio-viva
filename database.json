@@ -188,6 +188,21 @@
     "theOneIdea": "Your body image is an internal brain projection: when sensory input stops, neighboring cortical territories invade the silent space and visual feedback can instantly unbind physical memory.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "the-mind-without-a-brain",
+  "title": "The Mind Without a Brain",
+  "subtitle": "How 40 million blind ants build 6,000km networks with zero central command — and the math we stole from them.",
+  "slug": "the-mind-without-a-brain",
+  "topic": "The Architecture of Ant Colonies",
+  "publishedAt": "2025-01-15",
+  "artifactUrl": "artifacts/the-mind-without-a-brain.html",
+  "tags": ["emergence", "ant-colony-optimization", "networks"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Intelligence isn't a brain — it's a conversation between simple parts, and you can wire it yourself.",
+    "peakEmotion": "Awe"
+  }
 }
 
 
