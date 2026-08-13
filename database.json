@@ -14,6 +14,22 @@
     "theOneIdea": "Sleep isn't passive rest; it's an active fluid-flushing process where brain cells shrink by 60% to sweep away neurotoxic plaques.",
     "peakEmotion": "Awe (Scale shift of interstitial space fluid dynamics)"
   }
+},{
+  "id": "photospheric-voyage-100k-years",
+  "title": "The Photospheric Voyage: 100,000 Years to Your Eyes",
+  "subtitle": "Why solar light takes a millennium to exit the Sun's core, but minutes to cross space.",
+  "slug": "photospheric-voyage-100k-years",
+  "topic": "The Photospheric Voyage: Why photons take 100,000 years to exit the sun but 8 minutes to hit Earth.",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/photospheric-voyage-100k-years.html",
+  "tags": ["physics", "astronomy", "neuroscience", "scale", "interactive"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "tune",
+    "theOneIdea": "Sunlight warming your skin is ancient energy carrying a 100,000-year history of core-scattering.",
+    "peakEmotion": "Awe"
+  }
 }
+
 
 ]
