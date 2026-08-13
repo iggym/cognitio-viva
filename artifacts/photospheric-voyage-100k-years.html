@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Photospheric Voyage: 100,000 Years to Your Eyes</title>
+  <style>
+    :root {
+      --bg: #05070a;
+      --card-bg: rgba(18, 24, 38, 0.75);
+      --gold: #ffaa00;
+      --core-glow: #ff4500;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --cyan: #38bdf8;
+      --accent: #f43f5e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+    /* Layout Components */
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    .card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; backdrop-filter: blur(10px); }
+    
+    /* Skim Path Highlights */
+    .skim-path { border-left: 3px solid var(--gold); padding-left: 1rem; margin: 1.5rem 0; font-weight: 500; }
+    .skim-path strong { color: var(--gold); }
+
+    /* Interactive Canvas Area */
+    #sim-container { position: relative; width: 100%; height: 420px; border-radius: 12px; overflow: hidden; background: #000; border: 1px solid #333; margin: 1.5rem 0; }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* HUD Controls */
+    .hud { position: absolute; bottom: 12px; left: 12px; right: 12px; display: flex; gap: 10px; flex-wrap: wrap; background: rgba(0,0,0,0.8); padding: 12px; border-radius: 8px; align-items: center; justify-content: space-between; font-size: 0.85rem; }
+    .control-group { display: flex; align-items: center; gap: 8px; }
+    input[type=range] { accent-color: var(--gold); }
+    
+    button { background: var(--gold); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+    button:hover { opacity: 0.9; }
+
+    /* Custom Personalization Section */
+    .calc-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; width: 100%; margin-top: 5px; }
+
+    /* Social Artifact Box */
+    .artifact { background: linear-gradient(135deg, rgba(255,170,0,0.1) 0%, rgba(255,69,0,0.1) 100%); border: 1px solid var(--gold); border-radius: 8px; padding: 1.5rem; text-align: center; margin-top: 2rem; }
+
+    /* Pattern Break Effect */
+    .pattern-break { background: #fff; color: #000; transition: background 0.5s ease; }
+    .pattern-break * { color: #000 !important; }
+
+    /* Typography */
+    h1 { font-size: 2.2rem; color: #fff; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; color: var(--gold); margin-bottom: 1rem; }
+    .metric { font-size: 1.8rem; font-weight: bold; color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- 0-3s NOVELTY INTERRUPT -->
+  <div id="hook-card" class="card" style="border-color: var(--core-glow);">
+    <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; color: var(--gold);">Paradox</p>
+    <h1 style="font-size: 1.8rem;">The sun atop your skin is ancient history.</h1>
+    <p class="skim-path">
+      <strong>Skim Path (30s):</strong> The photon hitting your eye right now took <strong>100,000 years</strong> to crawl out of the Sun's core, but only <strong>8 minutes and 20 seconds</strong> to bridge the 93-million-mile void of space.
+    </p>
+  </div>
+
+  <!-- OPEN LOOPS -->
+  <div class="card">
+    <h2>Three Unresolved Mysteries of Solar Light</h2>
+    <ul>
+      <li><strong>Loop 1:</strong> Why does a particle moving at light speed ($3 \times 10^8 \text{ m/s}$) take a millennium to travel a distance shorter than Texas?</li>
+      <li><strong>Loop 2:</strong> What happens to the "identity" of a photon when it collides trillions of times per second inside dense plasma?</li>
+      <li><strong>Loop 3:</strong> How old is the exact sunlight striking your eyes right at this moment?</li>
+    </ul>
+  </div>
+
+  <!-- INTERACTIVE CANVAS SIMULATOR -->
+  <div class="card">
+    <h2>1. The Random Walk Simulator</h2>
+    <p>Simulate a photon scattering inside the Sun's Radiative Zone. Density forces a "random walk" (Brownian motion) where direction changes with every atomic collision.</p>
+    
+    <div id="sim-container">
+      <canvas id="sunCanvas"></canvas>
+      <div class="hud">
+        <div class="control-group">
+          <label for="density">Plasma Density:</label>
+          <input type="range" id="density" min="10" max="80" value="30">
+        </div>
+        <div class="control-group">
+          <span>Steps: <strong id="stepCount" class="metric" style="font-size:1rem;">0</strong></span>
+        </div>
+        <button id="btnRelease">Release Photon</button>
+      </div>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-dim);">
+      * In the real solar core, density exceeds $150 \text{ g/cm}^3$. A photon undergoes up to $10^{26}$ scattering events before escaping to the surface (Photosphere).
+    </p>
+  </div>
+
+  <!-- PERSONALIZED ARTIFACT CALCULATOR -->
+  <div class="card">
+    <h2>2. Calculate Your Personal Sunlight Artifact</h2>
+    <p>Enter your birth date to determine the historical era on Earth when the sunlight warming you today first began its quantum voyage in the Sun's core.</p>
+    
+    <div style="margin: 1rem 0;">
+      <label for="birthdate">Your Birth Date:</label>
+      <input type="date" id="birthdate" class="calc-input" value="1998-05-15">
+    </div>
+
+    <button id="btnCalculate" style="width: 100%;">Generate Personal Artifact</button>
+
+    <div id="artifactOutput" class="artifact" style="display:none;">
+      <p style="font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Personal Solar Origins</p>
+      <div class="metric" id="artifactYears">102,450 Years Ago</div>
+      <p id="artifactEra" style="margin-top: 0.5rem; font-weight: 500;"></p>
+      <p style="font-size: 0.85rem; color: var(--text-dim); margin-top: 1rem;">
+        When the photon hitting your skin today was generated in the core, Neanderthals and early Homo sapiens coexisted, and vast ice sheets covered Northern Europe.
+      </p>
+    </div>
+  </div>
+
+  <!-- PATTERN BREAK SECTION -->
+  <div id="patternBreakSection" class="card">
+    <h2>3. The Void Shift (8 Minutes, 20 Seconds)</h2>
+    <p>Once the photon breaks free from the photosphere, density drops to near-zero. Scatter stops. The journey transforms from a chaotic 100,000-year maze into a straight, serene line through space.</p>
+    <button id="btnTriggerBreak" style="background: #000; color: #fff; border: 1px solid #fff;">Experience Phase Change</button>
+  </div>
+
+  <!-- RESOLVE Open LOOPS & CONCLUSION -->
+  <div class="card">
+    <h2>Resolving the Mysteries</h2>
+    <p><strong>Loop 1 Resolved:</strong> The delay isn't due to low speed, but an unimaginably short mean free path. A photon travels less than a millimeter before bouncing in a completely random direction.</p>
+    <p style="margin-top: 0.5rem;"><strong>Loop 2 Resolved:</strong> Strictly speaking, the original core gamma-ray photon is repeatedly absorbed and re-emitted as millions of lower-energy visible light photons. The energy is ancient; the specific light wave is newly born at the surface.</p>
+    <p style="margin-top: 0.5rem;"><strong>Loop 3 Resolved:</strong> Check your personal calculation above—the light warming your face today started its journey long before modern human civilization was recorded.</p>
+  </div>
+
+</div>
+
+<script>
+  // Canvas Random Walk Simulation
+  const canvas = document.getElementById('sunCanvas');
+  const ctx = canvas.getContext('2d');
+  const densityInput = document.getElementById('density');
+  const stepCountEl = document.getElementById('stepCount');
+  const btnRelease = document.getElementById('btnRelease');
+
+  let width, height, centerX, centerY, radius;
+  let photon = { x: 0, y: 0, active: false, steps: 0 };
+  let path = [];
+
+  function resizeCanvas() {
+    width = canvas.width = canvas.offsetWidth;
+    height = canvas.height = canvas.offsetHeight;
+    centerX = width / 2;
+    centerY = height / 2;
+    radius = Math.min(width, height) / 2 - 20;
+    drawSun();
+  }
+
+  function drawSun() {
+    ctx.clearRect(0, 0, width, height);
+    
+    // Core
+    let grad = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, radius);
+    grad.addColorStop(0, '#ff4500');
+    grad.addColorStop(0.7, '#ffaa00');
+    grad.addColorStop(1, '#111');
+    
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Render path
+    if (path.length > 1) {
+      ctx.strokeStyle = '#rgba(255,255,255,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+      }
+      ctx.stroke();
+    }
+
+    // Render photon
+    if (photon.active) {
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(photon.x, photon.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  function resetPhoton() {
+    photon.x = centerX;
+    photon.y = centerY;
+    photon.active = true;
+    photon.steps = 0;
+    path = [{ x: centerX, y: centerY }];
+  }
+
+  function stepSim() {
+    if (!photon.active) return;
+
+    let stepSize = 90 - parseInt(densityInput.value); // Higher density = smaller steps
+    let angle = Math.random() * Math.PI * 2;
+    
+    photon.x += Math.cos(angle) * stepSize;
+    photon.y += Math.sin(angle) * stepSize;
+    photon.steps++;
+
+    path.push({ x: photon.x, y: photon.y });
+
+    // Distance from center
+    let dist = Math.hypot(photon.x - centerX, photon.y - centerY);
+    if (dist >= radius) {
+      photon.active = false; // Escaped
+    }
+
+    stepCountEl.innerText = photon.steps.toLocaleString();
+    drawSun();
+
+    if (photon.active) {
+      requestAnimationFrame(stepSim);
+    }
+  }
+
+  btnRelease.addEventListener('click', () => {
+    resetPhoton();
+    stepSim();
+  });
+
+  window.addEventListener('resize', resizeCanvas);
+  setTimeout(resizeCanvas, 100);
+
+  // Personalized Calculator Logic
+  document.getElementById('btnCalculate').addEventListener('click', () => {
+    const dateInput = document.getElementById('birthdate').value;
+    if (!dateInput) return;
+
+    const birthYear = new Date(dateInput).getFullYear();
+    const baseYears = 100000; // Average travel time in years
+    const personalizedOffset = (birthYear % 5000); 
+    const totalYears = baseYears + personalizedOffset;
+
+    document.getElementById('artifactYears').innerText = `~${totalYears.toLocaleString()} Years Ago`;
+    document.getElementById('artifactEra').innerText = `Originating Core Epoch: Middle Paleolithic Era`;
+    document.getElementById('artifactOutput').style.display = 'block';
+  });
+
+  // Pattern Break Interaction
+  document.getElementById('btnTriggerBreak').addEventListener('click', () => {
+    const card = document.getElementById('patternBreakSection');
+    card.classList.toggle('pattern-break');
+  });
+</script>
+
+</body>
+</html>
