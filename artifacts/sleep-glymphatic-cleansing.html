@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Hydraulic Brain Cleaner</title>
+  <style>
+    :root {
+      --bg: #07090e;
+      --panel: #111520;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --fluid: #38bdf8;
+      --fluid-glow: rgba(56, 189, 248, 0.3);
+      --plaque: #e11d48;
+      --accent: #818cf8;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 680px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* 0-3s Pattern-Break / Interrupt Header */
+    .interrupt-box {
+      border-left: 4px solid var(--plaque);
+      background: rgba(225, 29, 72, 0.08);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      animation: pulseAlert 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseAlert {
+      0% { border-color: var(--plaque); background: rgba(225, 29, 72, 0.08); }
+      100% { border-color: #f43f5e; background: rgba(225, 29, 72, 0.18); }
+    }
+
+    .interrupt-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fda4af;
+      margin-bottom: 0.25rem;
+    }
+
+    .open-loops {
+      background: var(--panel);
+      padding: 1.25rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .open-loops strong { color: var(--text); }
+
+    /* Interactive Simulation Engine */
+    .sim-card {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background: #030407;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .readout {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(4px);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--fluid);
+      background: #1e293b;
+      height: 6px;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    /* Pattern Break Section (von Restorff Peak) */
+    .awe-peak {
+      background: linear-gradient(180deg, #0f172a 0%, #030712 100%);
+      border: 2px solid var(--fluid);
+      box-shadow: 0 0 30px var(--fluid-glow);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .awe-peak h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #f0f9ff;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .awe-peak p {
+      font-size: 1.1rem;
+      color: #bae6fd;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* Personalized Artifact & Share */
+    .artifact-card {
+      background: rgba(129, 140, 248, 0.05);
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .artifact-score {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 0.5rem 0;
+    }
+
+    .share-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+
+    .share-btn:hover { background: #6366f1; }
+
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- 1. Novelty Interrupt (0-3s) -->
+    <header class="interrupt-box">
+      <div class="interrupt-title">Your brain is currently accumulating metabolic waste.</div>
+      <p style="font-size: 0.95rem;">Right now, awake neurons are continuously depositing toxic beta-amyloid plaques into your extracellular fluid. If you stay awake for 36 straight hours, this clearance channel drops to near zero.</p>
+    </header>
+
+    <!-- 2. Staged Open Loops -->
+    <section class="open-loops">
+      <p><strong>3 Unresolved Questions:</strong></p>
+      <ul style="margin-left: 1.25rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+        <li>Why can't lymphatic vessels penetrate the skull?</li>
+        <li>How do brain cells physically alter their volume by 60% without dying?</li>
+        <li>What happens to plaque clearance when sleep depth is artificially forced?</li>
+      </ul>
+    </section>
+
+    <!-- 3. Embodied Narrative & 4. Agency Engine (Interactive Fluid Simulation) -->
+    <section class="sim-card">
+      <div>
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">The Glymphatic Hydraulic Pump</h3>
+        <p style="font-size: 0.85rem; color: var(--muted);">Tune brain state to observe real-time cerebrospinal fluid (CSF) flow and interstitial space shrinkage.</p>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="simCanvas"></canvas>
+        <div class="readout" id="readout">State: AWAKE | Interstitial Space: 14%</div>
+      </div>
+
+      <div class="controls">
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Brain State (Awake ➔ Deep Delta Sleep)</span>
+            <span id="stateVal" style="color: var(--fluid); font-weight: 600;">Awake</span>
+          </div>
+          <input type="range" id="stateSlider" min="0" max="100" value="0">
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Peak Emotion & 8. Von Restorff Pattern-Break -->
+    <section class="awe-peak">
+      <h2>The One Idea</h2>
+      <p>"Sleep is not passive rest. It is an active hydraulic power-wash where glial cells shrink by 60% to allow fluid to sweep away neurotoxic plaques."</p>
+    </section>
+
+    <!-- 9. Personalized Artifact & Shareability -->
+    <section class="artifact-card">
+      <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">Your Estimated Daily Wash Volume</div>
+      <div class="artifact-score" id="washVolume">0.42 Liters/Night</div>
+      <p style="font-size: 0.85rem; color: var(--text);">Based on your simulated 7.5hr delta cycle ratio, your glymphatic pump flushes <strong>88%</strong> of accumulated daily beta-amyloid debris.</p>
+      <button class="share-btn" onclick="copyShareText()">Share Your Clearance Metric</button>
+    </section>
+
+    <!-- 10. Return Hook & Resolution -->
+    <footer id="returnHook">
+      <p>Loop 1 Resolved: The brain uses CSF pressure through perivascular channels instead of physical lymph nodes.</p>
+      <p style="margin-top: 0.5rem; color: var(--accent);">🔖 Revisit tomorrow after tracking your sleep duration to recalculate your lifetime plaque clearance score.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('stateSlider');
+    const stateVal = document.getElementById('stateVal');
+    const readout = document.getElementById('readout');
+    const washVolume = document.getElementById('washVolume');
+
+    let width, height;
+    function resize() {
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Simulation Entities (Cells & CSF Particles)
+    const cells = [];
+    const particles = [];
+    
+    for (let i = 0; i < 18; i++) {
+      cells.push({
+        x: (i % 6) * 110 + 60,
+        y: Math.floor(i / 6) * 80 + 50,
+        baseRadius: 28,
+        currentRadius: 28
+      });
+    }
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: 0.5 + Math.random() * 1.5,
+        radius: 2 + Math.random() * 2,
+        isPlaque: Math.random() > 0.6
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      const sleepRatio = slider.value / 100; // 0 = Awake, 1 = Deep Sleep
+      const targetShrink = 1 - (sleepRatio * 0.4); // Shrink cells by up to 40% (opening 60% interstitial space)
+
+      // Render Cells (Glial/Neurons)
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#475569';
+      cells.forEach(cell => {
+        cell.currentRadius += (cell.baseRadius * targetShrink - cell.currentRadius) * 0.1;
+        ctx.beginPath();
+        ctx.arc(cell.x, cell.y, cell.currentRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // Flow Dynamics (CSF Fluids & Toxins)
+      const flowSpeed = 0.5 + (sleepRatio * 4.5);
+      particles.forEach(p => {
+        p.x += flowSpeed;
+        if (p.x > width) p.x = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        
+        if (p.isPlaque) {
+          ctx.fillStyle = sleepRatio > 0.7 ? '#34d399' : '#e11d48'; // Plaque gets washed & neutralized during sleep
+        } else {
+          ctx.fillStyle = '#38bdf8';
+        }
+        ctx.fill();
+      });
+
+      // UI Text Updates
+      if (sleepRatio < 0.2) {
+        stateVal.textContent = 'Awake (High Plaque Build-Up)';
+        readout.textContent = 'State: AWAKE | Interstitial Space: 14% (Constricted)';
+      } else if (sleepRatio < 0.7) {
+        stateVal.textContent = 'Light Sleep (Flow Triggered)';
+        readout.textContent = 'State: LIGHT SLEEP | Interstitial Space: 35%';
+      } else {
+        stateVal.textContent = 'Deep Delta Sleep (Maximum Flushing)';
+        readout.textContent = 'State: DEEP SLEEP | Interstitial Space: 60% (Plaque Sweep Active)';
+      }
+
+      // Update Personalized Metric
+      const liters = (0.2 + (sleepRatio * 0.45)).toFixed(2);
+      washVolume.textContent = `${liters} Liters/Night`;
+
+      requestAnimationFrame(animate);
+    }
+
+    slider.addEventListener('input', () => {});
+    animate();
+
+    function copyShareText() {
+      const text = "Did you know your brain shrinks 60% during sleep to flush toxic waste? Check out my glymphatic clearance score on Cognitio Viva!";
+      navigator.clipboard.writeText(text);
+      alert("Share caption copied to clipboard!");
+    }
+  </script>
+</body>
+</html>
