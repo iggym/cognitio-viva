@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitio Viva — Living Interactive Cognition</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --card-bg: rgba(20, 20, 24, 0.85);
+      --card-border: #24242c;
+      --card-hover: #3b3b48;
+      --text-main: #f0f0f5;
+      --text-muted: #8e8e9a;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --tag-bg: #1e1e28;
+      --tag-text: #a5b4fc;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Neural Background Canvas */
+    #neuralCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+
+    header, main, footer, .modal {
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      padding: 3rem 2rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      border-radius: 6px;
+      box-shadow: 0 0 12px rgba(129, 140, 248, 0.4);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    /* Controls Bar */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .search-input {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      flex: 1;
+      min-width: 220px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Action Toggle Buttons */
+    .btn-control {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn-control:hover,
+    .btn-control.active {
+      color: var(--text-main);
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    /* Collapsible Tag Filter Tray */
+    .tag-filters-tray {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin 0.2s ease;
+      opacity: 0;
+      margin-top: 0;
+      overflow: hidden;
+    }
+
+    .tag-filters-tray.expanded {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 0.5rem;
+    }
+
+    .tag-filters {
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+
+    .tag-btn {
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag-btn:hover,
+    .tag-btn.active {
+      color: var(--tag-text);
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    /* Gallery Grid */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      text-align: left;
+    }
+
+    .card:hover, .card:focus-visible {
+      transform: translateY(-4px);
+      border-color: var(--card-hover);
+      outline: none;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-topic {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .card-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--card-border);
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-height: 2.25rem;
+    }
+
+    /* Card Mini-Tags (Hidden by default, visible when tag view active) */
+    .card-tags {
+      display: none;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .show-card-tags .card-tags {
+      display: flex;
+    }
+
+    .mini-tag {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--tag-text);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .mini-tag:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.25);
+    }
+
+    /* Modals (Preview & Article Index) */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 1000;
+    }
+
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-header {
+      height: 60px;
+      padding: 0 1.5rem;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    /* Index Modal Content */
+    .index-modal-body {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .index-table-container {
+      margin-top: 1rem;
+    }
+
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .index-table th {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+    }
+
+    .index-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-main);
+    }
+
+    .index-table tr {
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+
+    .index-table tr:hover {
+      background: var(--card-bg);
+    }
+
+    .index-action-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .index-action-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Interactive Synapse Canvas -->
+  <canvas id="neuralCanvas"></canvas>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <h1>Cognitio Viva</h1>
+    </div>
+    <p class="subtitle">Interactive, animated web experiences engineered against the neuroscience of attention, memory, and agency.</p>
+
+    <div class="controls">
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search experiences or insights..." aria-label="Search experiences">
+        
+        <button type="button" id="toggleTagsBtn" class="btn-control" aria-expanded="false" aria-controls="tagFiltersTray">
+          <span>🏷️ Tags</span>
+        </button>
+
+        <button type="button" id="openIndexBtn" class="btn-control" aria-label="Open full directory index">
+          <span>📚 Directory</span>
+        </button>
+      </div>
+
+      <div class="tag-filters-tray" id="tagFiltersTray">
+        <div class="tag-filters" id="tagFilters" role="group" aria-label="Filter by tag">
+          <button type="button" class="tag-btn active" data-tag="all" aria-pressed="true">All</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="experienceGrid">
+      <!-- Cards rendered dynamically via JS -->
+    </div>
+  </main>
+
+  <!-- Interactive Artifact Preview Modal -->
+  <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Experience Preview</h2>
+      <button type="button" class="close-btn" id="closeModal" aria-label="Close preview">&times;</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="artifactFrame" src="about:blank" title="Interactive Artifact Viewer"></iframe>
+    </div>
+  </div>
+
+  <!-- Complete Directory Index Modal -->
+  <div class="modal" id="indexModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="indexModalTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="indexModalTitle">Complete Directory Index</h2>
+      <button type="button" class="close-btn" id="closeIndexModal" aria-label="Close directory index">&times;</button>
+    </div>
+    <div class="index-modal-body">
+      <input type="text" id="indexSearchInput" class="search-input" placeholder="Filter index directory..." style="width:100%;">
+      <div id="indexTableContainer" class="index-table-container"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. Ambient Neural Synapse Canvas Engine
+       ========================================================================== */
+    const initNeuralCanvas = () => {
+      const canvas = document.getElementById('neuralCanvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      const particles = [];
+      const particleCount = Math.min(Math.floor((width * height) / 18000), 65);
+      const mouse = { x: null, y: null, maxDist: 140 };
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
+
+      window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          radius: Math.random() * 1.8 + 1
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = '#818cf8';
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            let p2 = particles[j];
+            let dx = p.x - p2.x;
+            let dy = p.y - p2.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 120) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(99, 102, 241, ${1 - dist / 120})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+
+          if (mouse.x !== null) {
+            let dx = p.x - mouse.x;
+            let dy = p.y - mouse.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < mouse.maxDist) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(mouse.x, mouse.y);
+              ctx.strokeStyle = `rgba(192, 132, 252, ${1 - dist / mouse.maxDist})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    };
+
+    /* ==========================================================================
+       2. Core Application Logic & Data Management
+       ========================================================================== */
+    let experiences = [];
+    let activeTag = 'all';
+    let tagsVisible = false;
+
+    // Element References
+    const searchInput = document.getElementById('searchInput');
+    const toggleTagsBtn = document.getElementById('toggleTagsBtn');
+    const tagFiltersTray = document.getElementById('tagFiltersTray');
+    const tagFilters = document.getElementById('tagFilters');
+    const experienceGrid = document.getElementById('experienceGrid');
+    
+    // Preview Modal References
+    const previewModal = document.getElementById('previewModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const artifactFrame = document.getElementById('artifactFrame');
+    const closeModal = document.getElementById('closeModal');
+
+    // Index Modal References
+    const openIndexBtn = document.getElementById('openIndexBtn');
+    const indexModal = document.getElementById('indexModal');
+    const closeIndexModal = document.getElementById('closeIndexModal');
+    const indexSearchInput = document.getElementById('indexSearchInput');
+    const indexTableContainer = document.getElementById('indexTableContainer');
+
+    // Fetch and Initialize Database
+    async function loadDatabase() {
+      try {
+        const response = await fetch('database.json');
+        experiences = await response.json();
+        renderTagFilters();
+        parseHashState();
+        renderGrid();
+      } catch (err) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>Unable to load database.json. Ensure file exists and is served properly.</p>
+          </div>`;
+      }
+    }
+
+    // Toggle Tag Tray and Mini-Tags Visibility
+    function setTagVisibility(show) {
+      tagsVisible = show;
+      toggleTagsBtn.classList.toggle('active', tagsVisible);
+      toggleTagsBtn.setAttribute('aria-expanded', tagsVisible ? 'true' : 'false');
+      tagFiltersTray.classList.toggle('expanded', tagsVisible);
+      experienceGrid.classList.toggle('show-card-tags', tagsVisible);
+    }
+
+    toggleTagsBtn.addEventListener('click', () => {
+      setTagVisibility(!tagsVisible);
+    });
+
+    // Extract unique tags and build filter buttons
+    function renderTagFilters() {
+      const tags = new Set();
+      experiences.forEach(item => item.tags?.forEach(t => tags.add(t)));
+
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tag-btn';
+        btn.dataset.tag = tag;
+        btn.textContent = `#${tag}`;
+        btn.setAttribute('aria-pressed', 'false');
+        tagFilters.appendChild(btn);
+      });
+
+      tagFilters.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tag-btn');
+        if (!btn) return;
+        selectTag(btn.dataset.tag);
+      });
+    }
+
+    function selectTag(tag) {
+      activeTag = tag;
+      document.querySelectorAll('.tag-btn').forEach(b => {
+        const isActive = b.dataset.tag === activeTag;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+
+      if (activeTag === 'all') {
+        history.replaceState(null, '', location.pathname);
+      } else {
+        location.hash = `tag=${encodeURIComponent(activeTag)}`;
+      }
+      renderGrid();
+    }
+
+    function parseHashState() {
+      const match = location.hash.match(/tag=([^&]+)/);
+      if (match) {
+        const tag = decodeURIComponent(match[1]);
+        activeTag = tag;
+        setTagVisibility(true);
+      }
+    }
+
+    window.addEventListener('hashchange', () => {
+      parseHashState();
+      selectTag(activeTag);
+    });
+
+    // Render Grid Cards
+    function renderGrid() {
+      const query = searchInput.value.toLowerCase().trim();
+
+      const filtered = experiences.filter(item => {
+        const matchesTag = activeTag === 'all' || item.tags?.includes(activeTag);
+        const matchesSearch = item.title.toLowerCase().includes(query) ||
+                              item.subtitle.toLowerCase().includes(query) ||
+                              item.topic.toLowerCase().includes(query) ||
+                              (item.tags || []).some(t => t.toLowerCase().includes(query));
+        return matchesTag && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>No interactive experiences matched your criteria.</p>
+          </div>`;
+        return;
+      }
+
+      experienceGrid.innerHTML = filtered.map((item, index) => `
+        <article class="card"
+                 tabindex="0"
+                 role="button"
+                 data-index="${index}"
+                 aria-label="Launch preview for ${escapeQuotes(item.title)}">
+          <div>
+            <div class="card-topic">${item.topic}</div>
+            <h2 class="card-title">${item.title}</h2>
+            <p class="card-subtitle">${item.subtitle}</p>
+          </div>
+          <div class="card-footer">
+            <div class="card-tags">
+              ${(item.tags || []).map(t => `<span class="mini-tag" data-tag="${t}">#${t}</span>`).join('')}
+            </div>
+            <span>${item.readTimeMinutes || 3} min explore</span>
+          </div>
+        </article>
+      `).join('');
+
+      // Card Event Delegation
+      document.querySelectorAll('.card').forEach((cardEl, idx) => {
+        const item = filtered[idx];
+
+        cardEl.addEventListener('click', (e) => {
+          const tagSpan = e.target.closest('.mini-tag');
+          if (tagSpan) {
+            e.stopPropagation();
+            setTagVisibility(true);
+            selectTag(tagSpan.dataset.tag);
+            return;
+          }
+          openModal(item.artifactUrl, item.title);
+        });
+
+        cardEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openModal(item.artifactUrl, item.title);
+          }
+        });
+      });
+    }
+
+    /* ==========================================================================
+       3. Preview Modal Logic
+       ========================================================================== */
+    function openModal(url, title) {
+      artifactFrame.src = url;
+      modalTitle.textContent = title;
+      previewModal.classList.add('open');
+      previewModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeModal.focus();
+    }
+
+    function closeModalHandler() {
+      previewModal.classList.remove('open');
+      previewModal.setAttribute('aria-hidden', 'true');
+      artifactFrame.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    closeModal.addEventListener('click', closeModalHandler);
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) closeModalHandler();
+    });
+
+    /* ==========================================================================
+       4. Directory Index Modal Logic
+       ========================================================================== */
+    openIndexBtn.addEventListener('click', () => {
+      renderIndexTable();
+      indexModal.classList.add('open');
+      indexModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      indexSearchInput.focus();
+    });
+
+    function closeIndexModalHandler() {
+      indexModal.classList.remove('open');
+      indexModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    closeIndexModal.addEventListener('click', closeIndexModalHandler);
+    indexModal.addEventListener('click', (e) => {
+      if (e.target === indexModal) closeIndexModalHandler();
+    });
+
+    function renderIndexTable() {
+      const query = indexSearchInput.value.toLowerCase().trim();
+      const filtered = experiences.filter(item =>
+        item.title.toLowerCase().includes(query) ||
+        item.topic.toLowerCase().includes(query) ||
+        (item.tags || []).some(t => t.toLowerCase().includes(query))
+      );
+
+      if (filtered.length === 0) {
+        indexTableContainer.innerHTML = `<p class="empty-state">No matching articles in directory.</p>`;
+        return;
+      }
+
+      indexTableContainer.innerHTML = `
+        <table class="index-table">
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Title</th>
+              <th>Est. Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(item => `
+              <tr data-url="${item.artifactUrl}" data-title="${escapeQuotes(item.title)}">
+                <td style="color: var(--accent); font-weight: 600;">${item.topic}</td>
+                <td style="font-weight: 500;">${item.title}</td>
+                <td style="color: var(--text-muted);">${item.readTimeMinutes || 3} min</td>
+                <td><button class="index-action-btn" type="button">Launch</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      indexTableContainer.querySelectorAll('tbody tr').forEach(row => {
+        row.addEventListener('click', () => {
+          closeIndexModalHandler();
+          openModal(row.dataset.url, row.dataset.title);
+        });
+      });
+    }
+
+    indexSearchInput.addEventListener('input', renderIndexTable);
+
+    /* ==========================================================================
+       5. Global Helpers & Event Handlers
+       ========================================================================== */
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    searchInput.addEventListener('input', renderGrid);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (previewModal.classList.contains('open')) closeModalHandler();
+        if (indexModal.classList.contains('open')) closeIndexModalHandler();
+      }
+    });
+
+    // Boot Up
+    initNeuralCanvas();
+    loadDatabase();
+  </script>
+</body>
+</html>
