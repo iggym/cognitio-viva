@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phantom Limb Plasticity: The Remapped Self</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(56, 189, 248, 0.25);
+      --cortex-glow: #38bdf8;
+      --face-color: #f43f5e;
+      --hand-color: #fbbf24;
+      --mirror-glow: #34d399;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 60px;
+    }
+
+    /* 30-Second Skim Bar */
+    .skim-bar {
+      background: linear-gradient(90deg, var(--face-color), var(--cortex-glow), var(--mirror-glow));
+      color: #000;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      letter-spacing: 0.3px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
+
+    /* 0-3s Pattern Interrupt Hero */
+    .hero {
+      text-align: center;
+      padding: 40px 16px 20px 16px;
+    }
+
+    .hero-stat {
+      font-size: clamp(3rem, 9vw, 5.5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--face-color), var(--cortex-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Open Loops Grid */
+    .loops-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 36px 0 48px 0;
+    }
+
+    .loop-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .loop-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.15);
+    }
+
+    .loop-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cortex-glow);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .loop-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .loop-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* Interactive Simulation Canvas */
+    .sim-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 48px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    .sim-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+    }
+
+    @media (max-width: 820px) {
+      .sim-layout { grid-template-columns: 1fr; }
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: #020617;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .control-group {
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .control-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--cortex-glow);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .stat-val {
+      color: var(--cortex-glow);
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--cortex-glow), var(--mirror-glow));
+      color: #000;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:active { transform: scale(0.98); }
+
+    /* Hypermedia Loop Resolver */
+    .hypermedia-resolver {
+      background: rgba(10, 15, 30, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 48px;
+    }
+
+    .resolver-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .resolver-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .tab-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--cortex-glow);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--cortex-glow);
+    }
+
+    .resolver-stage {
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      min-height: 180px;
+    }
+
+    /* Pattern Break Visual Shift */
+    .pattern-break {
+      background: linear-gradient(135deg, #31121d, #030712);
+      border: 2px dashed var(--face-color);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .pattern-break h2 {
+      color: var(--face-color);
+      font-size: 1.6rem;
+      margin-bottom: 12px;
+    }
+
+    /* Personalized Artifact Calculator */
+    .artifact-card {
+      background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(3,7,18,0.98));
+      border: 1px solid var(--cortex-glow);
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 48px;
+      text-align: center;
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.12);
+    }
+
+    .calc-input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      margin: 16px 8px;
+      width: 220px;
+      text-align: center;
+    }
+
+    .result-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid var(--cortex-glow);
+      color: var(--cortex-glow);
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 20px 0;
+      max-width: 100%;
+    }
+
+    /* 5-Platform Share Engine */
+    .share-engine {
+      margin-top: 24px;
+    }
+
+    .share-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .share-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .share-btn {
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .share-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+    .share-x { background: #000; border: 1px solid rgba(255,255,255,0.2); }
+    .share-li { background: #0a66c2; }
+    .share-wa { background: #25d366; color: #000; }
+    .share-rd { background: #ff4500; }
+    .share-th { background: #101010; border: 1px solid rgba(255,255,255,0.2); }
+
+    footer {
+      text-align: center;
+      padding: 32px 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 30-Second Skim Path -->
+  <div class="skim-bar">
+    ⚡ 30-SEC SKIM: Touch a cheek, feel a missing thumb—the cortical map rewires in days, proving the physical self is a hallucinated brain projection.
+  </div>
+
+  <div class="container">
+
+    <!-- 0-3s Pattern Interrupt Hero -->
+    <section class="hero">
+      <div class="hero-stat">TOUCH FACE, FEEL HAND</div>
+      <p class="hero-subtitle">
+        Stroke an amputee's cheek with a cotton swab, and they feel individual missing fingers. The body map in your brain isn't fixed; it invades neighboring territory when real input stops.
+      </p>
+    </section>
+
+    <!-- Open Loops Stage -->
+    <div class="loops-grid">
+      <div class="loop-card" onclick="selectLoop(0)">
+        <div class="loop-tag">Loop #1: Cortical Sprouting</div>
+        <h3>Why does the face map takeover the hand zone?</h3>
+        <p>In Penfield's somatosensory homunculus, the hand area sits directly next to the face. What happens when hand signals drop to zero?</p>
+      </div>
+      <div class="loop-card" onclick="selectLoop(2)">
+        <div class="loop-tag">Loop #2: The Clenched Phantom</div>
+        <h3>How a phantom hand can freeze in an agonizing fist for decades</h3>
+        <p>Motor commands fire outward without sensory feedback coming back, trapping the brain in an inescapable motor paralysis loop.</p>
+      </div>
+      <div class="loop-card" onclick="selectLoop(1)">
+        <div class="loop-tag">Loop #3: The Mirror Box Hack</div>
+        <h3>Tricking the brain with visual illusions to unbind pain</h3>
+        <p>How V.S. Ramachandran used a $10 mirror box to fool the visual cortex and instantly release decades-old phantom spasms.</p>
+      </div>
+    </div>
+
+    <!-- Main Interactive Canvas Simulation -->
+    <section class="sim-section">
+      <div class="sim-header">
+        <h2>Interactive Somatosensory Cortical Map</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Simulate deafferentation and observe collateral axonal sprouting from the face territory into the silent hand cortex.</p>
+      </div>
+      <div class="sim-layout">
+        <div class="canvas-container">
+          <canvas id="simCanvas"></canvas>
+        </div>
+        <div class="sim-controls">
+          <div class="control-group">
+            <label>Amputation / Deafferentation State</label>
+            <button class="btn" id="amputateBtn" onclick="toggleAmputation()">Hand Input: INTACT</button>
+          </div>
+
+          <div class="control-group">
+            <label>Cortical Sprouting Days Post-Loss</label>
+            <input type="range" id="sproutSlider" min="0" max="100" value="0" disabled oninput="updateSproutFromSlider()">
+            <div class="stat-row">
+              <span>Map Infiltration:</span>
+              <span class="stat-val" id="sproutVal">0%</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Mirror Box Optical Therapy</label>
+            <button class="btn" id="mirrorBtn" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="toggleMirrorBox()">Mirror Box: OFF</button>
+          </div>
+
+          <div class="control-group">
+            <div class="stat-row">
+              <span>Perceived Sensation:</span>
+              <span class="stat-val" id="sensationVal">Normal Hand</span>
+            </div>
+            <div class="stat-row" style="margin-top: 8px;">
+              <span>Phantom Spasm Pain:</span>
+              <span class="stat-val" id="painVal">None</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hypermedia Open Loop Resolver -->
+    <section class="hypermedia-resolver">
+      <div class="resolver-header">
+        <h2>Hypermedia Loop Resolver</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Interactive step-through explaining cortical remapping and Ramachandran's mirror breakthrough.</p>
+      </div>
+      <div class="resolver-tabs">
+        <button class="tab-btn active" onclick="selectLoop(0)">1. Penfield's Homunculus</button>
+        <button class="tab-btn" onclick="selectLoop(1)">2. The $10 Mirror Box</button>
+        <button class="tab-btn" onclick="selectLoop(2)">3. Learned Paralysis</button>
+      </div>
+      <div class="resolver-stage" id="resolverOutput">
+        <!-- Content injected by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Pattern Break Shift -->
+    <section class="pattern-break">
+      <h2>⚠️ Pattern-Break: The Construct of Body Image</h2>
+      <p style="max-width: 720px; margin: 0 auto; color: var(--face-color); font-size: 1.05rem;">
+        Your physical body is not what you actually experience. <strong>You live entirely inside an internal neural map projected by your brain.</strong> When the physical limb disappears, the internal neural projection persists—until rewritten by visual feedback.
+      </p>
+    </section>
+
+    <!-- Personalized Artifact & 5-Platform Share Engine -->
+    <section class="artifact-card">
+      <h2>Personalized Cortical Plasticity Calculator</h2>
+      <p style="color: var(--text-muted); margin-top: 6px;">
+        Calculate your brain's estimated remapping speed and neural plasticity index based on age and novel skill acquisition.
+      </p>
+
+      <div>
+        <input type="number" id="userAge" class="calc-input" placeholder="Your Age" value="28" min="10" max="100" oninput="calculateArtifact()">
+      </div>
+
+      <div class="result-badge" id="artifactResult">
+        Age 28: High Cortical Plasticity Potential! Sprouting rate ~0.4mm/day.
+      </div>
+
+      <!-- 5-Platform Share Engine -->
+      <div class="share-engine">
+        <div class="share-title">Share Your Cortical Plasticity Artifact</div>
+        <div class="share-buttons">
+          <a id="shareX" class="share-btn share-x" href="#" target="_blank">X (Twitter)</a>
+          <a id="shareLI" class="share-btn share-li" href="#" target="_blank">LinkedIn</a>
+          <a id="shareWA" class="share-btn share-wa" href="#" target="_blank">WhatsApp</a>
+          <a id="shareRD" class="share-btn share-rd" href="#" target="_blank">Reddit</a>
+          <a id="shareTH" class="share-btn share-th" href="#" target="_blank">Threads</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Phantom Limb Plasticity — Engineered for Cognitive Resonance.</p>
+    <p style="margin-top: 6px; color: rgba(255,255,255,0.4);">Return Hook: Revisit when learning sensory-motor skills to recalibrate your somatosensory map expansion rate.</p>
+  </footer>
+
+  <script>
+    // --- CANVAS SIMULATION ENGINE ---
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let isAmputated = false;
+    let sproutProgress = 0; // 0 to 100
+    let mirrorBoxActive = false;
+    let faceNeurons = [];
+    let handNeurons = [];
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      width = canvas.width;
+      height = canvas.height;
+      initNeurons();
+    }
+
+    class Neuron {
+      constructor(x, y, region) {
+        this.x = x;
+        this.y = y;
+        this.region = region; // 'face' or 'hand'
+        this.active = false;
+        this.sprouts = [];
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+        if (this.region === 'face') {
+          ctx.fillStyle = this.active ? '#f43f5e' : 'rgba(244, 63, 94, 0.4)';
+        } else {
+          ctx.fillStyle = this.active ? '#fbbf24' : 'rgba(251, 191, 36, 0.2)';
+        }
+        ctx.fill();
+      }
+    }
+
+    function initNeurons() {
+      faceNeurons = [];
+      handNeurons = [];
+
+      // Left zone: Face cortex, Right zone: Hand cortex
+      for (let i = 0; i < 20; i++) {
+        faceNeurons.push(new Neuron(width * 0.2 + (Math.random() - 0.5) * 100, height * 0.5 + (Math.random() - 0.5) * 200, 'face'));
+      }
+      for (let i = 0; i < 20; i++) {
+        handNeurons.push(new Neuron(width * 0.7 + (Math.random() - 0.5) * 100, height * 0.5 + (Math.random() - 0.5) * 200, 'hand'));
+      }
+    }
+
+    function toggleAmputation() {
+      isAmputated = !isAmputated;
+      const btn = document.getElementById('amputateBtn');
+      const slider = document.getElementById('sproutSlider');
+
+      if (isAmputated) {
+        btn.innerText = "Hand Input: AMPUTATED (Silent Zone)";
+        btn.style.background = "linear-gradient(135deg, #f43f5e, #be123c)";
+        slider.disabled = false;
+        sproutProgress = 50;
+        slider.value = 50;
+      } else {
+        btn.innerText = "Hand Input: INTACT";
+        btn.style.background = "linear-gradient(135deg, #38bdf8, #34d399)";
+        slider.disabled = true;
+        sproutProgress = 0;
+        slider.value = 0;
+        mirrorBoxActive = false;
+        document.getElementById('mirrorBtn').innerText = "Mirror Box: OFF";
+      }
+      updateSproutFromSlider();
+    }
+
+    function updateSproutFromSlider() {
+      sproutProgress = parseInt(document.getElementById('sproutSlider').value);
+      document.getElementById('sproutVal').innerText = `${sproutProgress}%`;
+      updateStats();
+    }
+
+    function toggleMirrorBox() {
+      if (!isAmputated) return;
+      mirrorBoxActive = !mirrorBoxActive;
+      const btn = document.getElementById('mirrorBtn');
+      btn.innerText = mirrorBoxActive ? "Mirror Box: ACTIVE (Visual Feedback)" : "Mirror Box: OFF";
+      btn.style.background = mirrorBoxActive ? "linear-gradient(135deg, #34d399, #059669)" : "rgba(255,255,255,0.1)";
+      updateStats();
+    }
+
+    function updateStats() {
+      const sensation = document.getElementById('sensationVal');
+      const pain = document.getElementById('painVal');
+
+      if (!isAmputated) {
+        sensation.innerText = "Normal Hand";
+        pain.innerText = "None";
+      } else {
+        if (sproutProgress > 30) {
+          sensation.innerText = "Touch Face → Feel Phantom Index/Thumb!";
+        } else {
+          sensation.innerText = "Numb / Silent Cortex";
+        }
+
+        if (mirrorBoxActive) {
+          pain.innerText = "Released (0/10)";
+        } else {
+          pain.innerText = "Severe Clenched Spasm (8/10)";
+        }
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.25)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Boundary line separating Face and Hand cortex
+      ctx.beginPath();
+      ctx.setLineDash([6, 6]);
+      ctx.moveTo(width * 0.45, 40);
+      ctx.lineTo(width * 0.45, height - 40);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Labels
+      ctx.fillStyle = '#f43f5e';
+      ctx.font = '12px sans-serif';
+      ctx.fillText("FACE CORTEX ZONE", width * 0.15, 30);
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText(isAmputated ? "SILENT HAND CORTEX ZONE" : "HAND CORTEX ZONE", width * 0.55, 30);
+
+      // Activate face neurons periodically
+      const pulse = Math.sin(Date.now() * 0.005) > 0;
+      faceNeurons.forEach(n => n.active = pulse);
+
+      // Hand neurons behavior
+      handNeurons.forEach(n => {
+        if (!isAmputated) {
+          n.active = pulse;
+        } else {
+          // If sprouted and face active, hand cortex fires on face touch!
+          n.active = (sproutProgress > 30) && pulse;
+        }
+      });
+
+      // Draw Neurons
+      faceNeurons.forEach(n => n.draw());
+      handNeurons.forEach(n => n.draw());
+
+      // Draw Sprouting Axons from Face to Hand Cortex
+      if (isAmputated && sproutProgress > 0) {
+        const sproutReach = (sproutProgress / 100) * (width * 0.4);
+
+        faceNeurons.forEach((fn, idx) => {
+          if (idx % 2 === 0) {
+            const targetX = fn.x + sproutReach;
+            const targetY = fn.y + Math.sin(idx + Date.now() * 0.002) * 20;
+
+            ctx.beginPath();
+            ctx.moveTo(fn.x, fn.y);
+            ctx.lineTo(targetX, targetY);
+            ctx.strokeStyle = pulse ? 'rgba(244, 63, 94, 0.8)' : 'rgba(244, 63, 94, 0.2)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            if (pulse && targetX >= width * 0.5) {
+              ctx.beginPath();
+              ctx.arc(targetX, targetY, 3, 0, Math.PI * 2);
+              ctx.fillStyle = '#38bdf8';
+              ctx.fill();
+            }
+          }
+        });
+      }
+
+      // Visual Mirror Box overlay effect
+      if (mirrorBoxActive) {
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.08)';
+        ctx.fillRect(width * 0.45, 0, width * 0.55, height);
+        ctx.fillStyle = '#34d399';
+        ctx.font = '13px sans-serif';
+        ctx.fillText("✨ Optical Mirror Illusion Resolving Paralysis", width * 0.52, height - 20);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // --- HYPERMEDIA RESOLVER DATA & LOGIC ---
+    const loopData = [
+      {
+        title: "Loop 1: Penfield's Homunculus & Neighborhood Invasion",
+        content: "<p>In the primary somatosensory cortex ($S1$), body parts are mapped sequentially. The hand representation lies directly adjacent to the face representation. When sensory signals from the hand cease post-amputation, face-sensory neurons sprout collaterals into the silent hand territory.</p><div style='margin-top:12px; padding:12px; background:rgba(244,63,94,0.1); border-left:3px solid #f43f5e;'><strong>Cross-Wiring Result:</strong> Swabbing the upper lip or jaw fires neurons in both face and former hand cortex—causing the patient to feel precise touch on missing fingers!</div>"
+      },
+      {
+        title: "Loop 2: V.S. Ramachandran's $10 Mirror Box Miracle",
+        content: "<p>In 1995, V.S. Ramachandran placed a vertical mirror inside a cardboard box to reflect an amputee's intact hand into the visual position of the missing phantom. By moving both hands symmetrically, the visual cortex received the long-lost visual confirmation of movement.</p><div style='margin-top:12px; padding:12px; background:rgba(52,211,153,0.1); border-left:3px solid #34d399;'><strong>Visual Overwrite:</strong> Seeing the mirrored hand unclench instantly released debilitating 10-year phantom spasms!</div>"
+      },
+      {
+        title: "Loop 3: Learned Paralysis & The Motor-Sensory Mismatch",
+        content: "<p>When a real limb is paralyzed before amputation (e.g., nerve damage), the brain repeatedly sends motor commands without receiving sensory confirmation. The motor system encodes this mismatch as 'learned paralysis.' The phantom remains locked in pain until visual feedback rewrites the motor expectation.</p><div style='margin-top:12px; padding:12px; background:rgba(56,189,248,0.1); border-left:3px solid #38bdf8;'><strong>Takeaway:</strong> Perception requires continuous multi-sensory cross-validation; vision can overrule touch memory.</div>"
+      }
+    ];
+
+    function selectLoop(index) {
+      const tabs = document.querySelectorAll('.tab-btn');
+      tabs.forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+      const output = document.getElementById('resolverOutput');
+      output.innerHTML = `<h3 style="margin-bottom:8px;">${loopData[index].title}</h3><div>${loopData[index].content}</div>`;
+    }
+
+    // --- PERSONALIZED ARTIFACT & SHARE ENGINE ---
+    function calculateArtifact() {
+      const age = parseFloat(document.getElementById('userAge').value) || 28;
+      const rate = (0.8 - (age / 100) * 0.5).toFixed(2);
+      const index = Math.round((1 - age / 120) * 100);
+
+      const resultText = `Age ${age}: Plasticity Index ${index}/100 — Cortical sprouting potential ~${rate} mm/day.`;
+      document.getElementById('artifactResult').innerText = resultText;
+
+      const pageUrl = encodeURIComponent(window.location.href);
+      const textX = encodeURIComponent(`Your brain can remap face sensations into a missing hand in days. My cortical plasticity rating at age ${age} is ${index}/100! Calculate yours:`);
+      const textLI = encodeURIComponent(`Neuroscience of neuroplasticity: Phantom Limb Remapping & Ramachandran's Mirror Box. How tactile maps reorganize when input drops.`);
+      const textWA = encodeURIComponent(`Check out my cortical remapping index! At age ${age}, my brain's sprouting potential is ${rate}mm/day: ${window.location.href}`);
+      const textRD = encodeURIComponent(`Phantom Limb Plasticity: How touching the face evokes sensation in a missing hand`);
+      const textTH = encodeURIComponent(`Your body image is a brain projection, not a physical reality. My age ${age} plasticity score is ${index}/100.`);
+
+      document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${textX}&url=${pageUrl}`;
+      document.getElementById('shareLI').href = `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`;
+      document.getElementById('shareWA').href = `https://api.whatsapp.com/send?text=${textWA}`;
+      document.getElementById('shareRD').href = `https://reddit.com/submit?url=${pageUrl}&title=${textRD}`;
+      document.getElementById('shareTH').href = `https://www.threads.net/intent/post?text=${textTH}`;
+    }
+
+    // Initialize Engine
+    resizeCanvas();
+    animate();
+    selectLoop(0);
+    updateStats();
+    calculateArtifact();
+  </script>
+</body>
+</html>
