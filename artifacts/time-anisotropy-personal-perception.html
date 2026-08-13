@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⏳ Time Anisotropy · Your Personal Time</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0b0d17;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      color: #e8edf5;
+      padding: 1.5rem;
+    }
+    .container {
+      max-width: 760px;
+      width: 100%;
+      background: rgba(18, 25, 40, 0.6);
+      backdrop-filter: blur(3px);
+      border-radius: 2.5rem;
+      padding: 2rem 1.5rem 2.5rem;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+    h1, h2, h3 {
+      font-weight: 400;
+      letter-spacing: -0.02em;
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.25s; }
+    .delay-3 { animation-delay: 0.4s; }
+    .delay-4 { animation-delay: 0.55s; }
+
+    /* pattern-break: glitch pulse */
+    .pattern-break {
+      animation: glitchPulse 0.3s ease 2;
+    }
+    @keyframes glitchPulse {
+      0% { text-shadow: 0 0 0 #ff4d6d, 0 0 0 #4d9eff; }
+      50% { text-shadow: 4px -4px 0 #ff4d6d, -6px 6px 0 #4d9eff; transform: scale(1.01); }
+      100% { text-shadow: 0 0 0 transparent; }
+    }
+
+    .stat-badge {
+      display: inline-block;
+      background: #2a334f;
+      padding: 0.3rem 1rem;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+      border: 1px solid #3f4a6b;
+    }
+
+    .interactive-block {
+      background: #131d2f;
+      border-radius: 2rem;
+      padding: 1.5rem 1.2rem;
+      margin: 1.8rem 0;
+      border: 1px solid #2b3855;
+      transition: border 0.2s;
+    }
+    .interactive-block:hover {
+      border-color: #4d6a9b;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 0.8rem 0;
+      height: 6px;
+      -webkit-appearance: none;
+      background: #2e3c60;
+      border-radius: 10px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #9bbaff;
+      border-radius: 50%;
+      cursor: grab;
+      box-shadow: 0 0 20px #6a8ed4;
+      border: 2px solid #b2caff;
+    }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #8b9bc0;
+      margin-top: -0.2rem;
+    }
+
+    .calc-result {
+      background: #1f2942;
+      padding: 0.8rem 1.2rem;
+      border-radius: 3rem;
+      font-size: 1.4rem;
+      font-weight: 500;
+      display: inline-block;
+      backdrop-filter: blur(4px);
+      border: 1px solid #3c4b70;
+    }
+    .btn-share {
+      background: #1f2b44;
+      border: 1px solid #3f5279;
+      color: #d0dcf5;
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-share:hover {
+      background: #2f3e64;
+      border-color: #7b97d4;
+      color: white;
+      transform: scale(1.02);
+    }
+    .share-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.2rem;
+      justify-content: center;
+      margin-top: 1.2rem;
+    }
+    .share-grid .btn-share {
+      flex: 1 0 auto;
+      min-width: 60px;
+      justify-content: center;
+    }
+
+    .loop-badge {
+      background: #293753;
+      border-radius: 100px;
+      padding: 0.2rem 1rem;
+      font-size: 0.8rem;
+      border-left: 3px solid #ffb347;
+      margin: 0.5rem 0;
+    }
+
+    .hypermedia-answer {
+      background: #0f1a2b;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-left: 6px solid #ffb347;
+    }
+
+    .magnet-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+    }
+    .magnet-btn {
+      background: #1e2b47;
+      border: 1px solid #3e5580;
+      border-radius: 100px;
+      padding: 0.4rem 1.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+      color: #b7caf5;
+    }
+    .magnet-btn.active {
+      background: #4466a8;
+      border-color: #8db0ff;
+      color: white;
+      box-shadow: 0 0 20px #3d6bb3;
+    }
+
+    .footer-return {
+      margin-top: 2.2rem;
+      text-align: center;
+      border-top: 1px solid #25324b;
+      padding-top: 1.8rem;
+      font-size: 0.9rem;
+      color: #7d8fb0;
+    }
+    .footer-return span {
+      background: #1f2b44;
+      padding: 0.2rem 1.2rem;
+      border-radius: 100px;
+      border: 1px solid #3b4d72;
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+
+  <!-- OPEN: novelty interrupt + open loops -->
+  <div class="reveal delay-1" style="margin-bottom: 0.2rem;">
+    <span class="stat-badge">⚡ NOVELTY INTERRUPT</span>
+    <h1 style="font-size: 2.3rem; font-weight: 500; margin: 0.2rem 0 0.2rem; line-height: 1.1;">
+      Your brain <span style="color: #ffb347;">slows time</span> as you age
+    </h1>
+    <div style="font-size: 1.1rem; color: #b3c7f0; margin-bottom: 0.8rem;">
+      ⏳ <span id="ageDisplay">32</span> · your subjective year = <strong id="subjYearDisplay">0.78</strong> real years
+    </div>
+  </div>
+
+  <!-- open loop 1 + 2 -->
+  <div class="reveal delay-2 loop-badge">🌀 OPEN LOOP 1: Why does a 5‑year old’s summer feel endless?</div>
+  <div class="reveal delay-3 loop-badge" style="border-left-color: #6fc3ff;">🌀 OPEN LOOP 2: The 60% brain‑shrink during sleep — does it reset time perception?</div>
+
+  <!-- AGENCY RUNG: personal slider (make) -->
+  <div class="interactive-block reveal delay-3">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <span style="font-weight: 400;">🧠 your age</span>
+      <span style="font-size: 1.6rem; font-weight: 300;" id="ageValue">32</span>
+    </div>
+    <input type="range" id="ageSlider" min="5" max="85" value="32" step="1">
+    <div class="range-labels"><span>5</span><span>85</span></div>
+    <div style="margin-top: 0.5rem; display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center;">
+      <span class="calc-result" id="subjYear">⏳ 0.78 yr</span>
+      <span style="color: #8ea3d0;">real year feels like</span>
+    </div>
+    <div style="margin-top: 0.5rem; background: #192336; border-radius: 3rem; padding: 0.2rem 0.8rem; font-size: 0.8rem; display: inline-block;">
+      <span id="timePercept">🌀 time compression: -22%</span>
+    </div>
+  </div>
+
+  <!-- THE PEAK (awe + ONE IDEA) -->
+  <div class="reveal delay-4 interactive-block" style="background: #12213b; border-color: #ffb347; position: relative;">
+    <div style="position: absolute; top: -10px; right: 20px; background: #ffb347; color: #0b0d17; padding: 0.2rem 1.2rem; border-radius: 100px; font-weight: 500; font-size: 0.7rem; letter-spacing: 1px;">⚡ AWE PEAK</div>
+    <h3 style="font-size: 1.8rem; font-weight: 400; margin-bottom: 0.3rem;">⚡ ONE IDEA</h3>
+    <div style="font-size: 1.3rem; line-height: 1.3; background: #1c2b48; padding: 0.8rem 1.2rem; border-radius: 2rem; border-left: 6px solid #ffb347;">
+      “Your brain <strong>remaps time</strong> proportionally — each new year is a smaller fraction of your life, so it <em>feels</em> shorter.”
+    </div>
+    <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <span class="stat-badge" style="background: #2f4068;">🔬 proportional firing rate</span>
+      <span class="stat-badge" style="background: #2f4068;">🧠 60% glymphatic reset</span>
+    </div>
+  </div>
+
+  <!-- HYPERMEDIA ANSWER: interactive toggle diagram for open loop 1 -->
+  <div class="hypermedia-answer reveal" style="margin-top: 1rem;">
+    <div style="display: flex; justify-content: space-between;">
+      <span style="font-weight: 400; color: #ffb347;">🌀 LOOP 1 RESOLUTION</span>
+      <span class="btn-share" style="background: #1c2b48;" id="toggleLoop1">▶ reveal</span>
+    </div>
+    <div id="loop1Content" style="display: none; margin-top: 1rem; background: #0c1629; border-radius: 2rem; padding: 1rem;">
+      <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center;">
+        <span style="background: #243552; padding: 0.2rem 1.2rem; border-radius: 100px;">🧒 age 5</span>
+        <span style="font-size: 1.6rem;">→</span>
+        <span style="background: #243552; padding: 0.2rem 1.2rem; border-radius: 100px;">👴 age 50</span>
+      </div>
+      <div style="background: #111f33; border-radius: 3rem; padding: 0.8rem; margin: 0.6rem 0;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #b0c3e0;">
+          <span>proportional reference: 1 year = 20% of life</span>
+          <span>1 year = 2% of life</span>
+        </div>
+        <div style="width: 100%; height: 8px; background: #2b3d62; border-radius: 10px; margin: 0.4rem 0;">
+          <div id="loop1Bar" style="width: 20%; height: 100%; background: #ffb347; border-radius: 10px; transition: width 0.3s;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #b0c3e0; font-size: 0.8rem;">
+          <span>⚡ 20% perceived weight</span>
+          <span>⚡ 2% perceived weight</span>
+        </div>
+      </div>
+      <div style="font-size: 0.95rem; background: #1a2845; border-radius: 2rem; padding: 0.4rem 1rem;">
+        <span style="color: #ffb347;">→</span> Each new year is a <strong>smaller slice</strong> of your total experience.
+      </div>
+    </div>
+  </div>
+
+  <!-- LOOP 2 RESOLUTION: interactive state stepper (glymphatic) -->
+  <div class="hypermedia-answer reveal">
+    <div style="display: flex; justify-content: space-between;">
+      <span style="font-weight: 400; color: #6fc3ff;">🌀 LOOP 2 RESOLUTION</span>
+      <span class="btn-share" style="background: #1c2b48;" id="toggleLoop2">▶ show glymphatic reset</span>
+    </div>
+    <div id="loop2Content" style="display: none; margin-top: 1rem;">
+      <div style="background: #0f1c30; border-radius: 2rem; padding: 1rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+          <span class="magnet-btn" data-step="1">🌙 deep sleep</span>
+          <span class="magnet-btn" data-step="2">🧽 60% shrink</span>
+          <span class="magnet-btn" data-step="3">🔄 waste pump</span>
+        </div>
+        <div id="stepDisplay" style="margin-top: 1rem; background: #131f32; border-radius: 2rem; padding: 0.8rem 1.2rem; min-height: 3.5rem;">
+          <span id="stepText">Select a step →</span>
+        </div>
+        <div style="font-size: 0.9rem; color: #a6b9dc; margin-top: 0.6rem;">
+          <span id="stepDetail">Glymphatic clearance resets neural timing baselines.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONALIZED ARTIFACT + SHARE -->
+  <div class="reveal" style="margin: 2rem 0 1.2rem; background: #16233b; border-radius: 3rem; padding: 1.2rem; border: 1px solid #3d5279;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+      <span style="font-weight: 300; font-size: 1.2rem;">🧬 your time‑distortion score</span>
+      <span class="calc-result" style="font-size: 1.8rem; background: #1a2949;" id="shareScore">0.78x</span>
+    </div>
+    <div style="font-size: 0.9rem; color: #b3c7f2; margin: 0.5rem 0 0.2rem;">
+      “At age <span id="shareAge">32</span>, each real year feels like <span id="shareSubj">0.78</span> years.”
+    </div>
+    <!-- 5‑platform share engine -->
+    <div class="share-grid">
+      <button class="btn-share" data-share="x">🐦 X</button>
+      <button class="btn-share" data-share="linkedin">💼 LinkedIn</button>
+      <button class="btn-share" data-share="whatsapp">💬 WhatsApp</button>
+      <button class="btn-share" data-share="reddit">🤖 Reddit</button>
+      <button class="btn-share" data-share="threads">🧵 Threads</button>
+    </div>
+  </div>
+
+  <!-- pattern-break: deliberate glitch in the footer (one moment) -->
+  <div class="footer-return pattern-break" id="patternBreakFooter">
+    <span>⟳ return hook: revisit when you age another year</span>
+  </div>
+
+  <!-- THE END: over‑built closing 10s (animated counter) -->
+  <div style="margin-top: 1.8rem; text-align: center; background: #0b1424; border-radius: 3rem; padding: 1rem 0.5rem; border: 1px solid #2d4068;">
+    <div style="letter-spacing: 2px; font-size: 0.7rem; color: #6f87b5;">⏳ your subjective time remaining (today)</div>
+    <div style="font-size: 2rem; font-weight: 300; display: flex; justify-content: center; gap: 0.4rem; align-items: baseline;">
+      <span id="subjectiveDay">22.3</span><span style="font-size: 1rem; color: #8da0cc;">hr</span>
+    </div>
+    <div style="font-size: 0.7rem; color: #5b72a0;">based on your age · resets daily</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // DOM refs
+    const ageSlider = document.getElementById('ageSlider');
+    const ageValue = document.getElementById('ageValue');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const subjYearDisplay = document.getElementById('subjYearDisplay');
+    const subjYear = document.getElementById('subjYear');
+    const timePercept = document.getElementById('timePercept');
+    const shareAge = document.getElementById('shareAge');
+    const shareSubj = document.getElementById('shareSubj');
+    const shareScore = document.getElementById('shareScore');
+    const loop1Bar = document.getElementById('loop1Bar');
+    const toggleLoop1 = document.getElementById('toggleLoop1');
+    const loop1Content = document.getElementById('loop1Content');
+    const toggleLoop2 = document.getElementById('toggleLoop2');
+    const loop2Content = document.getElementById('loop2Content');
+    const stepBtns = document.querySelectorAll('.magnet-btn');
+    const stepText = document.getElementById('stepText');
+    const stepDetail = document.getElementById('stepDetail');
+    const subjectiveDay = document.getElementById('subjectiveDay');
+
+    // open loops state
+    let loop1Open = false;
+    let loop2Open = false;
+
+    // compute subjective year ratio: proportional reference
+    function computeRatio(age) {
+      // baseline: at age 5 ratio ~ 1.0 (each year = 1/5 = 20%)
+      // at age 80 ratio ~ 0.3 (1/80 ~ 1.25% vs 20% → ~0.0625 but we use smooth)
+      // use sqrt or log: ratio = (5 / age) ^ 0.6  (better feel)
+      let raw = 5 / age;
+      let ratio = Math.pow(raw, 0.55);
+      return Math.min(1.0, Math.max(0.25, ratio));
+    }
+
+    function updateAll(age) {
+      const ratio = computeRatio(age);
+      const subj = ratio.toFixed(2);
+      const compression = ((1 - ratio) * 100).toFixed(0);
+      ageValue.textContent = age;
+      ageDisplay.textContent = age;
+      subjYearDisplay.textContent = subj;
+      subjYear.textContent = `⏳ ${subj} yr`;
+      timePercept.textContent = `🌀 time compression: -${compression}%`;
+      shareAge.textContent = age;
+      shareSubj.textContent = subj;
+      shareScore.textContent = `${subj}x`;
+      // loop1 bar: show proportional reference
+      if (loop1Bar) {
+        const pct = Math.min(100, Math.max(5, (ratio * 100)));
+        loop1Bar.style.width = pct + '%';
+      }
+      // subjective day remaining (24 * ratio)
+      const dayHrs = (24 * ratio).toFixed(1);
+      subjectiveDay.textContent = dayHrs;
+    }
+
+    ageSlider.addEventListener('input', function(e) {
+      const val = parseInt(e.target.value, 10);
+      updateAll(val);
+    });
+
+    // toggle loop1
+    toggleLoop1.addEventListener('click', function() {
+      loop1Open = !loop1Open;
+      loop1Content.style.display = loop1Open ? 'block' : 'none';
+      toggleLoop1.textContent = loop1Open ? '▼ hide' : '▶ reveal';
+    });
+
+    // toggle loop2
+    toggleLoop2.addEventListener('click', function() {
+      loop2Open = !loop2Open;
+      loop2Content.style.display = loop2Open ? 'block' : 'none';
+      toggleLoop2.textContent = loop2Open ? '▼ hide' : '▶ show glymphatic reset';
+    });
+
+    // step buttons (loop2 interactive)
+    const stepMap = {
+      '1': { text: '🌙 deep sleep: 60% brain volume reduction', detail: 'Interstitial space expands 60% allowing CSF flow.' },
+      '2': { text: '🧽 glymphatic clearance: waste proteins removed', detail: 'Beta‑amyloid and tau are flushed during NREM sleep.' },
+      '3': { text: '🔄 reset of neural timing networks', detail: 'Cleared metabolites restore synaptic homeostasis, recalibrating time perception.' }
+    };
+    stepBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        stepBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const step = this.dataset.step;
+        const info = stepMap[step];
+        if (info) {
+          stepText.textContent = info.text;
+          stepDetail.textContent = info.detail;
+        }
+      });
+    });
+
+    // share engine (5 platforms)
+    function getShareText() {
+      const age = parseInt(ageSlider.value, 10);
+      const ratio = computeRatio(age);
+      return `My brain time‑distortion score: ${ratio.toFixed(2)}x (age ${age}). Each year feels ${ratio.toFixed(2)} years. 🧠⏳ #Neuroscience #TimePerception`;
+    }
+
+    function getShareUrl(platform) {
+      const text = encodeURIComponent(getShareText());
+      const url = encodeURIComponent('https://time-anisotropy.vercel.app'); // placeholder
+      const base = {
+        'x': `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+        'linkedin': `https://www.linkedin.com/sharing/share-offscreen/?summary=${text}&url=${url}`,
+        'whatsapp': `https://api.whatsapp.com/send?text=${text}%20${url}`,
+        'reddit': `https://reddit.com/submit?title=${text}&url=${url}`,
+        'threads': `https://threads.net/intent/post?text=${text}`
+      };
+      return base[platform] || '#';
+    }
+
+    document.querySelectorAll('[data-share]').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const platform = this.dataset.share;
+        const shareUrl = getShareUrl(platform);
+        if (shareUrl && shareUrl !== '#') {
+          window.open(shareUrl, '_blank', 'width=600,height=500');
+        } else {
+          // fallback copy
+          navigator.clipboard?.writeText(getShareText()).then(() => {
+            alert('copied share text!');
+          });
+        }
+      });
+    });
+
+    // initial update
+    updateAll(32);
+
+    // pattern-break: re-trigger glitch on footer click
+    const footer = document.getElementById('patternBreakFooter');
+    footer.addEventListener('click', function() {
+      this.classList.remove('pattern-break');
+      void this.offsetWidth;
+      this.classList.add('pattern-break');
+    });
+
+    // return hook: show a reminder to revisit (already in footer)
+  })();
+</script>
+</body>
+</html>
