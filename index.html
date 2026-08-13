@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cognitio Viva — Living Knowledge System</title>
+  <style>
+    :root {
+      --bg: #090b10;
+      --surface: #121620;
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --surface-hover: #1a202c;
+      --text-main: #f0f4f8;
+      --text-muted: #8b9bb4;
+      --accent-cyan: #38bdf8;
+      --accent-violet: #a855f7;
+      --accent-amber: #f59e0b;
+      --glow-cyan: rgba(56, 189, 248, 0.15);
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Living Canvas background */
+    #living-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.65;
+    }
+
+    /* Main Layout */
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 6rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--surface-border);
+      margin-bottom: 2.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .pulse-node {
+      width: 12px;
+      height: 12px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-cyan);
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px var(--accent-cyan); }
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    /* Subdued Ambient Keyword Dock */
+    .ambient-keyword-bar {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      overflow-x: auto;
+      padding: 0.4rem 0;
+      scrollbar-width: none;
+    }
+
+    .ambient-keyword-bar::-webkit-scrollbar { display: none; }
+
+    .keyword-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-right: 0.4rem;
+    }
+
+    .keyword-chip {
+      font-size: 0.75rem;
+      color: rgba(240, 244, 248, 0.55);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0.25rem 0.65rem;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s ease;
+    }
+
+    .keyword-chip:hover, .keyword-chip.active {
+      color: var(--accent-cyan);
+      background: var(--glow-cyan);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Filter & Controls */
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 260px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-main);
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    /* Titles Feed Grid */
+    .knowledge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .knowledge-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .knowledge-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .knowledge-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .knowledge-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .card-category {
+      color: var(--accent-cyan);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+      color: var(--text-main);
+    }
+
+    .card-excerpt {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-subtle-keywords {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+
+    .knowledge-card:hover .card-subtle-keywords {
+      opacity: 0.9;
+    }
+
+    .mini-tag {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* Article Hypermedia Reader Drawer */
+    .reader-drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: 100%;
+      max-width: 680px;
+      height: 100vh;
+      background: #0d111a;
+      border-left: 1px solid var(--surface-border);
+      z-index: 100;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -20px 0 50px rgba(0,0,0,0.6);
+    }
+
+    .reader-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+
+    .drawer-body {
+      padding: 2.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+      line-height: 1.7;
+      color: #d1d5db;
+    }
+
+    .drawer-body h1 {
+      font-size: 1.8rem;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    .drawer-body p {
+      margin-bottom: 1.25rem;
+    }
+
+    .drawer-body blockquote {
+      border-left: 3px solid var(--accent-cyan);
+      padding-left: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .interactive-element {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Universal Modal (About Cognitio Viva) */
+    .modal-backdrop {
+      position: fixed;
+      top:0; left:0; width:100vw; height:100vh;
+      background: rgba(5, 7, 10, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 580px;
+      padding: 2.25rem;
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-content p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .modal-content mark {
+      background: var(--glow-cyan);
+      color: var(--accent-cyan);
+      padding: 0.1em 0.3em;
+      border-radius: 4px;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      line-height: 1;
+    }
+
+    .close-btn:hover { color: var(--text-main); }
+
+    /* Sound Effect Visual Indicator */
+    .audio-indicator {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    @media (max-width: 640px) {
+      .app-container { padding: 1.25rem 1rem 4rem; }
+      .knowledge-grid { grid-template-columns: 1fr; }
+      .reader-drawer { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Living Kinetic Background Canvas -->
+  <canvas id="living-canvas"></canvas>
+
+  <div class="app-container">
+    <header>
+      <div class="brand">
+        <div class="pulse-node"></div>
+        <div class="brand-title">Cognitio Viva</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="sound-toggle" title="Toggle audio synthesis">
+          <span id="sound-icon">🔊</span> Audio
+        </button>
+        <button class="btn" id="about-btn">
+          <span>❖</span> Philosophy
+        </button>
+      </div>
+    </header>
+
+    <!-- Subdued Ambient Keyword Drawer (Does not dominate, provides subtle filter context) -->
+    <div class="ambient-keyword-bar" id="keyword-bar">
+      <span class="keyword-label">Nodes:</span>
+      <div class="keyword-chip active" data-tag="all">all synthesis</div>
+      <!-- Dynamically generated keywords appear here -->
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <input type="text" class="search-input" id="search-input" placeholder="Search living knowledge nodes or titles..." />
+    </div>
+
+    <!-- Title Feed Grid -->
+    <main class="knowledge-grid" id="knowledge-grid">
+      <!-- Living cards dynamically rendered here -->
+    </main>
+  </div>
+
+  <!-- Dynamic Reader Drawer -->
+  <aside class="reader-drawer" id="reader-drawer">
+    <div class="drawer-header">
+      <div class="audio-indicator" id="reading-pulse">
+        <span class="pulse-node" style="width:8px; height:8px;"></span> Living Stream Active
+      </div>
+      <button class="close-btn" id="close-drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <!-- Content loaded on demand -->
+    </div>
+  </aside>
+
+  <!-- Modal: What is Cognitio Viva? -->
+  <div class="modal-backdrop" id="about-modal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <h2 class="modal-title">
+          <span style="color: var(--accent-cyan)">❖</span> Cognitio Viva
+        </h2>
+        <button class="close-btn" id="close-modal">&times;</button>
+      </div>
+      <div class="modal-content">
+        <p>
+          Derived from classical epistemology (Alexander Baumgarten & G.F. Meier), <mark>Cognitio Viva</mark> translates to <strong>Living Cognition</strong>—knowledge that possesses motion, affect, and sufficient power to excite thought and prompt active creation.
+        </p>
+        <p>
+          Unlike static archives (<em>cognitio mortua</em> or dead knowledge), this platform treats notes, systems blueprints, and contextual thoughts as interconnected, living nodes that evolve dynamically.
+        </p>
+        <p>
+          <strong>Navigation:</strong>
+        </p>
+        <ul style="color: var(--text-muted); font-size: 0.9rem; margin-left: 1.25rem; margin-bottom: 1rem; line-height: 1.7;">
+          <li>Click any card to enter its active hypermedia state.</li>
+          <li>Subtle tag nodes at the top allow context filtering without cluttering your reading focus.</li>
+          <li>Interact with the background network canvas using your cursor or touch.</li>
+        </ul>
+        <div style="text-align: right; margin-top: 1.5rem;">
+          <button class="btn" id="modal-acknowledge" style="background: var(--glow-cyan); border-color: var(--accent-cyan); color: var(--accent-cyan);">
+            Enter Knowledge Graph
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. Knowledge Corpus (Living Data)
+       ========================================================================== */
+    const corpus = [
+      {
+        id: "context-harness-architecture",
+        title: "Autonomous Context Harnessing & Dynamic Token Pruning",
+        category: "AI Systems",
+        date: "2026-08-12",
+        summary: "Architecting non-destructive sliding-window truncation algorithms to minimize overhead while maintaining deep attention integrity across LLM agent execution loops.",
+        keywords: ["context-engineering", "llm-harness", "token-optimization", "sliding-window"],
+        content: `
+          <h1>Autonomous Context Harnessing & Dynamic Token Pruning</h1>
+          <p>In high-throughput multi-agent orchestration, raw history accumulation degrades model reasoning speed and increases API costs exponential to turn depth. Rather than naive hard-truncation, a dynamic context harness prunes redundant historical state while shielding system prompts and active intent parameters.</p>
+          <blockquote>"Cognition is living only when it retains actionable energy without being weighed down by static residue."</blockquote>
+          <h3>Key System Specifications</h3>
+          <p>By enforcing client-side, zero-dependency token estimation before API dispatch, we achieve sub-10ms context boundary calculation directly within browser sandboxes.</p>
+          <div class="interactive-element">
+            <div>
+              <strong>Interactive Context Meter</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Simulate context compaction efficiency</div>
+            </div>
+            <button class="btn" id="sim-compact-btn">Run Trimming Simulation</button>
+          </div>
+          <div id="sim-output" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan); display: none; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px;">
+            [COMPACTOR] Initial Context: 128,400 tokens -> Pruned: 18,200 tokens (85.8% reduction)
+          </div>
+        `
+      },
+      {
+        id: "vanilla-stack-velocity",
+        title: "Zero-Dependency Mobile Web Engineering",
+        category: "Web Architecture",
+        date: "2026-07-28",
+        summary: "Shipping full-featured, high-performance web tools directly from mobile sandboxes (iPad/iOS) using vanilla HTML5, modern CSS, and client-side JavaScript.",
+        keywords: ["vanilla-js", "zero-dependency", "mobile-first", "single-file"],
+        content: `
+          <h1>Zero-Dependency Mobile Web Engineering</h1>
+          <p>Modern web engineering frequently falls prey to bloat—heavy package trees, fragile build steps, and server dependencies. By constraining projects to pure standalone files running directly in mobile browser environments, execution speed approaches native hardware thresholds.</p>
+          <p>Every piece of state, graphic rendering, and routing in this interface is authored without NPM dependencies, bundlers, or frameworks.</p>
+        `
+      },
+      {
+        id: "interpretability-circuits",
+        title: "Feature Circuit Alignment in Deep Neural Weights",
+        category: "Interpretability",
+        date: "2026-06-15",
+        summary: "Exposing internal feature circuits inside language model neural layers to achieve deterministic verification before safe agent state transitions.",
+        keywords: ["interpretability", "neural-circuits", "guardrails", "alignment"],
+        content: `
+          <h1>Feature Circuit Alignment in Deep Neural Weights</h1>
+          <p>Inspecting raw activation vectors allows real-time structural policy verification. Before an autonomous code agent merges code to a target branch, policy guardrails verify that specific hazardous activation paths remain dormant.</p>
+        `
+      },
+      {
+        id: "sovereign-reader-paradigm",
+        title: "The Sovereign Reader: Hypermedia Beyond the Feed",
+        category: "Epistemology",
+        date: "2026-05-02",
+        summary: "Redesigning digital reading interfaces to inspire focus and deliberate exploration rather than passive algorithm-driven scrolling.",
+        keywords: ["epistemology", "hypermedia", "ui-design", "sovereign-reader"],
+        content: `
+          <h1>The Sovereign Reader: Hypermedia Beyond the Feed</h1>
+          <p>When knowledge is presented as an endless vertical feed, retention drops and cognitive fatigue accelerates. Hypermedia should invite non-linear traversal through subtle ambient indicators.</p>
+        `
+      }
+    ];
+
+    /* ==========================================================================
+       2. Audio Synthesizer (Zero external assets)
+       ========================================================================== */
+    let audioCtx = null;
+    let audioEnabled = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq = 440, type = 'sine', duration = 0.15, gainVal = 0.03) {
+      if (!audioEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e){}
+    }
+
+    /* ==========================================================================
+       3. Kinetic Interactive Canvas Background
+       ========================================================================== */
+    const canvas = document.getElementById('living-canvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let nodes = [];
+    let mouse = { x: null, y: null, radius: 180 };
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      createNodes();
+    }
+
+    function createNodes() {
+      nodes = [];
+      const count = Math.floor((width * height) / 18000);
+      for (let i = 0; i < count; i++) {
+        nodes.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          radius: Math.random() * 2 + 1,
+          color: Math.random() > 0.5 ? '#38bdf8' : '#a855f7'
+        });
+      }
+    }
+
+    function renderCanvas() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (let i = 0; i < nodes.length; i++) {
+        let n = nodes[i];
+        n.x += n.vx;
+        n.y += n.vy;
+
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
+
+        // Draw Node
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+
+        // Connect nearby nodes
+        for (let j = i + 1; j < nodes.length; j++) {
+          let n2 = nodes[j];
+          let dx = n.x - n2.x;
+          let dy = n.y - n2.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 110) {
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(n2.x, n2.y);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - dist / 110)})`;
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+          }
+        }
+
+        // Mouse interaction
+        if (mouse.x !== null) {
+          let mdx = n.x - mouse.x;
+          let mdy = n.y - mouse.y;
+          let mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (mdist < mouse.radius) {
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = `rgba(168, 85, 247, ${0.25 * (1 - mdist / mouse.radius)})`;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(renderCanvas);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+    window.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
+
+    /* ==========================================================================
+       4. UI Rendering & Keyword Management
+       ========================================================================== */
+    const grid = document.getElementById('knowledge-grid');
+    const keywordBar = document.getElementById('keyword-bar');
+    const searchInput = document.getElementById('search-input');
+    const drawer = document.getElementById('reader-drawer');
+    const drawerBody = document.getElementById('drawer-body');
+    const modal = document.getElementById('about-modal');
+
+    let activeTag = 'all';
+
+    function extractUniqueKeywords() {
+      const tagMap = new Map();
+      corpus.forEach(item => {
+        item.keywords.forEach(kw => {
+          tagMap.set(kw, (tagMap.get(kw) || 0) + 1);
+        });
+      });
+      return tagMap;
+    }
+
+    function renderKeywordBar() {
+      const tagMap = extractUniqueKeywords();
+      tagMap.forEach((count, tag) => {
+        const chip = document.createElement('div');
+        chip.className = 'keyword-chip';
+        chip.dataset.tag = tag;
+        chip.textContent = `#${tag}`;
+        chip.addEventListener('click', () => {
+          initAudio();
+          playTone(520, 'sine', 0.1);
+          document.querySelectorAll('.keyword-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeTag = tag;
+          filterAndRender();
+        });
+        keywordBar.appendChild(chip);
+      });
+    }
+
+    function renderCard(item) {
+      const card = document.createElement('article');
+      card.className = 'knowledge-card';
+      
+      const keywordsHTML = item.keywords.map(k => `<span class="mini-tag">#${k}</span>`).join(' ');
+
+      card.innerHTML = `
+        <div>
+          <div class="card-meta">
+            <span class="card-category">${item.category}</span>
+            <span>${item.date}</span>
+          </div>
+          <h2 class="card-title">${item.title}</h2>
+          <p class="card-excerpt">${item.summary}</p>
+        </div>
+        <div class="card-subtle-keywords">
+          ${keywordsHTML}
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        openArticle(item);
+      });
+
+      return card;
+    }
+
+    function filterAndRender() {
+      grid.innerHTML = '';
+      const query = searchInput.value.toLowerCase().trim();
+
+      const filtered = corpus.filter(item => {
+        const matchesTag = activeTag === 'all' || item.keywords.includes(activeTag);
+        const matchesSearch = query === '' || 
+          item.title.toLowerCase().includes(query) ||
+          item.summary.toLowerCase().includes(query) ||
+          item.keywords.some(k => k.toLowerCase().includes(query));
+        return matchesTag && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No living nodes match your query.</div>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        grid.appendChild(renderCard(item));
+      });
+    }
+
+    function openArticle(item) {
+      initAudio();
+      playTone(640, 'triangle', 0.2);
+      drawerBody.innerHTML = item.content;
+      drawer.classList.add('open');
+
+      // Attach dynamic handlers inside content if present
+      const simBtn = document.getElementById('sim-compact-btn');
+      if (simBtn) {
+        simBtn.addEventListener('click', () => {
+          playTone(880, 'sine', 0.15);
+          document.getElementById('sim-output').style.display = 'block';
+        });
+      }
+    }
+
+    // Modal Control
+    document.getElementById('about-btn').addEventListener('click', () => {
+      initAudio();
+      playTone(480, 'sine', 0.15);
+      modal.classList.add('open');
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => {
+      modal.classList.remove('open');
+    });
+
+    document.getElementById('modal-acknowledge').addEventListener('click', () => {
+      modal.classList.remove('open');
+    });
+
+    document.getElementById('close-drawer').addEventListener('click', () => {
+      drawer.classList.remove('open');
+    });
+
+    // Sound Toggle
+    document.getElementById('sound-toggle').addEventListener('click', () => {
+      initAudio();
+      audioEnabled = !audioEnabled;
+      document.getElementById('sound-icon').textContent = audioEnabled ? '🔊' : '🔇';
+      if (audioEnabled) playTone(700, 'sine', 0.15);
+    });
+
+    // Search input listener
+    searchInput.addEventListener('input', () => {
+      filterAndRender();
+    });
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        drawer.classList.remove('open');
+        modal.classList.remove('open');
+      }
+      if (e.key === '?') {
+        modal.classList.add('open');
+      }
+    });
+
+    /* ==========================================================================
+       5. Initializer
+       ========================================================================== */
+    resizeCanvas();
+    renderCanvas();
+    renderKeywordBar();
+    filterAndRender();
+  </script>
+</body>
+</html>
