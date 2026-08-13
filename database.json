@@ -101,6 +101,21 @@
     "theOneIdea": "You don't sleep to rest. You sleep so your brain can be washed — consciousness is a state of controlled pollution.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "time-anisotropy-personal-perception",
+  "title": "Your Brain Slows Time: The Neuroscience of Age and Perception",
+  "subtitle": "Each new year feels shorter because your brain remaps time proportionally — discover your personal time-distortion score.",
+  "slug": "time-anisotropy-personal-perception",
+  "topic": "The Anisotropy of Time: Why time feels faster as you age (proportional neuron firing rate theory)",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/time-anisotropy-personal-perception.html",
+  "tags": ["neuroscience", "time perception", "cognitive science", "aging", "interactive"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Your brain remaps time proportionally — each new year is a smaller fraction of your life, so it feels shorter.",
+    "peakEmotion": "Awe"
+  }
 }
 
 
