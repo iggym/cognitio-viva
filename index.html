@@ -1,869 +1,1041 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Cognitio Viva — Living Knowledge System</title>
-  <style>
-    :root {
-      --bg: #090b10;
-      --surface: #121620;
-      --surface-border: rgba(255, 255, 255, 0.08);
-      --surface-hover: #1a202c;
-      --text-main: #f0f4f8;
-      --text-muted: #8b9bb4;
-      --accent-cyan: #38bdf8;
-      --accent-violet: #a855f7;
-      --accent-amber: #f59e0b;
-      --glow-cyan: rgba(56, 189, 248, 0.15);
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      --font-mono: 'SF Mono', 'Fira Code', Consolas, monospace;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitio Viva — Living Knowledge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Crimson Pro"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg: #08080e;
+            --fg: #FDFCF8;
+            --muted: rgba(253,252,248,0.35);
+            --dim: rgba(253,252,248,0.12);
+            --accent: #c05621;
+            --accent-glow: rgba(192,86,33,0.35);
+            --card: rgba(253,252,248,0.04);
+            --border: rgba(253,252,248,0.08);
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-      -webkit-font-smoothing: antialiased;
-    }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Living Canvas background */
-    #living-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.65;
-    }
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+        }
 
-    /* Main Layout */
-    .app-container {
-      position: relative;
-      z-index: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2rem 1.25rem 6rem;
-    }
+        /* Grain overlay */
+        .grain {
+            position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--surface-border);
-      margin-bottom: 2.5rem;
-    }
+        /* Canvas */
+        #neural-canvas {
+            position: fixed; inset: 0; z-index: 0;
+        }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+        /* Central title */
+        .central-title {
+            position: fixed; z-index: 10;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            user-select: none;
+        }
+        .central-title h1 {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 300;
+            font-style: italic;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            letter-spacing: -0.03em;
+            color: var(--fg);
+            opacity: 0.12;
+            animation: breathe 6s ease-in-out infinite;
+        }
+        .central-title .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+            opacity: 0.3;
+            margin-top: 0.5rem;
+            animation: breathe 6s ease-in-out infinite 1s;
+        }
 
-    .pulse-node {
-      width: 12px;
-      height: 12px;
-      background: var(--accent-cyan);
-      border-radius: 50%;
-      box-shadow: 0 0 12px var(--accent-cyan);
-      animation: pulse 2.5s infinite ease-in-out;
-    }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.10; transform: scale(1); }
+            50% { opacity: 0.18; transform: scale(1.01); }
+        }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(0.9); opacity: 0.6; }
-      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px var(--accent-cyan); }
-    }
+        /* Thought nodes */
+        .thought-node {
+            position: absolute;
+            z-index: 10;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(8px);
+            max-width: 220px;
+        }
+        .thought-node:hover, .thought-node.near {
+            background: rgba(253,252,248,0.07);
+            border-color: rgba(192,86,33,0.4);
+            box-shadow: 0 0 30px rgba(192,86,33,0.12), 0 0 60px rgba(192,86,33,0.05);
+            transform: scale(1.05);
+            z-index: 15;
+        }
+        .thought-node.dimmed {
+            opacity: 0.15 !important;
+            pointer-events: none;
+        }
+        .thought-node.highlighted {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .thought-node .node-title {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-size: 0.95rem;
+            line-height: 1.3;
+            color: var(--fg);
+            opacity: 0.85;
+            transition: opacity 0.3s;
+        }
+        .thought-node:hover .node-title,
+        .thought-node.near .node-title {
+            opacity: 1;
+            color: var(--fg);
+        }
+        .thought-node .node-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .thought-node:hover .node-keywords,
+        .thought-node.near .node-keywords {
+            opacity: 1;
+            max-height: 40px;
+        }
+        .node-keyword {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.55rem;
+            letter-spacing: 0.06em;
+            text-transform: lowercase;
+            color: var(--accent);
+            background: rgba(192,86,33,0.08);
+            padding: 1px 6px;
+            border-radius: 2px;
+            border: 1px solid rgba(192,86,33,0.15);
+            white-space: nowrap;
+        }
+        .node-index {
+            position: absolute;
+            top: -6px; right: -6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.5rem;
+            color: var(--muted);
+            opacity: 0.4;
+        }
 
-    .brand-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      background: linear-gradient(135deg, var(--text-main), var(--accent-cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        /* Float animations per node */
+        @keyframes float-a { 0%,100%{transform:translate(0,0)} 33%{transform:translate(3px,-8px)} 66%{transform:translate(-4px,-3px)} }
+        @keyframes float-b { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-5px,-6px)} 66%{transform:translate(2px,-10px)} }
+        @keyframes float-c { 0%,100%{transform:translate(0,0)} 33%{transform:translate(4px,-4px)} 66%{transform:translate(-3px,-9px)} }
 
-    .header-actions {
-      display: flex;
-      gap: 0.75rem;
-    }
+        /* Floating buttons */
+        .floating-btn {
+            position: fixed; z-index: 60;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+        .floating-btn:hover {
+            border-color: rgba(192,86,33,0.5);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(192,86,33,0.15);
+        }
 
-    .btn {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      color: var(--text-main);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      backdrop-filter: blur(10px);
-    }
+        /* Modal */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 70;
+            background: rgba(8,8,14,0.85);
+            backdrop-filter: blur(20px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .modal-card {
+            position: fixed; z-index: 80;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            max-width: 520px; width: 90%;
+            background: rgba(20,20,30,0.95);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .modal-card.open {
+            opacity: 1; pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .modal-card h2 {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-style: italic;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        .modal-card p {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        .modal-card .accent-line {
+            width: 40px; height: 1px;
+            background: var(--accent);
+            margin: 1.5rem 0;
+            opacity: 0.5;
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 1.2rem; transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--fg); }
 
-    .btn:hover {
-      background: var(--surface-hover);
-      border-color: var(--accent-cyan);
-      transform: translateY(-1px);
-    }
+        /* Keyword cloud */
+        .keyword-cloud {
+            position: fixed; bottom: 60px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex; flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            max-width: 600px; width: 90%;
+            padding: 16px 20px;
+            background: rgba(12,12,20,0.9);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            backdrop-filter: blur(16px);
+            opacity: 0; pointer-events: none;
+            transform: translateX(-50%) translateY(10px);
+            transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+        }
+        .keyword-cloud.open {
+            opacity: 1; pointer-events: all;
+            transform: translateX(-50%) translateY(0);
+        }
+        .cloud-keyword {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.65rem;
+            letter-spacing: 0.04em;
+            text-transform: lowercase;
+            color: var(--muted);
+            padding: 3px 10px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .cloud-keyword:hover {
+            color: var(--accent);
+            border-color: rgba(192,86,33,0.3);
+            background: rgba(192,86,33,0.06);
+        }
+        .cloud-keyword.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(192,86,33,0.1);
+        }
 
-    /* Subdued Ambient Keyword Dock */
-    .ambient-keyword-bar {
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      overflow-x: auto;
-      padding: 0.4rem 0;
-      scrollbar-width: none;
-    }
+        /* Node detail panel */
+        .detail-panel {
+            position: fixed; z-index: 55;
+            top: 50%; right: 40px;
+            transform: translateY(-50%) translateX(20px);
+            max-width: 340px; width: 85%;
+            background: rgba(16,16,26,0.95);
+            border: 1px solid rgba(192,86,33,0.25);
+            border-radius: 6px;
+            padding: 28px;
+            opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.23,1,0.32,1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 60px rgba(192,86,33,0.08);
+        }
+        .detail-panel.open {
+            opacity: 1; pointer-events: all;
+            transform: translateY(-50%) translateX(0);
+        }
+        .detail-panel .detail-title {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .detail-panel .detail-desc {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+        .detail-panel .detail-keywords {
+            display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px;
+        }
+        .detail-panel .detail-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-decoration: none;
+            transition: gap 0.2s;
+        }
+        .detail-panel .detail-link:hover { gap: 10px; }
+        .detail-close {
+            position: absolute; top: 12px; right: 12px;
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 0.9rem; transition: color 0.2s;
+        }
+        .detail-close:hover { color: var(--fg); }
 
-    .ambient-keyword-bar::-webkit-scrollbar { display: none; }
+        /* Ripple effect */
+        .ripple {
+            position: fixed; z-index: 5; pointer-events: none;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            animation: ripple-out 1.2s ease-out forwards;
+        }
+        @keyframes ripple-out {
+            0% { width: 0; height: 0; opacity: 0.5; }
+            100% { width: 300px; height: 300px; opacity: 0; }
+        }
 
-    .keyword-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      white-space: nowrap;
-      margin-right: 0.4rem;
-    }
+        /* Bottom hint */
+        .bottom-hint {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            opacity: 0.25;
+            pointer-events: none;
+        }
 
-    .keyword-chip {
-      font-size: 0.75rem;
-      color: rgba(240, 244, 248, 0.55);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 0.25rem 0.65rem;
-      border-radius: 12px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.25s ease;
-    }
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            z-index: 90;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.72rem;
+            color: var(--muted);
+            background: rgba(16,16,26,0.95);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 4px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
 
-    .keyword-chip:hover, .keyword-chip.active {
-      color: var(--accent-cyan);
-      background: var(--glow-cyan);
-      border-color: rgba(56, 189, 248, 0.3);
-    }
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .thought-node { max-width: 160px; padding: 8px 12px; }
+            .thought-node .node-title { font-size: 0.8rem; }
+            .detail-panel { right: 10px; left: 10px; max-width: none; top: auto; bottom: 10px; transform: translateY(20px); }
+            .detail-panel.open { transform: translateY(0); }
+            .central-title h1 { font-size: 2rem; }
+        }
 
-    /* Filter & Controls */
-    .controls-row {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .search-input {
-      flex: 1;
-      min-width: 260px;
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      color: var(--text-main);
-      padding: 0.75rem 1.25rem;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .search-input:focus {
-      border-color: var(--accent-cyan);
-    }
-
-    /* Titles Feed Grid */
-    .knowledge-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .knowledge-card {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .knowledge-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .knowledge-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(56, 189, 248, 0.4);
-      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5);
-    }
-
-    .knowledge-card:hover::before {
-      opacity: 1;
-    }
-
-    .card-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-    }
-
-    .card-category {
-      color: var(--accent-cyan);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-bottom: 0.75rem;
-      color: var(--text-main);
-    }
-
-    .card-excerpt {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 1.25rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-subtle-keywords {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      opacity: 0.5;
-      transition: opacity 0.3s;
-    }
-
-    .knowledge-card:hover .card-subtle-keywords {
-      opacity: 0.9;
-    }
-
-    .mini-tag {
-      font-size: 0.7rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-    }
-
-    /* Article Hypermedia Reader Drawer */
-    .reader-drawer {
-      position: fixed;
-      top: 0; right: 0;
-      width: 100%;
-      max-width: 680px;
-      height: 100vh;
-      background: #0d111a;
-      border-left: 1px solid var(--surface-border);
-      z-index: 100;
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      box-shadow: -20px 0 50px rgba(0,0,0,0.6);
-    }
-
-    .reader-drawer.open {
-      transform: translateX(0);
-    }
-
-    .drawer-header {
-      padding: 1.5rem 2rem;
-      border-bottom: 1px solid var(--surface-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--surface);
-    }
-
-    .drawer-body {
-      padding: 2.5rem 2rem;
-      overflow-y: auto;
-      flex: 1;
-      line-height: 1.7;
-      color: #d1d5db;
-    }
-
-    .drawer-body h1 {
-      font-size: 1.8rem;
-      color: var(--text-main);
-      margin-bottom: 1rem;
-      line-height: 1.3;
-    }
-
-    .drawer-body p {
-      margin-bottom: 1.25rem;
-    }
-
-    .drawer-body blockquote {
-      border-left: 3px solid var(--accent-cyan);
-      padding-left: 1rem;
-      margin: 1.5rem 0;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    .interactive-element {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin: 1.5rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    /* Universal Modal (About Cognitio Viva) */
-    .modal-backdrop {
-      position: fixed;
-      top:0; left:0; width:100vw; height:100vh;
-      background: rgba(5, 7, 10, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .modal-backdrop.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .modal-card {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 580px;
-      padding: 2.25rem;
-      position: relative;
-      transform: scale(0.95);
-      transition: transform 0.3s ease;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    }
-
-    .modal-backdrop.open .modal-card {
-      transform: scale(1);
-    }
-
-    .modal-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .modal-content p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 1rem;
-    }
-
-    .modal-content mark {
-      background: var(--glow-cyan);
-      color: var(--accent-cyan);
-      padding: 0.1em 0.3em;
-      border-radius: 4px;
-    }
-
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.25rem 0.5rem;
-      line-height: 1;
-    }
-
-    .close-btn:hover { color: var(--text-main); }
-
-    /* Sound Effect Visual Indicator */
-    .audio-indicator {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    @media (max-width: 640px) {
-      .app-container { padding: 1.25rem 1rem 4rem; }
-      .knowledge-grid { grid-template-columns: 1fr; }
-      .reader-drawer { max-width: 100%; }
-    }
-  </style>
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
 </head>
 <body>
+    <!-- Grain texture overlay -->
+    <div class="grain"></div>
 
-  <!-- Living Kinetic Background Canvas -->
-  <canvas id="living-canvas"></canvas>
+    <!-- Neural network canvas -->
+    <canvas id="neural-canvas"></canvas>
 
-  <div class="app-container">
-    <header>
-      <div class="brand">
-        <div class="pulse-node"></div>
-        <div class="brand-title">Cognitio Viva</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn" id="sound-toggle" title="Toggle audio synthesis">
-          <span id="sound-icon">🔊</span> Audio
-        </button>
-        <button class="btn" id="about-btn">
-          <span>❖</span> Philosophy
-        </button>
-      </div>
-    </header>
-
-    <!-- Subdued Ambient Keyword Drawer (Does not dominate, provides subtle filter context) -->
-    <div class="ambient-keyword-bar" id="keyword-bar">
-      <span class="keyword-label">Nodes:</span>
-      <div class="keyword-chip active" data-tag="all">all synthesis</div>
-      <!-- Dynamically generated keywords appear here -->
+    <!-- Central watermark title -->
+    <div class="central-title">
+        <h1>Cognitio Viva</h1>
+        <div class="subtitle">living knowledge</div>
     </div>
 
-    <!-- Controls -->
-    <div class="controls-row">
-      <input type="text" class="search-input" id="search-input" placeholder="Search living knowledge nodes or titles..." />
+    <!-- Info button -->
+    <button class="floating-btn" style="top:24px;right:24px;" id="info-btn" title="About this space">i</button>
+
+    <!-- Keyword filter button -->
+    <button class="floating-btn" style="bottom:24px;right:24px;" id="keyword-btn" title="Filter by keyword">κ</button>
+
+    <!-- Thought nodes container -->
+    <div id="nodes-container"></div>
+
+    <!-- Node detail panel -->
+    <div class="detail-panel" id="detail-panel">
+        <button class="detail-close" id="detail-close">&times;</button>
+        <div class="detail-title" id="detail-title"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+        <div class="detail-keywords" id="detail-keywords"></div>
+        <a class="detail-link" id="detail-link" href="#">Enter <span>&rarr;</span></a>
     </div>
 
-    <!-- Title Feed Grid -->
-    <main class="knowledge-grid" id="knowledge-grid">
-      <!-- Living cards dynamically rendered here -->
-    </main>
-  </div>
-
-  <!-- Dynamic Reader Drawer -->
-  <aside class="reader-drawer" id="reader-drawer">
-    <div class="drawer-header">
-      <div class="audio-indicator" id="reading-pulse">
-        <span class="pulse-node" style="width:8px; height:8px;"></span> Living Stream Active
-      </div>
-      <button class="close-btn" id="close-drawer">&times;</button>
-    </div>
-    <div class="drawer-body" id="drawer-body">
-      <!-- Content loaded on demand -->
-    </div>
-  </aside>
-
-  <!-- Modal: What is Cognitio Viva? -->
-  <div class="modal-backdrop" id="about-modal">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <h2 class="modal-title">
-          <span style="color: var(--accent-cyan)">❖</span> Cognitio Viva
-        </h2>
-        <button class="close-btn" id="close-modal">&times;</button>
-      </div>
-      <div class="modal-content">
+    <!-- Modal: About -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-card" id="modal-card">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <h2>Cognitio Viva</h2>
         <p>
-          Derived from classical epistemology (Alexander Baumgarten & G.F. Meier), <mark>Cognitio Viva</mark> translates to <strong>Living Cognition</strong>—knowledge that possesses motion, affect, and sufficient power to excite thought and prompt active creation.
+            <em>Cognitio viva</em> — living knowledge — is a constellation of interrelated ideas drawn from phenomenology, cognitive science, process philosophy, and the philosophy of mind. Each node in this space represents a line of thought; each connection, a shared horizon of meaning.
+        </p>
+        <div class="accent-line"></div>
+        <p>
+            This is not a library. It is an ecology of concepts — a terrain where ideas breathe, reverberate, and transform one another. Knowledge here is not stored but <em>enacted</em>: it lives in the relations between thoughts, in the tension of their differences, in the movement of your attention across them.
         </p>
         <p>
-          Unlike static archives (<em>cognitio mortua</em> or dead knowledge), this platform treats notes, systems blueprints, and contextual thoughts as interconnected, living nodes that evolve dynamically.
+            <strong style="color:var(--fg);opacity:0.7;">How to navigate:</strong> Move through the space with your cursor. Ideas drift toward your attention. Hover to glimpse their keywords; click to dwell. Use the <em>κ</em> button below to filter by theme. Follow the threads that compel you — there is no prescribed order.
         </p>
-        <p>
-          <strong>Navigation:</strong>
+        <div class="accent-line"></div>
+        <p style="font-style:italic;font-family:'Crimson Pro',serif;font-size:0.95rem;color:rgba(253,252,248,0.5);">
+            "The world is not what we think, but what we live."<br>
+            <span style="font-size:0.7rem;font-family:'Inter',sans-serif;font-style:normal;letter-spacing:0.1em;text-transform:uppercase;opacity:0.6;">— Merleau-Ponty</span>
         </p>
-        <ul style="color: var(--text-muted); font-size: 0.9rem; margin-left: 1.25rem; margin-bottom: 1rem; line-height: 1.7;">
-          <li>Click any card to enter its active hypermedia state.</li>
-          <li>Subtle tag nodes at the top allow context filtering without cluttering your reading focus.</li>
-          <li>Interact with the background network canvas using your cursor or touch.</li>
-        </ul>
-        <div style="text-align: right; margin-top: 1.5rem;">
-          <button class="btn" id="modal-acknowledge" style="background: var(--glow-cyan); border-color: var(--accent-cyan); color: var(--accent-cyan);">
-            Enter Knowledge Graph
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <script>
-    /* ==========================================================================
-       1. Knowledge Corpus (Living Data)
-       ========================================================================== */
-    const corpus = [
-      {
-        id: "context-harness-architecture",
-        title: "Autonomous Context Harnessing & Dynamic Token Pruning",
-        category: "AI Systems",
-        date: "2026-08-12",
-        summary: "Architecting non-destructive sliding-window truncation algorithms to minimize overhead while maintaining deep attention integrity across LLM agent execution loops.",
-        keywords: ["context-engineering", "llm-harness", "token-optimization", "sliding-window"],
-        content: `
-          <h1>Autonomous Context Harnessing & Dynamic Token Pruning</h1>
-          <p>In high-throughput multi-agent orchestration, raw history accumulation degrades model reasoning speed and increases API costs exponential to turn depth. Rather than naive hard-truncation, a dynamic context harness prunes redundant historical state while shielding system prompts and active intent parameters.</p>
-          <blockquote>"Cognition is living only when it retains actionable energy without being weighed down by static residue."</blockquote>
-          <h3>Key System Specifications</h3>
-          <p>By enforcing client-side, zero-dependency token estimation before API dispatch, we achieve sub-10ms context boundary calculation directly within browser sandboxes.</p>
-          <div class="interactive-element">
-            <div>
-              <strong>Interactive Context Meter</strong>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">Simulate context compaction efficiency</div>
-            </div>
-            <button class="btn" id="sim-compact-btn">Run Trimming Simulation</button>
-          </div>
-          <div id="sim-output" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan); display: none; background: rgba(0,0,0,0.3); padding: 0.75rem; border-radius: 8px;">
-            [COMPACTOR] Initial Context: 128,400 tokens -> Pruned: 18,200 tokens (85.8% reduction)
-          </div>
-        `
-      },
-      {
-        id: "vanilla-stack-velocity",
-        title: "Zero-Dependency Mobile Web Engineering",
-        category: "Web Architecture",
-        date: "2026-07-28",
-        summary: "Shipping full-featured, high-performance web tools directly from mobile sandboxes (iPad/iOS) using vanilla HTML5, modern CSS, and client-side JavaScript.",
-        keywords: ["vanilla-js", "zero-dependency", "mobile-first", "single-file"],
-        content: `
-          <h1>Zero-Dependency Mobile Web Engineering</h1>
-          <p>Modern web engineering frequently falls prey to bloat—heavy package trees, fragile build steps, and server dependencies. By constraining projects to pure standalone files running directly in mobile browser environments, execution speed approaches native hardware thresholds.</p>
-          <p>Every piece of state, graphic rendering, and routing in this interface is authored without NPM dependencies, bundlers, or frameworks.</p>
-        `
-      },
-      {
-        id: "interpretability-circuits",
-        title: "Feature Circuit Alignment in Deep Neural Weights",
-        category: "Interpretability",
-        date: "2026-06-15",
-        summary: "Exposing internal feature circuits inside language model neural layers to achieve deterministic verification before safe agent state transitions.",
-        keywords: ["interpretability", "neural-circuits", "guardrails", "alignment"],
-        content: `
-          <h1>Feature Circuit Alignment in Deep Neural Weights</h1>
-          <p>Inspecting raw activation vectors allows real-time structural policy verification. Before an autonomous code agent merges code to a target branch, policy guardrails verify that specific hazardous activation paths remain dormant.</p>
-        `
-      },
-      {
-        id: "sovereign-reader-paradigm",
-        title: "The Sovereign Reader: Hypermedia Beyond the Feed",
-        category: "Epistemology",
-        date: "2026-05-02",
-        summary: "Redesigning digital reading interfaces to inspire focus and deliberate exploration rather than passive algorithm-driven scrolling.",
-        keywords: ["epistemology", "hypermedia", "ui-design", "sovereign-reader"],
-        content: `
-          <h1>The Sovereign Reader: Hypermedia Beyond the Feed</h1>
-          <p>When knowledge is presented as an endless vertical feed, retention drops and cognitive fatigue accelerates. Hypermedia should invite non-linear traversal through subtle ambient indicators.</p>
-        `
-      }
+    <!-- Keyword cloud -->
+    <div class="keyword-cloud" id="keyword-cloud"></div>
+
+    <!-- Bottom hint -->
+    <div class="bottom-hint">move &middot; hover &middot; click &middot; explore</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // ─── DATA ───────────────────────────────────────────────────────────
+    const NODES = [
+        {
+            title: "Phenomenology of Attention",
+            keywords: ["husserl", "intentionality", "constitution"],
+            link: "./phenomenology-of-attention/",
+            description: "Attention as the constitutive gesture of consciousness — a meditation on how the directedness of mind shapes the very field in which objects appear.",
+            x: 14, y: 14, float: 'a', dur: 7, delay: 0
+        },
+        {
+            title: "Cognition as Embodied Praxis",
+            keywords: ["merleau-ponty", "body", "perception"],
+            link: "./cognition-as-embodied-praxis/",
+            description: "The body is not merely in the world — it is of the world. Cognition emerges through the intertwining of flesh and situation.",
+            x: 70, y: 10, float: 'b', dur: 9, delay: 1.3
+        },
+        {
+            title: "The Virtual and the Actual",
+            keywords: ["deleuze", "difference", "becoming"],
+            link: "./the-virtual-and-the-actual/",
+            description: "The virtual is not the possible. It is a real without being actual, ideal without being abstract — the engine of becoming itself.",
+            x: 42, y: 22, float: 'c', dur: 8, delay: 2.1
+        },
+        {
+            title: "Schema Theory Revisited",
+            keywords: ["bartlett", "memory", "schema"],
+            link: "./schema-theory-revisited/",
+            description: "Beyond the computational metaphor: schemas as living patterns of expectation that reshape themselves with every encounter.",
+            x: 10, y: 36, float: 'a', dur: 10, delay: 0.7
+        },
+        {
+            title: "Intentionality and the Open",
+            keywords: ["brentano", "openness", "horizon"],
+            link: "./intentionality-and-the-open/",
+            description: "Consciousness is always consciousness-of — but what of the horizon that frames every 'of'? The open as the condition of intentionality.",
+            x: 80, y: 32, float: 'b', dur: 7.5, delay: 3.0
+        },
+        {
+            title: "Emergence: A Process Ontology",
+            keywords: ["whitehead", "process", "novelty"],
+            link: "./emergence-a-process-ontology/",
+            description: "Reality is not made of substance but of process. Novelty emerges not from nothing, but from the creative advance of the actual world.",
+            x: 54, y: 42, float: 'c', dur: 8.5, delay: 1.0
+        },
+        {
+            title: "The Threshold of Perception",
+            keywords: ["liminality", "subliminal", "affect"],
+            link: "./the-threshold-of-perception/",
+            description: "At the edge of the perceptible, something stirs. The threshold is not a boundary but a zone of indistinction where perception becomes creation.",
+            x: 28, y: 48, float: 'a', dur: 9.5, delay: 2.5
+        },
+        {
+            title: "Recursive Self-Reference",
+            keywords: ["gödel", "strange-loop", "consciousness"],
+            link: "./recursive-self-reference/",
+            description: "A system that refers to itself encounters the limits of formalization — and perhaps the condition of consciousness itself.",
+            x: 64, y: 56, float: 'b', dur: 7, delay: 0.4
+        },
+        {
+            title: "Maps and Territories",
+            keywords: ["korzybski", "representation", "abstraction"],
+            link: "./maps-and-territories/",
+            description: "The map is not the territory — but every territory is already a map of something else. The regress of representation and its halt.",
+            x: 6, y: 60, float: 'c', dur: 11, delay: 1.8
+        },
+        {
+            title: "The Extended Mind",
+            keywords: ["clark", "coupling", "externalism"],
+            link: "./the-extended-mind/",
+            description: "Where does the mind stop and the world begin? If cognition extends into the environment, the boundary of self dissolves.",
+            x: 86, y: 52, float: 'a', dur: 8, delay: 3.3
+        },
+        {
+            title: "Affordances and Meaning",
+            keywords: ["gibson", "ecology", "action"],
+            link: "./affordances-and-meaning/",
+            description: "The environment does not merely surround — it offers. Meaning is not added to the world but discovered in the affordances of the situation.",
+            x: 38, y: 66, float: 'b', dur: 9, delay: 0.9
+        },
+        {
+            title: "Cognition Without Borders",
+            keywords: ["enactivism", "autopoiesis", "boundaries"],
+            link: "./cognition-without-borders/",
+            description: "If life and cognition share the same logical roots, then to understand mind we must first understand the organization of the living.",
+            x: 74, y: 70, float: 'c', dur: 7.5, delay: 2.7
+        },
+        {
+            title: "The Lived Body",
+            keywords: ["merleau-ponty", "flesh", "chiasm"],
+            link: "./the-lived-body/",
+            description: "I am my body — but my body is also a thing among things. The chiasm of subject and object, seer and seen, touching and touched.",
+            x: 18, y: 76, float: 'a', dur: 10.5, delay: 1.5
+        },
+        {
+            title: "Process and Becoming",
+            keywords: ["heraclitus", "flux", "time"],
+            link: "./process-and-becoming/",
+            description: "Everything flows — but what is the structure of flow? Becoming as neither being nor nothing, but the verb from which nouns are derived.",
+            x: 56, y: 82, float: 'b', dur: 8.5, delay: 3.6
+        },
+        {
+            title: "Topology of Thought",
+            keywords: ["manifold", "continuity", "transformation"],
+            link: "./topology-of-thought/",
+            description: "Thought has a shape. Concepts are not discrete atoms but regions in a manifold — continuous, deformable, topologically entangled.",
+            x: 34, y: 88, float: 'c', dur: 7, delay: 0.2
+        }
     ];
 
-    /* ==========================================================================
-       2. Audio Synthesizer (Zero external assets)
-       ========================================================================== */
-    let audioCtx = null;
-    let audioEnabled = false;
+    // ─── STATE ──────────────────────────────────────────────────────────
+    const mouse = { x: -1000, y: -1000 };
+    let particles = [];
+    let pulses = [];
+    let nodeElements = [];
+    let nodePositions = []; // {x, y} in px for canvas drawing
+    let activeKeyword = null;
+    let detailOpen = false;
+    let cloudOpen = false;
+    let W, H;
 
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
-
-    function playTone(freq = 440, type = 'sine', duration = 0.15, gainVal = 0.03) {
-      if (!audioEnabled || !audioCtx) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e){}
-    }
-
-    /* ==========================================================================
-       3. Kinetic Interactive Canvas Background
-       ========================================================================== */
-    const canvas = document.getElementById('living-canvas');
+    // ─── CANVAS ─────────────────────────────────────────────────────────
+    const canvas = document.getElementById('neural-canvas');
     const ctx = canvas.getContext('2d');
-    let width, height;
-    let nodes = [];
-    let mouse = { x: null, y: null, radius: 180 };
 
     function resizeCanvas() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      createNodes();
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
     }
-
-    function createNodes() {
-      nodes = [];
-      const count = Math.floor((width * height) / 18000);
-      for (let i = 0; i < count; i++) {
-        nodes.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: (Math.random() - 0.5) * 0.6,
-          radius: Math.random() * 2 + 1,
-          color: Math.random() > 0.5 ? '#38bdf8' : '#a855f7'
-        });
-      }
-    }
-
-    function renderCanvas() {
-      ctx.clearRect(0, 0, width, height);
-
-      for (let i = 0; i < nodes.length; i++) {
-        let n = nodes[i];
-        n.x += n.vx;
-        n.y += n.vy;
-
-        if (n.x < 0 || n.x > width) n.vx *= -1;
-        if (n.y < 0 || n.y > height) n.vy *= -1;
-
-        // Draw Node
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
-        ctx.fillStyle = n.color;
-        ctx.fill();
-
-        // Connect nearby nodes
-        for (let j = i + 1; j < nodes.length; j++) {
-          let n2 = nodes[j];
-          let dx = n.x - n2.x;
-          let dy = n.y - n2.y;
-          let dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 110) {
-            ctx.beginPath();
-            ctx.moveTo(n.x, n.y);
-            ctx.lineTo(n2.x, n2.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.12 * (1 - dist / 110)})`;
-            ctx.lineWidth = 0.6;
-            ctx.stroke();
-          }
-        }
-
-        // Mouse interaction
-        if (mouse.x !== null) {
-          let mdx = n.x - mouse.x;
-          let mdy = n.y - mouse.y;
-          let mdist = Math.sqrt(mdx * mdx + mdy * mdy);
-          if (mdist < mouse.radius) {
-            ctx.beginPath();
-            ctx.moveTo(n.x, n.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${0.25 * (1 - mdist / mouse.radius)})`;
-            ctx.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(renderCanvas);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
-    window.addEventListener('mouseleave', () => {
-      mouse.x = null;
-      mouse.y = null;
-    });
-
-    /* ==========================================================================
-       4. UI Rendering & Keyword Management
-       ========================================================================== */
-    const grid = document.getElementById('knowledge-grid');
-    const keywordBar = document.getElementById('keyword-bar');
-    const searchInput = document.getElementById('search-input');
-    const drawer = document.getElementById('reader-drawer');
-    const drawerBody = document.getElementById('drawer-body');
-    const modal = document.getElementById('about-modal');
-
-    let activeTag = 'all';
-
-    function extractUniqueKeywords() {
-      const tagMap = new Map();
-      corpus.forEach(item => {
-        item.keywords.forEach(kw => {
-          tagMap.set(kw, (tagMap.get(kw) || 0) + 1);
-        });
-      });
-      return tagMap;
-    }
-
-    function renderKeywordBar() {
-      const tagMap = extractUniqueKeywords();
-      tagMap.forEach((count, tag) => {
-        const chip = document.createElement('div');
-        chip.className = 'keyword-chip';
-        chip.dataset.tag = tag;
-        chip.textContent = `#${tag}`;
-        chip.addEventListener('click', () => {
-          initAudio();
-          playTone(520, 'sine', 0.1);
-          document.querySelectorAll('.keyword-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          activeTag = tag;
-          filterAndRender();
-        });
-        keywordBar.appendChild(chip);
-      });
-    }
-
-    function renderCard(item) {
-      const card = document.createElement('article');
-      card.className = 'knowledge-card';
-      
-      const keywordsHTML = item.keywords.map(k => `<span class="mini-tag">#${k}</span>`).join(' ');
-
-      card.innerHTML = `
-        <div>
-          <div class="card-meta">
-            <span class="card-category">${item.category}</span>
-            <span>${item.date}</span>
-          </div>
-          <h2 class="card-title">${item.title}</h2>
-          <p class="card-excerpt">${item.summary}</p>
-        </div>
-        <div class="card-subtle-keywords">
-          ${keywordsHTML}
-        </div>
-      `;
-
-      card.addEventListener('click', () => {
-        openArticle(item);
-      });
-
-      return card;
-    }
-
-    function filterAndRender() {
-      grid.innerHTML = '';
-      const query = searchInput.value.toLowerCase().trim();
-
-      const filtered = corpus.filter(item => {
-        const matchesTag = activeTag === 'all' || item.keywords.includes(activeTag);
-        const matchesSearch = query === '' || 
-          item.title.toLowerCase().includes(query) ||
-          item.summary.toLowerCase().includes(query) ||
-          item.keywords.some(k => k.toLowerCase().includes(query));
-        return matchesTag && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">No living nodes match your query.</div>`;
-        return;
-      }
-
-      filtered.forEach(item => {
-        grid.appendChild(renderCard(item));
-      });
-    }
-
-    function openArticle(item) {
-      initAudio();
-      playTone(640, 'triangle', 0.2);
-      drawerBody.innerHTML = item.content;
-      drawer.classList.add('open');
-
-      // Attach dynamic handlers inside content if present
-      const simBtn = document.getElementById('sim-compact-btn');
-      if (simBtn) {
-        simBtn.addEventListener('click', () => {
-          playTone(880, 'sine', 0.15);
-          document.getElementById('sim-output').style.display = 'block';
-        });
-      }
-    }
-
-    // Modal Control
-    document.getElementById('about-btn').addEventListener('click', () => {
-      initAudio();
-      playTone(480, 'sine', 0.15);
-      modal.classList.add('open');
-    });
-
-    document.getElementById('close-modal').addEventListener('click', () => {
-      modal.classList.remove('open');
-    });
-
-    document.getElementById('modal-acknowledge').addEventListener('click', () => {
-      modal.classList.remove('open');
-    });
-
-    document.getElementById('close-drawer').addEventListener('click', () => {
-      drawer.classList.remove('open');
-    });
-
-    // Sound Toggle
-    document.getElementById('sound-toggle').addEventListener('click', () => {
-      initAudio();
-      audioEnabled = !audioEnabled;
-      document.getElementById('sound-icon').textContent = audioEnabled ? '🔊' : '🔇';
-      if (audioEnabled) playTone(700, 'sine', 0.15);
-    });
-
-    // Search input listener
-    searchInput.addEventListener('input', () => {
-      filterAndRender();
-    });
-
-    // Keyboard Shortcuts
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        drawer.classList.remove('open');
-        modal.classList.remove('open');
-      }
-      if (e.key === '?') {
-        modal.classList.add('open');
-      }
-    });
-
-    /* ==========================================================================
-       5. Initializer
-       ========================================================================== */
     resizeCanvas();
-    renderCanvas();
-    renderKeywordBar();
-    filterAndRender();
-  </script>
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        positionNodes();
+    });
+
+    // Particles
+    const PARTICLE_COUNT = Math.min(90, Math.floor(W * H / 12000));
+    function createParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                r: Math.random() * 1.5 + 0.5,
+                opacity: Math.random() * 0.4 + 0.1,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+    createParticles();
+
+    const CONNECT_DIST = 120;
+    const MOUSE_REPEL_DIST = 150;
+
+    function animateCanvas() {
+        ctx.clearRect(0, 0, W, H);
+        const t = performance.now() * 0.001;
+
+        // Update & draw particles
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            // Mouse repulsion
+            const dx = p.x - mouse.x;
+            const dy = p.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_REPEL_DIST && dist > 0) {
+                const force = (MOUSE_REPEL_DIST - dist) / MOUSE_REPEL_DIST * 0.4;
+                p.vx += (dx / dist) * force;
+                p.vy += (dy / dist) * force;
+            }
+            // Damping
+            p.vx *= 0.98;
+            p.vy *= 0.98;
+            // Base drift
+            p.x += p.vx + Math.sin(t + p.phase) * 0.1;
+            p.y += p.vy + Math.cos(t * 0.7 + p.phase) * 0.1;
+            // Wrap
+            if (p.x < -10) p.x = W + 10;
+            if (p.x > W + 10) p.x = -10;
+            if (p.y < -10) p.y = H + 10;
+            if (p.y > H + 10) p.y = -10;
+            // Draw
+            const pulse = 0.5 + 0.5 * Math.sin(t * 0.5 + p.phase);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(253,252,248,${p.opacity * (0.6 + 0.4 * pulse)})`;
+            ctx.fill();
+        }
+
+        // Connections between particles
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < CONNECT_DIST) {
+                    const alpha = (1 - dist / CONNECT_DIST) * 0.08;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(253,252,248,${alpha})`;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Connections between nodes (shared keywords)
+        if (nodePositions.length > 0) {
+            ctx.lineWidth = 0.6;
+            for (let i = 0; i < NODES.length; i++) {
+                for (let j = i + 1; j < NODES.length; j++) {
+                    const shared = NODES[i].keywords.filter(k => NODES[j].keywords.includes(k));
+                    if (shared.length > 0) {
+                        const ni = nodePositions[i];
+                        const nj = nodePositions[j];
+                        if (!ni || !nj) continue;
+                        const pulse = 0.3 + 0.3 * Math.sin(t * 0.8 + i * 0.5 + j * 0.3);
+                        let alpha = pulse * 0.06;
+                        // Brighter if keyword filter matches
+                        if (activeKeyword && shared.includes(activeKeyword)) {
+                            alpha = pulse * 0.25;
+                            ctx.strokeStyle = `rgba(192,86,33,${alpha})`;
+                        } else if (activeKeyword && !shared.includes(activeKeyword)) {
+                            alpha = 0.01;
+                            ctx.strokeStyle = `rgba(253,252,248,${alpha})`;
+                        } else {
+                            ctx.strokeStyle = `rgba(192,86,33,${alpha})`;
+                        }
+                        ctx.beginPath();
+                        ctx.moveTo(ni.x, ni.y);
+                        ctx.lineTo(nj.x, nj.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Pulses (neural firing)
+        for (let i = pulses.length - 1; i >= 0; i--) {
+            const p = pulses[i];
+            p.r += 2.5;
+            p.opacity -= 0.012;
+            if (p.opacity <= 0) { pulses.splice(i, 1); continue; }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(192,86,33,${p.opacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Mouse trail glow
+        if (mouse.x > 0 && mouse.y > 0) {
+            const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 80);
+            gradient.addColorStop(0, 'rgba(192,86,33,0.04)');
+            gradient.addColorStop(1, 'rgba(192,86,33,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(mouse.x - 80, mouse.y - 80, 160, 160);
+        }
+
+        requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
+
+    // ─── NODE RENDERING ─────────────────────────────────────────────────
+    const container = document.getElementById('nodes-container');
+
+    function renderNodes() {
+        container.innerHTML = '';
+        nodeElements = [];
+        nodePositions = [];
+
+        NODES.forEach((node, i) => {
+            const el = document.createElement('div');
+            el.className = 'thought-node';
+            el.dataset.index = i;
+            el.style.animation = `float-${node.float} ${node.dur}s ease-in-out infinite ${node.delay}s`;
+
+            el.innerHTML = `
+                <span class="node-index">${String(i + 1).padStart(2, '0')}</span>
+                <div class="node-title">${node.title}</div>
+                <div class="node-keywords">
+                    ${node.keywords.map(k => `<span class="node-keyword">${k}</span>`).join('')}
+                </div>
+            `;
+
+            el.addEventListener('mouseenter', () => onNodeHover(i, true));
+            el.addEventListener('mouseleave', () => onNodeHover(i, false));
+            el.addEventListener('click', (e) => { e.stopPropagation(); onNodeClick(i); });
+
+            container.appendChild(el);
+            nodeElements.push(el);
+            nodePositions.push({ x: 0, y: 0 });
+        });
+
+        positionNodes();
+    }
+
+    function positionNodes() {
+        const isMobile = window.innerWidth < 768;
+        NODES.forEach((node, i) => {
+            const el = nodeElements[i];
+            if (!el) return;
+            if (isMobile) {
+                // Grid-like layout on mobile
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                el.style.position = 'absolute';
+                el.style.left = col === 0 ? '5%' : '52%';
+                el.style.top = (12 + row * 12) + '%';
+                el.style.right = col === 0 ? '52%' : '5%';
+            } else {
+                el.style.position = 'absolute';
+                el.style.left = node.x + '%';
+                el.style.top = node.y + '%';
+            }
+        });
+        // Update node positions for canvas drawing after a tick
+        requestAnimationFrame(updateNodePositions);
+    }
+
+    function updateNodePositions() {
+        nodeElements.forEach((el, i) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            nodePositions[i] = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        });
+    }
+    setInterval(updateNodePositions, 500);
+
+    renderNodes();
+
+    // ─── NODE INTERACTIONS ──────────────────────────────────────────────
+    function onNodeHover(index, entering) {
+        const el = nodeElements[index];
+        if (entering) {
+            el.classList.add('near');
+            // Emit subtle pulse
+            const rect = el.getBoundingClientRect();
+            pulses.push({
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+                r: 0,
+                opacity: 0.2
+            });
+        } else {
+            el.classList.remove('near');
+        }
+    }
+
+    function onNodeClick(index) {
+        const node = NODES[index];
+        const el = nodeElements[index];
+
+        // Ripple
+        const rect = el.getBoundingClientRect();
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        ripple.style.left = (rect.left + rect.width / 2 - 150) + 'px';
+        ripple.style.top = (rect.top + rect.height / 2 - 150) + 'px';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1300);
+
+        // Neural pulse
+        pulses.push({
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            r: 0,
+            opacity: 0.4
+        });
+
+        // Open detail
+        openDetail(node);
+    }
+
+    // ─── DETAIL PANEL ───────────────────────────────────────────────────
+    const detailPanel = document.getElementById('detail-panel');
+    const detailTitle = document.getElementById('detail-title');
+    const detailDesc = document.getElementById('detail-desc');
+    const detailKeywords = document.getElementById('detail-keywords');
+    const detailLink = document.getElementById('detail-link');
+    const detailClose = document.getElementById('detail-close');
+
+    function openDetail(node) {
+        detailTitle.textContent = node.title;
+        detailDesc.textContent = node.description;
+        detailKeywords.innerHTML = node.keywords.map(k =>
+            `<span class="node-keyword" style="font-size:0.6rem;">${k}</span>`
+        ).join('');
+        detailLink.href = node.link;
+        detailPanel.classList.add('open');
+        detailOpen = true;
+    }
+
+    function closeDetail() {
+        detailPanel.classList.remove('open');
+        detailOpen = false;
+    }
+
+    detailClose.addEventListener('click', closeDetail);
+
+    // ─── MODAL ──────────────────────────────────────────────────────────
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalCard = document.getElementById('modal-card');
+    const modalClose = document.getElementById('modal-close');
+    const infoBtn = document.getElementById('info-btn');
+
+    function openModal() {
+        modalBackdrop.classList.add('open');
+        modalCard.classList.add('open');
+        closeDetail();
+    }
+    function closeModal() {
+        modalBackdrop.classList.remove('open');
+        modalCard.classList.remove('open');
+    }
+
+    infoBtn.addEventListener('click', openModal);
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    // ─── KEYWORD CLOUD ──────────────────────────────────────────────────
+    const keywordCloud = document.getElementById('keyword-cloud');
+    const keywordBtn = document.getElementById('keyword-btn');
+
+    // Gather all unique keywords
+    const allKeywords = [...new Set(NODES.flatMap(n => n.keywords))].sort();
+
+    function renderKeywordCloud() {
+        keywordCloud.innerHTML = allKeywords.map(k =>
+            `<span class="cloud-keyword" data-keyword="${k}">${k}</span>`
+        ).join('');
+
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const kw = el.dataset.keyword;
+                if (activeKeyword === kw) {
+                    clearKeywordFilter();
+                } else {
+                    applyKeywordFilter(kw);
+                }
+            });
+        });
+    }
+    renderKeywordCloud();
+
+    function toggleCloud() {
+        cloudOpen = !cloudOpen;
+        keywordCloud.classList.toggle('open', cloudOpen);
+    }
+
+    keywordBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCloud();
+    });
+
+    function applyKeywordFilter(keyword) {
+        activeKeyword = keyword;
+        // Update cloud UI
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.classList.toggle('active', el.dataset.keyword === keyword);
+        });
+        // Dim/highlight nodes
+        nodeElements.forEach((el, i) => {
+            const hasKeyword = NODES[i].keywords.includes(keyword);
+            el.classList.toggle('dimmed', !hasKeyword);
+            el.classList.toggle('highlighted', hasKeyword);
+        });
+        showToast(`filtering: ${keyword}`);
+    }
+
+    function clearKeywordFilter() {
+        activeKeyword = null;
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.classList.remove('active');
+        });
+        nodeElements.forEach(el => {
+            el.classList.remove('dimmed', 'highlighted');
+        });
+        showToast('filter cleared');
+    }
+
+    // ─── TOAST ──────────────────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    let toastTimeout;
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ─── MOUSE TRACKING ─────────────────────────────────────────────────
+    document.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        // Proximity-based hover for nodes
+        nodeElements.forEach((el, i) => {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
+            if (dist < 80) {
+                el.classList.add('near');
+            } else if (!el.matches(':hover')) {
+                el.classList.remove('near');
+            }
+        });
+    });
+
+    document.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    // ─── CLICK OUTSIDE ──────────────────────────────────────────────────
+    document.addEventListener('click', (e) => {
+        // Close detail if clicking outside
+        if (detailOpen && !detailPanel.contains(e.target) && !e.target.closest('.thought-node')) {
+            closeDetail();
+        }
+        // Close cloud if clicking outside
+        if (cloudOpen && !keywordCloud.contains(e.target) && e.target !== keywordBtn) {
+            cloudOpen = false;
+            keywordCloud.classList.remove('open');
+        }
+    });
+
+    // ─── KEYBOARD ───────────────────────────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeDetail();
+            if (cloudOpen) {
+                cloudOpen = false;
+                keywordCloud.classList.remove('open');
+                clearKeywordFilter();
+            }
+        }
+    });
+
+    // ─── PERIODIC NEURAL PULSE ──────────────────────────────────────────
+    setInterval(() => {
+        if (particles.length > 0) {
+            const p = particles[Math.floor(Math.random() * particles.length)];
+            pulses.push({ x: p.x, y: p.y, r: 0, opacity: 0.15 });
+        }
+    }, 3000);
+
+    // ─── INIT ───────────────────────────────────────────────────────────
+    // Show a brief welcome toast
+    setTimeout(() => showToast('hover the ideas · click to dwell · press i for info'), 1500);
+    </script>
 </body>
 </html>
