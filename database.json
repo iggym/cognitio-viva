@@ -203,8 +203,37 @@
     "theOneIdea": "Intelligence isn't a brain — it's a conversation between simple parts, and you can wire it yourself.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "braess-paradox-traffic-networks",
+  "title": "The Traffic Paradox: Why Adding a Highway Makes You Later",
+  "subtitle": "How selfish routing and complex network dynamics break intuitive optimization.",
+  "slug": "braess-paradox-traffic-networks",
+  "topic": "Braess's Paradox in Traffic Networks: Why adding a new road can make travel times worse",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/braess-paradox-traffic-networks.html",
+  "tags": ["complex-systems", "game-theory", "network-economics", "decision-making"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Optimizing a local path in a complex network can degrade global system efficiency due to Nash equilibrium shifts.",
+    "peakEmotion": "Awe / Mind-bending"
+  }
+},{
+  "id": "the-road-that-made-everyone-later",
+  "title": "The Road That Made Everyone Later",
+  "subtitle": "Adding a road can slow every single car, because traffic isn't plumbing — it's a game, and a 'free' shortcut can rewrite the only stable outcome into a worse one.",
+  "slug": "the-road-that-made-everyone-later",
+  "topic": "Braess's Paradox in Traffic Networks",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/the-road-that-made-everyone-later.html",
+  "tags": ["complex-systems", "game-theory", "braess-paradox", "traffic", "decision-making", "nash-equilibrium"],
+  "readTimeMinutes": 6,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "A new road doesn't add capacity — it changes the game. Traffic settles into the one outcome no driver can improve alone, and a free shortcut can rewrite that outcome into one that is worse for everyone.",
+    "peakEmotion": "Awe (with a dread undertow): watching 4,000 individually perfect choices converge on a collectively worse morning"
+  }
 }
-
 
 
 
