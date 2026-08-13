@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitio Viva — Living Interactive Cognition</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --card-bg: #141418;
+      --card-border: #24242c;
+      --card-hover: #2e2e38;
+      --text-main: #f0f0f5;
+      --text-muted: #8e8e9a;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --tag-bg: #1e1e28;
+      --tag-text: #a5b4fc;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      padding: 3rem 2rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      border-radius: 6px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    /* Controls Bar */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .controls {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .search-input {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      width: 100%;
+      max-width: 400px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .tag-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag-btn {
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag-btn:hover, .tag-btn.active {
+      color: var(--tag-text);
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    /* Gallery Grid */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-hover);
+    }
+
+    .card-topic {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .card-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--card-border);
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .mini-tag {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    /* Modal Viewer */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 1000;
+    }
+
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-header {
+      height: 60px;
+      padding: 0 1.5rem;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <h1>Cognitio Viva</h1>
+    </div>
+    <p class="subtitle">Interactive, animated web experiences engineered against the neuroscience of attention, memory, and agency.</p>
+
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search experiences or insights...">
+      <div class="tag-filters" id="tagFilters">
+        <button class="tag-btn active" data-tag="all">All</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="experienceGrid">
+      <!-- Cards rendered dynamically via JS -->
+    </div>
+  </main>
+
+  <!-- Modal Preview Window -->
+  <div class="modal" id="previewModal" aria-hidden="true">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Experience Preview</span>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="artifactFrame" src="about:blank" title="Interactive Artifact Viewer"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let experiences = [];
+    let activeTag = 'all';
+
+    const searchInput = document.getElementById('searchInput');
+    const tagFilters = document.getElementById('tagFilters');
+    const experienceGrid = document.getElementById('experienceGrid');
+    const previewModal = document.getElementById('previewModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const artifactFrame = document.getElementById('artifactFrame');
+    const closeModal = document.getElementById('closeModal');
+
+    // Fetch and Initialize Database
+    async function loadDatabase() {
+      try {
+        const response = await fetch('database.json');
+        experiences = await response.json();
+        renderTagFilters();
+        renderGrid();
+      } catch (err) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>Unable to load database.json. Ensure file exists and is served properly.</p>
+          </div>`;
+      }
+    }
+
+    // Extract unique tags and build filter buttons
+    function renderTagFilters() {
+      const tags = new Set();
+      experiences.forEach(item => item.tags?.forEach(t => tags.add(t)));
+      
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.className = 'tag-btn';
+        btn.dataset.tag = tag;
+        btn.textContent = tag;
+        tagFilters.appendChild(btn);
+      });
+
+      tagFilters.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('tag-btn')) return;
+        document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        activeTag = e.target.dataset.tag;
+        renderGrid();
+      });
+    }
+
+    // Render experience cards based on search query and active tag
+    function renderGrid() {
+      const query = searchInput.value.toLowerCase().trim();
+
+      const filtered = experiences.filter(item => {
+        const matchesTag = activeTag === 'all' || item.tags?.includes(activeTag);
+        const matchesSearch = item.title.toLowerCase().includes(query) ||
+                              item.subtitle.toLowerCase().includes(query) ||
+                              item.topic.toLowerCase().includes(query);
+        return matchesTag && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>No interactive experiences matched your criteria.</p>
+          </div>`;
+        return;
+      }
+
+      experienceGrid.innerHTML = filtered.map(item => `
+        <article class="card" onclick="openModal('${item.artifactUrl}', '${escapeQuotes(item.title)}')">
+          <div>
+            <div class="card-topic">${item.topic}</div>
+            <h2 class="card-title">${item.title}</h2>
+            <p class="card-subtitle">${item.subtitle}</p>
+          </div>
+          <div class="card-footer">
+            <div class="card-tags">
+              ${(item.tags || []).slice(0, 2).map(t => `<span class="mini-tag">#${t}</span>`).join('')}
+            </div>
+            <span>${item.readTimeMinutes || 3} min explore</span>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function openModal(url, title) {
+      artifactFrame.src = url;
+      modalTitle.textContent = title;
+      previewModal.classList.add('open');
+      previewModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModalHandler() {
+      previewModal.classList.remove('open');
+      previewModal.setAttribute('aria-hidden', 'true');
+      artifactFrame.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', renderGrid);
+    closeModal.addEventListener('click', closeModalHandler);
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) closeModalHandler();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && previewModal.classList.contains('open')) {
+        closeModalHandler();
+      }
+    });
+
+    // Boot
+    loadDatabase();
+  </script>
+</body>
+</html>
