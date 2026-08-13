@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitio Viva — Living Knowledge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Crimson Pro"', 'serif'],
+                        sans: ['"Inter"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg: #08080e;
+            --fg: #FDFCF8;
+            --muted: rgba(253,252,248,0.35);
+            --dim: rgba(253,252,248,0.12);
+            --accent: #c05621;
+            --accent-glow: rgba(192,86,33,0.35);
+            --card: rgba(253,252,248,0.04);
+            --border: rgba(253,252,248,0.08);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Grain overlay */
+        .grain {
+            position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* Canvas */
+        #neural-canvas {
+            position: fixed; inset: 0; z-index: 0;
+        }
+
+        /* Central title */
+        .central-title {
+            position: fixed; z-index: 10;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            user-select: none;
+        }
+        .central-title h1 {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 300;
+            font-style: italic;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            letter-spacing: -0.03em;
+            color: var(--fg);
+            opacity: 0.12;
+            animation: breathe 6s ease-in-out infinite;
+        }
+        .central-title .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+            opacity: 0.3;
+            margin-top: 0.5rem;
+            animation: breathe 6s ease-in-out infinite 1s;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.10; transform: scale(1); }
+            50% { opacity: 0.18; transform: scale(1.01); }
+        }
+
+        /* Thought nodes */
+        .thought-node {
+            position: absolute;
+            z-index: 10;
+            padding: 10px 18px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(8px);
+            max-width: 220px;
+        }
+        .thought-node:hover, .thought-node.near {
+            background: rgba(253,252,248,0.07);
+            border-color: rgba(192,86,33,0.4);
+            box-shadow: 0 0 30px rgba(192,86,33,0.12), 0 0 60px rgba(192,86,33,0.05);
+            transform: scale(1.05);
+            z-index: 15;
+        }
+        .thought-node.dimmed {
+            opacity: 0.15 !important;
+            pointer-events: none;
+        }
+        .thought-node.highlighted {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .thought-node .node-title {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-size: 0.95rem;
+            line-height: 1.3;
+            color: var(--fg);
+            opacity: 0.85;
+            transition: opacity 0.3s;
+        }
+        .thought-node:hover .node-title,
+        .thought-node.near .node-title {
+            opacity: 1;
+            color: var(--fg);
+        }
+        .thought-node .node-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .thought-node:hover .node-keywords,
+        .thought-node.near .node-keywords {
+            opacity: 1;
+            max-height: 40px;
+        }
+        .node-keyword {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.55rem;
+            letter-spacing: 0.06em;
+            text-transform: lowercase;
+            color: var(--accent);
+            background: rgba(192,86,33,0.08);
+            padding: 1px 6px;
+            border-radius: 2px;
+            border: 1px solid rgba(192,86,33,0.15);
+            white-space: nowrap;
+        }
+        .node-index {
+            position: absolute;
+            top: -6px; right: -6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.5rem;
+            color: var(--muted);
+            opacity: 0.4;
+        }
+
+        /* Float animations per node */
+        @keyframes float-a { 0%,100%{transform:translate(0,0)} 33%{transform:translate(3px,-8px)} 66%{transform:translate(-4px,-3px)} }
+        @keyframes float-b { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-5px,-6px)} 66%{transform:translate(2px,-10px)} }
+        @keyframes float-c { 0%,100%{transform:translate(0,0)} 33%{transform:translate(4px,-4px)} 66%{transform:translate(-3px,-9px)} }
+
+        /* Floating buttons */
+        .floating-btn {
+            position: fixed; z-index: 60;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+        .floating-btn:hover {
+            border-color: rgba(192,86,33,0.5);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(192,86,33,0.15);
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 70;
+            background: rgba(8,8,14,0.85);
+            backdrop-filter: blur(20px);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .modal-card {
+            position: fixed; z-index: 80;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            max-width: 520px; width: 90%;
+            background: rgba(20,20,30,0.95);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 40px;
+            opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .modal-card.open {
+            opacity: 1; pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .modal-card h2 {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-style: italic;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        .modal-card p {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+        .modal-card .accent-line {
+            width: 40px; height: 1px;
+            background: var(--accent);
+            margin: 1.5rem 0;
+            opacity: 0.5;
+        }
+        .modal-close {
+            position: absolute; top: 16px; right: 16px;
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 1.2rem; transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--fg); }
+
+        /* Keyword cloud */
+        .keyword-cloud {
+            position: fixed; bottom: 60px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex; flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            max-width: 600px; width: 90%;
+            padding: 16px 20px;
+            background: rgba(12,12,20,0.9);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            backdrop-filter: blur(16px);
+            opacity: 0; pointer-events: none;
+            transform: translateX(-50%) translateY(10px);
+            transition: all 0.4s cubic-bezier(0.23,1,0.32,1);
+        }
+        .keyword-cloud.open {
+            opacity: 1; pointer-events: all;
+            transform: translateX(-50%) translateY(0);
+        }
+        .cloud-keyword {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.65rem;
+            letter-spacing: 0.04em;
+            text-transform: lowercase;
+            color: var(--muted);
+            padding: 3px 10px;
+            border-radius: 3px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .cloud-keyword:hover {
+            color: var(--accent);
+            border-color: rgba(192,86,33,0.3);
+            background: rgba(192,86,33,0.06);
+        }
+        .cloud-keyword.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(192,86,33,0.1);
+        }
+
+        /* Node detail panel */
+        .detail-panel {
+            position: fixed; z-index: 55;
+            top: 50%; right: 40px;
+            transform: translateY(-50%) translateX(20px);
+            max-width: 340px; width: 85%;
+            background: rgba(16,16,26,0.95);
+            border: 1px solid rgba(192,86,33,0.25);
+            border-radius: 6px;
+            padding: 28px;
+            opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.23,1,0.32,1);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 60px rgba(192,86,33,0.08);
+        }
+        .detail-panel.open {
+            opacity: 1; pointer-events: all;
+            transform: translateY(-50%) translateX(0);
+        }
+        .detail-panel .detail-title {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 400;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .detail-panel .detail-desc {
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+        .detail-panel .detail-keywords {
+            display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px;
+        }
+        .detail-panel .detail-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-decoration: none;
+            transition: gap 0.2s;
+        }
+        .detail-panel .detail-link:hover { gap: 10px; }
+        .detail-close {
+            position: absolute; top: 12px; right: 12px;
+            background: none; border: none;
+            color: var(--muted); cursor: pointer;
+            font-size: 0.9rem; transition: color 0.2s;
+        }
+        .detail-close:hover { color: var(--fg); }
+
+        /* Ripple effect */
+        .ripple {
+            position: fixed; z-index: 5; pointer-events: none;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            animation: ripple-out 1.2s ease-out forwards;
+        }
+        @keyframes ripple-out {
+            0% { width: 0; height: 0; opacity: 0.5; }
+            100% { width: 300px; height: 300px; opacity: 0; }
+        }
+
+        /* Bottom hint */
+        .bottom-hint {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            z-index: 90;
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            font-size: 0.72rem;
+            color: var(--muted);
+            background: rgba(16,16,26,0.95);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 4px;
+            transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .thought-node { max-width: 160px; padding: 8px 12px; }
+            .thought-node .node-title { font-size: 0.8rem; }
+            .detail-panel { right: 10px; left: 10px; max-width: none; top: auto; bottom: 10px; transform: translateY(20px); }
+            .detail-panel.open { transform: translateY(0); }
+            .central-title h1 { font-size: 2rem; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <!-- Grain texture overlay -->
+    <div class="grain"></div>
+
+    <!-- Neural network canvas -->
+    <canvas id="neural-canvas"></canvas>
+
+    <!-- Central watermark title -->
+    <div class="central-title">
+        <h1>Cognitio Viva</h1>
+        <div class="subtitle">living knowledge</div>
+    </div>
+
+    <!-- Info button -->
+    <button class="floating-btn" style="top:24px;right:24px;" id="info-btn" title="About this space">i</button>
+
+    <!-- Keyword filter button -->
+    <button class="floating-btn" style="bottom:24px;right:24px;" id="keyword-btn" title="Filter by keyword">κ</button>
+
+    <!-- Thought nodes container -->
+    <div id="nodes-container"></div>
+
+    <!-- Node detail panel -->
+    <div class="detail-panel" id="detail-panel">
+        <button class="detail-close" id="detail-close">&times;</button>
+        <div class="detail-title" id="detail-title"></div>
+        <div class="detail-desc" id="detail-desc"></div>
+        <div class="detail-keywords" id="detail-keywords"></div>
+        <a class="detail-link" id="detail-link" href="#">Enter <span>&rarr;</span></a>
+    </div>
+
+    <!-- Modal: About -->
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-card" id="modal-card">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <h2>Cognitio Viva</h2>
+        <p>
+            <em>Cognitio viva</em> — living knowledge — is a constellation of interrelated ideas drawn from phenomenology, cognitive science, process philosophy, and the philosophy of mind. Each node in this space represents a line of thought; each connection, a shared horizon of meaning.
+        </p>
+        <div class="accent-line"></div>
+        <p>
+            This is not a library. It is an ecology of concepts — a terrain where ideas breathe, reverberate, and transform one another. Knowledge here is not stored but <em>enacted</em>: it lives in the relations between thoughts, in the tension of their differences, in the movement of your attention across them.
+        </p>
+        <p>
+            <strong style="color:var(--fg);opacity:0.7;">How to navigate:</strong> Move through the space with your cursor. Ideas drift toward your attention. Hover to glimpse their keywords; click to dwell. Use the <em>κ</em> button below to filter by theme. Follow the threads that compel you — there is no prescribed order.
+        </p>
+        <div class="accent-line"></div>
+        <p style="font-style:italic;font-family:'Crimson Pro',serif;font-size:0.95rem;color:rgba(253,252,248,0.5);">
+            "The world is not what we think, but what we live."<br>
+            <span style="font-size:0.7rem;font-family:'Inter',sans-serif;font-style:normal;letter-spacing:0.1em;text-transform:uppercase;opacity:0.6;">— Merleau-Ponty</span>
+        </p>
+    </div>
+
+    <!-- Keyword cloud -->
+    <div class="keyword-cloud" id="keyword-cloud"></div>
+
+    <!-- Bottom hint -->
+    <div class="bottom-hint">move &middot; hover &middot; click &middot; explore</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // ─── DATA ───────────────────────────────────────────────────────────
+    const NODES = [
+        {
+            title: "Phenomenology of Attention",
+            keywords: ["husserl", "intentionality", "constitution"],
+            link: "./phenomenology-of-attention/",
+            description: "Attention as the constitutive gesture of consciousness — a meditation on how the directedness of mind shapes the very field in which objects appear.",
+            x: 14, y: 14, float: 'a', dur: 7, delay: 0
+        },
+        {
+            title: "Cognition as Embodied Praxis",
+            keywords: ["merleau-ponty", "body", "perception"],
+            link: "./cognition-as-embodied-praxis/",
+            description: "The body is not merely in the world — it is of the world. Cognition emerges through the intertwining of flesh and situation.",
+            x: 70, y: 10, float: 'b', dur: 9, delay: 1.3
+        },
+        {
+            title: "The Virtual and the Actual",
+            keywords: ["deleuze", "difference", "becoming"],
+            link: "./the-virtual-and-the-actual/",
+            description: "The virtual is not the possible. It is a real without being actual, ideal without being abstract — the engine of becoming itself.",
+            x: 42, y: 22, float: 'c', dur: 8, delay: 2.1
+        },
+        {
+            title: "Schema Theory Revisited",
+            keywords: ["bartlett", "memory", "schema"],
+            link: "./schema-theory-revisited/",
+            description: "Beyond the computational metaphor: schemas as living patterns of expectation that reshape themselves with every encounter.",
+            x: 10, y: 36, float: 'a', dur: 10, delay: 0.7
+        },
+        {
+            title: "Intentionality and the Open",
+            keywords: ["brentano", "openness", "horizon"],
+            link: "./intentionality-and-the-open/",
+            description: "Consciousness is always consciousness-of — but what of the horizon that frames every 'of'? The open as the condition of intentionality.",
+            x: 80, y: 32, float: 'b', dur: 7.5, delay: 3.0
+        },
+        {
+            title: "Emergence: A Process Ontology",
+            keywords: ["whitehead", "process", "novelty"],
+            link: "./emergence-a-process-ontology/",
+            description: "Reality is not made of substance but of process. Novelty emerges not from nothing, but from the creative advance of the actual world.",
+            x: 54, y: 42, float: 'c', dur: 8.5, delay: 1.0
+        },
+        {
+            title: "The Threshold of Perception",
+            keywords: ["liminality", "subliminal", "affect"],
+            link: "./the-threshold-of-perception/",
+            description: "At the edge of the perceptible, something stirs. The threshold is not a boundary but a zone of indistinction where perception becomes creation.",
+            x: 28, y: 48, float: 'a', dur: 9.5, delay: 2.5
+        },
+        {
+            title: "Recursive Self-Reference",
+            keywords: ["gödel", "strange-loop", "consciousness"],
+            link: "./recursive-self-reference/",
+            description: "A system that refers to itself encounters the limits of formalization — and perhaps the condition of consciousness itself.",
+            x: 64, y: 56, float: 'b', dur: 7, delay: 0.4
+        },
+        {
+            title: "Maps and Territories",
+            keywords: ["korzybski", "representation", "abstraction"],
+            link: "./maps-and-territories/",
+            description: "The map is not the territory — but every territory is already a map of something else. The regress of representation and its halt.",
+            x: 6, y: 60, float: 'c', dur: 11, delay: 1.8
+        },
+        {
+            title: "The Extended Mind",
+            keywords: ["clark", "coupling", "externalism"],
+            link: "./the-extended-mind/",
+            description: "Where does the mind stop and the world begin? If cognition extends into the environment, the boundary of self dissolves.",
+            x: 86, y: 52, float: 'a', dur: 8, delay: 3.3
+        },
+        {
+            title: "Affordances and Meaning",
+            keywords: ["gibson", "ecology", "action"],
+            link: "./affordances-and-meaning/",
+            description: "The environment does not merely surround — it offers. Meaning is not added to the world but discovered in the affordances of the situation.",
+            x: 38, y: 66, float: 'b', dur: 9, delay: 0.9
+        },
+        {
+            title: "Cognition Without Borders",
+            keywords: ["enactivism", "autopoiesis", "boundaries"],
+            link: "./cognition-without-borders/",
+            description: "If life and cognition share the same logical roots, then to understand mind we must first understand the organization of the living.",
+            x: 74, y: 70, float: 'c', dur: 7.5, delay: 2.7
+        },
+        {
+            title: "The Lived Body",
+            keywords: ["merleau-ponty", "flesh", "chiasm"],
+            link: "./the-lived-body/",
+            description: "I am my body — but my body is also a thing among things. The chiasm of subject and object, seer and seen, touching and touched.",
+            x: 18, y: 76, float: 'a', dur: 10.5, delay: 1.5
+        },
+        {
+            title: "Process and Becoming",
+            keywords: ["heraclitus", "flux", "time"],
+            link: "./process-and-becoming/",
+            description: "Everything flows — but what is the structure of flow? Becoming as neither being nor nothing, but the verb from which nouns are derived.",
+            x: 56, y: 82, float: 'b', dur: 8.5, delay: 3.6
+        },
+        {
+            title: "Topology of Thought",
+            keywords: ["manifold", "continuity", "transformation"],
+            link: "./topology-of-thought/",
+            description: "Thought has a shape. Concepts are not discrete atoms but regions in a manifold — continuous, deformable, topologically entangled.",
+            x: 34, y: 88, float: 'c', dur: 7, delay: 0.2
+        }
+    ];
+
+    // ─── STATE ──────────────────────────────────────────────────────────
+    const mouse = { x: -1000, y: -1000 };
+    let particles = [];
+    let pulses = [];
+    let nodeElements = [];
+    let nodePositions = []; // {x, y} in px for canvas drawing
+    let activeKeyword = null;
+    let detailOpen = false;
+    let cloudOpen = false;
+    let W, H;
+
+    // ─── CANVAS ─────────────────────────────────────────────────────────
+    const canvas = document.getElementById('neural-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        positionNodes();
+    });
+
+    // Particles
+    const PARTICLE_COUNT = Math.min(90, Math.floor(W * H / 12000));
+    function createParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                r: Math.random() * 1.5 + 0.5,
+                opacity: Math.random() * 0.4 + 0.1,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+    createParticles();
+
+    const CONNECT_DIST = 120;
+    const MOUSE_REPEL_DIST = 150;
+
+    function animateCanvas() {
+        ctx.clearRect(0, 0, W, H);
+        const t = performance.now() * 0.001;
+
+        // Update & draw particles
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            // Mouse repulsion
+            const dx = p.x - mouse.x;
+            const dy = p.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_REPEL_DIST && dist > 0) {
+                const force = (MOUSE_REPEL_DIST - dist) / MOUSE_REPEL_DIST * 0.4;
+                p.vx += (dx / dist) * force;
+                p.vy += (dy / dist) * force;
+            }
+            // Damping
+            p.vx *= 0.98;
+            p.vy *= 0.98;
+            // Base drift
+            p.x += p.vx + Math.sin(t + p.phase) * 0.1;
+            p.y += p.vy + Math.cos(t * 0.7 + p.phase) * 0.1;
+            // Wrap
+            if (p.x < -10) p.x = W + 10;
+            if (p.x > W + 10) p.x = -10;
+            if (p.y < -10) p.y = H + 10;
+            if (p.y > H + 10) p.y = -10;
+            // Draw
+            const pulse = 0.5 + 0.5 * Math.sin(t * 0.5 + p.phase);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(253,252,248,${p.opacity * (0.6 + 0.4 * pulse)})`;
+            ctx.fill();
+        }
+
+        // Connections between particles
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < CONNECT_DIST) {
+                    const alpha = (1 - dist / CONNECT_DIST) * 0.08;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(253,252,248,${alpha})`;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Connections between nodes (shared keywords)
+        if (nodePositions.length > 0) {
+            ctx.lineWidth = 0.6;
+            for (let i = 0; i < NODES.length; i++) {
+                for (let j = i + 1; j < NODES.length; j++) {
+                    const shared = NODES[i].keywords.filter(k => NODES[j].keywords.includes(k));
+                    if (shared.length > 0) {
+                        const ni = nodePositions[i];
+                        const nj = nodePositions[j];
+                        if (!ni || !nj) continue;
+                        const pulse = 0.3 + 0.3 * Math.sin(t * 0.8 + i * 0.5 + j * 0.3);
+                        let alpha = pulse * 0.06;
+                        // Brighter if keyword filter matches
+                        if (activeKeyword && shared.includes(activeKeyword)) {
+                            alpha = pulse * 0.25;
+                            ctx.strokeStyle = `rgba(192,86,33,${alpha})`;
+                        } else if (activeKeyword && !shared.includes(activeKeyword)) {
+                            alpha = 0.01;
+                            ctx.strokeStyle = `rgba(253,252,248,${alpha})`;
+                        } else {
+                            ctx.strokeStyle = `rgba(192,86,33,${alpha})`;
+                        }
+                        ctx.beginPath();
+                        ctx.moveTo(ni.x, ni.y);
+                        ctx.lineTo(nj.x, nj.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Pulses (neural firing)
+        for (let i = pulses.length - 1; i >= 0; i--) {
+            const p = pulses[i];
+            p.r += 2.5;
+            p.opacity -= 0.012;
+            if (p.opacity <= 0) { pulses.splice(i, 1); continue; }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(192,86,33,${p.opacity})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Mouse trail glow
+        if (mouse.x > 0 && mouse.y > 0) {
+            const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 80);
+            gradient.addColorStop(0, 'rgba(192,86,33,0.04)');
+            gradient.addColorStop(1, 'rgba(192,86,33,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(mouse.x - 80, mouse.y - 80, 160, 160);
+        }
+
+        requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
+
+    // ─── NODE RENDERING ─────────────────────────────────────────────────
+    const container = document.getElementById('nodes-container');
+
+    function renderNodes() {
+        container.innerHTML = '';
+        nodeElements = [];
+        nodePositions = [];
+
+        NODES.forEach((node, i) => {
+            const el = document.createElement('div');
+            el.className = 'thought-node';
+            el.dataset.index = i;
+            el.style.animation = `float-${node.float} ${node.dur}s ease-in-out infinite ${node.delay}s`;
+
+            el.innerHTML = `
+                <span class="node-index">${String(i + 1).padStart(2, '0')}</span>
+                <div class="node-title">${node.title}</div>
+                <div class="node-keywords">
+                    ${node.keywords.map(k => `<span class="node-keyword">${k}</span>`).join('')}
+                </div>
+            `;
+
+            el.addEventListener('mouseenter', () => onNodeHover(i, true));
+            el.addEventListener('mouseleave', () => onNodeHover(i, false));
+            el.addEventListener('click', (e) => { e.stopPropagation(); onNodeClick(i); });
+
+            container.appendChild(el);
+            nodeElements.push(el);
+            nodePositions.push({ x: 0, y: 0 });
+        });
+
+        positionNodes();
+    }
+
+    function positionNodes() {
+        const isMobile = window.innerWidth < 768;
+        NODES.forEach((node, i) => {
+            const el = nodeElements[i];
+            if (!el) return;
+            if (isMobile) {
+                // Grid-like layout on mobile
+                const col = i % 2;
+                const row = Math.floor(i / 2);
+                el.style.position = 'absolute';
+                el.style.left = col === 0 ? '5%' : '52%';
+                el.style.top = (12 + row * 12) + '%';
+                el.style.right = col === 0 ? '52%' : '5%';
+            } else {
+                el.style.position = 'absolute';
+                el.style.left = node.x + '%';
+                el.style.top = node.y + '%';
+            }
+        });
+        // Update node positions for canvas drawing after a tick
+        requestAnimationFrame(updateNodePositions);
+    }
+
+    function updateNodePositions() {
+        nodeElements.forEach((el, i) => {
+            if (!el) return;
+            const rect = el.getBoundingClientRect();
+            nodePositions[i] = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        });
+    }
+    setInterval(updateNodePositions, 500);
+
+    renderNodes();
+
+    // ─── NODE INTERACTIONS ──────────────────────────────────────────────
+    function onNodeHover(index, entering) {
+        const el = nodeElements[index];
+        if (entering) {
+            el.classList.add('near');
+            // Emit subtle pulse
+            const rect = el.getBoundingClientRect();
+            pulses.push({
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+                r: 0,
+                opacity: 0.2
+            });
+        } else {
+            el.classList.remove('near');
+        }
+    }
+
+    function onNodeClick(index) {
+        const node = NODES[index];
+        const el = nodeElements[index];
+
+        // Ripple
+        const rect = el.getBoundingClientRect();
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        ripple.style.left = (rect.left + rect.width / 2 - 150) + 'px';
+        ripple.style.top = (rect.top + rect.height / 2 - 150) + 'px';
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1300);
+
+        // Neural pulse
+        pulses.push({
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            r: 0,
+            opacity: 0.4
+        });
+
+        // Open detail
+        openDetail(node);
+    }
+
+    // ─── DETAIL PANEL ───────────────────────────────────────────────────
+    const detailPanel = document.getElementById('detail-panel');
+    const detailTitle = document.getElementById('detail-title');
+    const detailDesc = document.getElementById('detail-desc');
+    const detailKeywords = document.getElementById('detail-keywords');
+    const detailLink = document.getElementById('detail-link');
+    const detailClose = document.getElementById('detail-close');
+
+    function openDetail(node) {
+        detailTitle.textContent = node.title;
+        detailDesc.textContent = node.description;
+        detailKeywords.innerHTML = node.keywords.map(k =>
+            `<span class="node-keyword" style="font-size:0.6rem;">${k}</span>`
+        ).join('');
+        detailLink.href = node.link;
+        detailPanel.classList.add('open');
+        detailOpen = true;
+    }
+
+    function closeDetail() {
+        detailPanel.classList.remove('open');
+        detailOpen = false;
+    }
+
+    detailClose.addEventListener('click', closeDetail);
+
+    // ─── MODAL ──────────────────────────────────────────────────────────
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalCard = document.getElementById('modal-card');
+    const modalClose = document.getElementById('modal-close');
+    const infoBtn = document.getElementById('info-btn');
+
+    function openModal() {
+        modalBackdrop.classList.add('open');
+        modalCard.classList.add('open');
+        closeDetail();
+    }
+    function closeModal() {
+        modalBackdrop.classList.remove('open');
+        modalCard.classList.remove('open');
+    }
+
+    infoBtn.addEventListener('click', openModal);
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    // ─── KEYWORD CLOUD ──────────────────────────────────────────────────
+    const keywordCloud = document.getElementById('keyword-cloud');
+    const keywordBtn = document.getElementById('keyword-btn');
+
+    // Gather all unique keywords
+    const allKeywords = [...new Set(NODES.flatMap(n => n.keywords))].sort();
+
+    function renderKeywordCloud() {
+        keywordCloud.innerHTML = allKeywords.map(k =>
+            `<span class="cloud-keyword" data-keyword="${k}">${k}</span>`
+        ).join('');
+
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const kw = el.dataset.keyword;
+                if (activeKeyword === kw) {
+                    clearKeywordFilter();
+                } else {
+                    applyKeywordFilter(kw);
+                }
+            });
+        });
+    }
+    renderKeywordCloud();
+
+    function toggleCloud() {
+        cloudOpen = !cloudOpen;
+        keywordCloud.classList.toggle('open', cloudOpen);
+    }
+
+    keywordBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleCloud();
+    });
+
+    function applyKeywordFilter(keyword) {
+        activeKeyword = keyword;
+        // Update cloud UI
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.classList.toggle('active', el.dataset.keyword === keyword);
+        });
+        // Dim/highlight nodes
+        nodeElements.forEach((el, i) => {
+            const hasKeyword = NODES[i].keywords.includes(keyword);
+            el.classList.toggle('dimmed', !hasKeyword);
+            el.classList.toggle('highlighted', hasKeyword);
+        });
+        showToast(`filtering: ${keyword}`);
+    }
+
+    function clearKeywordFilter() {
+        activeKeyword = null;
+        keywordCloud.querySelectorAll('.cloud-keyword').forEach(el => {
+            el.classList.remove('active');
+        });
+        nodeElements.forEach(el => {
+            el.classList.remove('dimmed', 'highlighted');
+        });
+        showToast('filter cleared');
+    }
+
+    // ─── TOAST ──────────────────────────────────────────────────────────
+    const toast = document.getElementById('toast');
+    let toastTimeout;
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ─── MOUSE TRACKING ─────────────────────────────────────────────────
+    document.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        // Proximity-based hover for nodes
+        nodeElements.forEach((el, i) => {
+            const rect = el.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
+            if (dist < 80) {
+                el.classList.add('near');
+            } else if (!el.matches(':hover')) {
+                el.classList.remove('near');
+            }
+        });
+    });
+
+    document.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    // ─── CLICK OUTSIDE ──────────────────────────────────────────────────
+    document.addEventListener('click', (e) => {
+        // Close detail if clicking outside
+        if (detailOpen && !detailPanel.contains(e.target) && !e.target.closest('.thought-node')) {
+            closeDetail();
+        }
+        // Close cloud if clicking outside
+        if (cloudOpen && !keywordCloud.contains(e.target) && e.target !== keywordBtn) {
+            cloudOpen = false;
+            keywordCloud.classList.remove('open');
+        }
+    });
+
+    // ─── KEYBOARD ───────────────────────────────────────────────────────
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeDetail();
+            if (cloudOpen) {
+                cloudOpen = false;
+                keywordCloud.classList.remove('open');
+                clearKeywordFilter();
+            }
+        }
+    });
+
+    // ─── PERIODIC NEURAL PULSE ──────────────────────────────────────────
+    setInterval(() => {
+        if (particles.length > 0) {
+            const p = particles[Math.floor(Math.random() * particles.length)];
+            pulses.push({ x: p.x, y: p.y, r: 0, opacity: 0.15 });
+        }
+    }, 3000);
+
+    // ─── INIT ───────────────────────────────────────────────────────────
+    // Show a brief welcome toast
+    setTimeout(() => showToast('hover the ideas · click to dwell · press i for info'), 1500);
+    </script>
+</body>
+</html>
