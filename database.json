@@ -65,7 +65,29 @@
     "theOneIdea": "The exact same edge compounds into a fortune or a guaranteed zero — depending only on how much of your stack you risk each time.",
     "peakEmotion": "Awe / Cognitive Reframe"
   }
+},{
+  "id": "anisotropy-of-time-aging-perception",
+  "title": "The Anisotropy of Time: Why Years Speed Up as You Age",
+  "subtitle": "How proportional memory scaling and neural frame-rate decay compress years as we get older.",
+  "slug": "anisotropy-of-time-aging-perception",
+  "topic": "The Anisotropy of Time: Why time feels faster as you age (proportional neuron firing rate theory).",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/anisotropy-of-time-aging-perception.html",
+  "tags": [
+    "neuroscience",
+    "cognition",
+    "psychology",
+    "aging",
+    "interactive-simulation"
+  ],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "tune",
+    "theOneIdea": "Subjective time is logarithmic: age 20 is the perceptual midpoint of an 80-year life because our brains measure duration relative to total accumulated experience and frame-rate capture.",
+    "peakEmotion": "Awe"
+  }
 }
+
 
 
 
