@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Half-Life of Time — Why Life Speeds Up As You Age</title>
+<style>
+  :root {
+    --bg: #0a0a14;
+    --bg-elev: #14141f;
+    --bg-deep: #050508;
+    --fg: #ece9e0;
+    --fg-dim: #8a8896;
+    --fg-mute: #555560;
+    --warm: #f5a623;
+    --warm-glow: rgba(245, 166, 35, 0.15);
+    --cool: #5ec9d5;
+    --cool-glow: rgba(94, 201, 213, 0.15);
+    --accent: #e94560;
+    --line: #22222e;
+    --line-bright: #3a3a4a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 166, 35, 0.08), transparent 60%),
+      radial-gradient(ellipse 80% 50% at 50% 110%, rgba(94, 201, 213, 0.05), transparent 60%);
+    min-height: 100vh;
+  }
+
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+  }
+
+  section {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+
+  /* === Typography === */
+  h1, h2, h3, .serif {
+    font-family: "Iowan Old Style", "Apple Garamond", Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    color: var(--fg-dim);
+    font-family: -apple-system, sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.74rem;
+    margin-bottom: 24px;
+    display: inline-block;
+  }
+
+  p { margin-bottom: 18px; }
+
+  .lead {
+    font-size: 1.2rem;
+    line-height: 1.55;
+    color: var(--fg);
+    max-width: 720px;
+  }
+
+  .muted { color: var(--fg-dim); }
+  .warm { color: var(--warm); }
+  .cool { color: var(--cool); }
+  .accent { color: var(--accent); }
+
+  .num {
+    font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* === Progress rail === */
+  .progress-rail {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 220px;
+    background: var(--line);
+    z-index: 100;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, var(--warm), var(--accent));
+    height: 0%;
+    transition: height 0.15s;
+  }
+
+  /* === Open === */
+  #open {
+    padding-top: 80px;
+    min-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stack-line {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.7rem, 5vw, 3rem);
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 0.9s forwards;
+    margin-bottom: 14px;
+  }
+  .stack-line:nth-child(1) { animation-delay: 0.3s; }
+  .stack-line:nth-child(2) { animation-delay: 1.5s; }
+  .stack-line:nth-child(3) {
+    animation-delay: 2.7s;
+    color: var(--warm);
+    font-style: italic;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .scroll-hint {
+    margin-top: 70px;
+    color: var(--fg-mute);
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.9s 4s forwards;
+  }
+
+  /* === Loops === */
+  .loop {
+    display: flex;
+    gap: 28px;
+    align-items: baseline;
+    margin: 18px 0;
+    padding: 26px 28px;
+    background: var(--bg-elev);
+    border-left: 2px solid var(--warm);
+    border-radius: 0 6px 6px 0;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .loop:hover {
+    transform: translateX(6px);
+    border-left-color: var(--accent);
+  }
+  .loop-num {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 2.4rem;
+    color: var(--warm);
+    line-height: 1;
+    min-width: 56px;
+    font-style: italic;
+  }
+  .loop-text {
+    font-size: 1.15rem;
+    line-height: 1.45;
+    color: var(--fg);
+  }
+  .loop-text em { color: var(--warm); font-style: italic; }
+
+  /* === Transport === */
+  #transport .narrative {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+    line-height: 1.5;
+    color: var(--fg);
+    max-width: 700px;
+  }
+  #transport .narrative em {
+    color: var(--warm);
+    font-style: italic;
+  }
+
+  /* === Slider frame === */
+  .slider-frame {
+    background: linear-gradient(180deg, var(--bg-elev), rgba(20,20,31,0.4));
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 44px 32px 32px;
+    margin: 32px 0;
+    position: relative;
+  }
+  .slider-frame::before {
+    content: "DRAG TO TRAVEL THROUGH TIME";
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-size: 0.65rem;
+    color: var(--fg-mute);
+    letter-spacing: 0.25em;
+  }
+  .age-display {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(5rem, 14vw, 8rem);
+    line-height: 1;
+    color: var(--warm);
+    margin-bottom: 4px;
+    font-style: italic;
+    font-feature-settings: "tnum" 1;
+  }
+  .age-display .unit {
+    font-size: 0.22em;
+    color: var(--fg-dim);
+    font-style: normal;
+    margin-left: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .slider-row { margin: 32px 0 16px; }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--warm) 0%, var(--cool) 100%);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    background: var(--bg);
+    border: 2px solid var(--warm);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 0 0 8px var(--warm-glow), 0 0 24px var(--warm-glow);
+    transition: transform 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; }
+  input[type=range]::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    background: var(--bg);
+    border: 2px solid var(--warm);
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 0 0 8px var(--warm-glow);
+  }
+  .slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    font-size: 0.7rem;
+    color: var(--fg-mute);
+    font-family: monospace;
+    letter-spacing: 0.1em;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .stat-cell .label {
+    color: var(--fg-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 12px;
+  }
+  .stat-cell .value {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 2.4rem;
+    color: var(--fg);
+    line-height: 1;
+    font-feature-settings: "tnum" 1;
+  }
+  .stat-cell .value .small {
+    font-size: 0.45em;
+    color: var(--fg-dim);
+    margin-left: 6px;
+    font-style: normal;
+  }
+  .year-feel-bar {
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+  .year-feel-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--warm), var(--accent));
+    transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* === Timeline === */
+  .timeline-frame {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 36px 32px;
+    margin: 32px 0;
+  }
+  .timeline-svg-wrap {
+    width: 100%;
+    overflow: hidden;
+    cursor: ew-resize;
+    user-select: none;
+  }
+  .timeline-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .timeline-readout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .timeline-readout .big {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 2.6rem;
+    color: var(--warm);
+    line-height: 1;
+    font-style: italic;
+    font-feature-settings: "tnum" 1;
+  }
+  .timeline-readout .label {
+    color: var(--fg-dim);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .halflife-flash {
+    color: var(--accent);
+    font-style: italic;
+    font-size: 0.92rem;
+    margin-top: 10px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-family: "Iowan Old Style", Georgia, serif;
+  }
+  .halflife-flash.show { opacity: 1; }
+
+  /* === Peak === */
+  #peak {
+    text-align: center;
+    padding: 140px 0;
+    background: radial-gradient(ellipse at center, rgba(245, 166, 35, 0.10), transparent 65%);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  #peak::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(245, 166, 35, 0.07), transparent 70%);
+    animation: pulse 5s ease-in-out infinite;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.9; }
+  }
+  .peak-eyebrow {
+    color: var(--fg-dim);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .peak-number {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(10rem, 32vw, 18rem);
+    line-height: 0.85;
+    color: var(--warm);
+    margin: 16px 0;
+    font-style: italic;
+    font-feature-settings: "tnum" 1;
+    text-shadow: 0 0 80px rgba(245, 166, 35, 0.35);
+    position: relative;
+  }
+  .peak-statement {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    line-height: 1.3;
+    max-width: 680px;
+    margin: 36px auto 0;
+    color: var(--fg);
+    position: relative;
+  }
+  .peak-statement em {
+    color: var(--warm);
+    font-style: italic;
+  }
+
+  /* === Pattern break === */
+  #break {
+    background: #000;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: none;
+    padding: 100px 24px;
+  }
+  #break .break-text {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.5rem, 4vw, 2.4rem);
+    line-height: 1.45;
+    color: var(--fg);
+    max-width: 640px;
+    font-style: italic;
+  }
+  #break .break-text .lever {
+    color: var(--accent);
+    font-weight: 500;
+    font-style: normal;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 2px;
+  }
+
+  /* === Novelty === */
+  .novelty-intro { max-width: 700px; margin-bottom: 40px; }
+  .novelty-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 32px 0;
+  }
+  .novelty-card {
+    background: var(--bg-elev);
+    padding: 26px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+  .novelty-card h4 {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+  .novelty-card .sub {
+    font-size: 0.72rem;
+    color: var(--fg-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 18px;
+  }
+  .novelty-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    margin: 16px 0;
+    aspect-ratio: 8/6;
+  }
+  .novelty-cell {
+    background: var(--line);
+    border-radius: 2px;
+    transition: background 0.4s, transform 0.3s;
+  }
+  .novelty-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--line-bright);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .novelty-btn:hover {
+    background: var(--warm);
+    color: var(--bg);
+    border-color: var(--warm);
+    transform: translateY(-1px);
+  }
+  .novelty-btn.cool:hover {
+    background: var(--cool);
+    border-color: var(--cool);
+  }
+  .stretch-row {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .stretch-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--fg-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 10px;
+  }
+  .stretch-bar {
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stretch-fill {
+    height: 100%;
+    background: var(--warm);
+    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .stretch-fill.cool { background: var(--cool); }
+
+  /* === Artifact === */
+  #artifact { text-align: center; }
+  .artifact-card {
+    background: linear-gradient(180deg, var(--bg-elev), rgba(20,20,31,0.4));
+    border: 1px solid var(--line-bright);
+    border-radius: 16px;
+    padding: 56px 40px;
+    margin: 40px auto;
+    max-width: 660px;
+    position: relative;
+    overflow: hidden;
+  }
+  .artifact-card::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(245, 166, 35, 0.05), transparent 50%);
+    pointer-events: none;
+  }
+  .artifact-card > * { position: relative; }
+  .artifact-eyebrow {
+    color: var(--fg-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin-bottom: 32px;
+  }
+  .artifact-title {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    margin-bottom: 36px;
+    line-height: 1.3;
+    font-style: italic;
+  }
+  .artifact-title .age {
+    color: var(--warm);
+    font-style: normal;
+    font-feature-settings: "tnum" 1;
+  }
+  .artifact-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 32px 0;
+    text-align: left;
+  }
+  .artifact-stat .label {
+    color: var(--fg-dim);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 8px;
+  }
+  .artifact-stat .value {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.9rem;
+    color: var(--warm);
+    line-height: 1.1;
+    font-feature-settings: "tnum" 1;
+  }
+  .artifact-stat .value .small {
+    font-size: 0.55em;
+    color: var(--fg-dim);
+    margin-left: 6px;
+    font-style: normal;
+  }
+
+  /* === Share === */
+  #share { text-align: center; border-bottom: none; }
+  .share-eyebrow {
+    color: var(--fg-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin-bottom: 16px;
+  }
+  .share-title {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.8rem;
+    margin-bottom: 36px;
+    font-style: italic;
+  }
+  .share-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 32px 0;
+  }
+  .share-btn {
+    padding: 12px 22px;
+    background: var(--bg-elev);
+    color: var(--fg);
+    border: 1px solid var(--line-bright);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .share-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--warm);
+    background: var(--warm);
+    color: var(--bg);
+  }
+  .share-btn svg { width: 14px; height: 14px; }
+
+  /* === End === */
+  #end {
+    text-align: center;
+    padding: 120px 0 160px;
+    border-bottom: none;
+  }
+  .end-quote {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+    line-height: 1.5;
+    max-width: 720px;
+    margin: 0 auto 60px;
+    color: var(--fg);
+  }
+  .end-quote .source {
+    display: block;
+    font-style: normal;
+    font-size: 0.78rem;
+    color: var(--fg-dim);
+    margin-top: 24px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-family: -apple-system, sans-serif;
+  }
+  .return-hook {
+    background: var(--bg-elev);
+    padding: 32px 40px;
+    border-radius: 12px;
+    max-width: 540px;
+    margin: 0 auto;
+    border-left: 2px solid var(--cool);
+    text-align: left;
+  }
+  .return-hook .label {
+    color: var(--cool);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    margin-bottom: 14px;
+  }
+  .return-hook .text {
+    font-family: "Iowan Old Style", Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+  .return-hook .text .num { color: var(--cool); }
+
+  /* === Toast === */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-elev);
+    color: var(--fg);
+    padding: 14px 26px;
+    border-radius: 8px;
+    border: 1px solid var(--warm);
+    font-size: 0.88rem;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* === Reveal === */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  [data-reveal].in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* === Mobile === */
+  @media (max-width: 640px) {
+    .stat-grid { grid-template-columns: 1fr; gap: 24px; }
+    .novelty-container { grid-template-columns: 1fr; }
+    .artifact-stats { grid-template-columns: 1fr; }
+    section { padding: 64px 0; }
+    .progress-rail { display: none; }
+    main { padding: 0 20px; }
+    .slider-frame { padding: 36px 22px 26px; }
+    .timeline-frame { padding: 26px 18px; }
+    .timeline-readout { flex-direction: column; gap: 20px; align-items: flex-start; }
+    .timeline-readout > div { text-align: left !important; }
+    .loop { padding: 20px 22px; gap: 18px; }
+    .loop-num { font-size: 1.8rem; min-width: 40px; }
+    .artifact-card { padding: 40px 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+<div class="toast" id="toast"></div>
+
+<main>
+
+  <!-- OPEN -->
+  <section id="open">
+    <div>
+      <div class="stack-line">A year to a 10-year-old is 10% of their life.</div>
+      <div class="stack-line">A year to an 80-year-old is 1.25%.</div>
+      <div class="stack-line">But that isn't the strangest part.</div>
+    </div>
+    <div class="scroll-hint">↓ scroll to enter</div>
+  </section>
+
+  <!-- LOOPS -->
+  <section id="loops">
+    <div class="eyebrow" data-reveal>Three open loops</div>
+    <h2 data-reveal>Three questions about<br>the speed of life.</h2>
+    <div class="loop" data-reveal>
+      <div class="loop-num">01</div>
+      <div class="loop-text">Why does each year feel shorter than the one before it?</div>
+    </div>
+    <div class="loop" data-reveal>
+      <div class="loop-num">02</div>
+      <div class="loop-text">At what age have you already lived half of your <em>perceived</em> life?</div>
+    </div>
+    <div class="loop" data-reveal>
+      <div class="loop-num">03</div>
+      <div class="loop-text">Is there a way to slow time back down?</div>
+    </div>
+  </section>
+
+  <!-- TRANSPORT -->
+  <section id="transport">
+    <div class="eyebrow" data-reveal>The shape of a summer</div>
+    <div class="narrative" data-reveal>
+      <p>Remember summer vacation at age eight. Eight weeks stretched in every direction. July felt like a small <em>eternity</em>. By August you'd forgotten the smell of the school cafeteria, the weight of the backpack, the precise angle of morning light through classroom windows.</p>
+      <p>Now think about last July. Doesn't it feel like it ended about a week ago?</p>
+      <p>The clock didn't change. The calendar didn't change. Something <em>inside you</em> did.</p>
+    </div>
+  </section>
+
+  <!-- AGENCY: AGE SLIDER -->
+  <section id="agency">
+    <div class="eyebrow" data-reveal>Question 01 — answered</div>
+    <h2 data-reveal>Drag your age.<br>Watch the year shrink.</h2>
+    <p class="lead" data-reveal>A year is a fixed number of seconds. But to your memory, a year is a fraction — and the fraction keeps getting smaller.</p>
+
+    <div class="slider-frame" data-reveal>
+      <div class="age-display"><span id="ageDisplay">40</span><span class="unit">years old</span></div>
+
+      <div class="slider-row">
+        <input type="range" id="ageSlider" min="5" max="80" value="40" step="1" aria-label="Your age">
+        <div class="slider-ticks">
+          <span>5</span><span>20</span><span>40</span><span>60</span><span>80</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="label">A year is this much of your life</div>
+          <div class="value"><span id="yearFraction">2.50</span><span class="small">%</span></div>
+          <div class="year-feel-bar"><div class="year-feel-fill" id="yearFeelFill" style="width: 12.5%"></div></div>
+        </div>
+        <div class="stat-cell">
+          <div class="label">Compared to how it felt at age 10</div>
+          <div class="value"><span id="ageRatio">0.25</span><span class="small">× as long</span></div>
+          <div class="year-feel-bar"><div class="year-feel-fill" id="ratioFill" style="width: 25%"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HYPERMEDIA: TIMELINE -->
+  <section id="timeline">
+    <div class="eyebrow" data-reveal>Question 02 — interactive</div>
+    <h2 data-reveal>The half-life of perceived time.</h2>
+    <p class="lead" data-reveal>Two bars. Same life. The top is calendar time — each year identical. The bottom is perceived time — each year shrinks as 1/age. Drag the marker across either bar.</p>
+
+    <div class="timeline-frame" data-reveal>
+      <div class="timeline-svg-wrap" id="timelineSvgWrap"></div>
+
+      <div class="timeline-readout">
+        <div>
+          <div class="label">Perceived life lived</div>
+          <div class="big"><span id="perceivedLived">75</span>%</div>
+          <div class="halflife-flash" id="halflifeFlash">✦ Your perceived half-life: age 20</div>
+        </div>
+        <div style="text-align: right;">
+          <div class="label">Age marker</div>
+          <div class="big"><span id="markerAge">40</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top: 24px; font-size: 0.88rem;" data-reveal>
+      Mathematical model: perceived time per year ∝ 1/age, integrated from age 5 (first memories) to 80. Based on Paul Janet's proportional theory, 1877 — and supported by modern retrospective time-perception studies.
+    </p>
+  </section>
+
+  <!-- PEAK -->
+  <section id="peak">
+    <div class="peak-eyebrow">The answer to question 02</div>
+    <div class="peak-number">20</div>
+    <div class="peak-statement">
+      By the candles on your <em>twentieth</em> birthday cake, you have already lived half of your entire perceived lifetime.
+    </div>
+  </section>
+
+  <!-- PATTERN BREAK -->
+  <section id="break">
+    <div class="break-text">
+      The good news?<br>
+      This is not a prison.<br>
+      It's a <span class="lever">lever</span>.
+    </div>
+  </section>
+
+  <!-- NOVELTY DEMO -->
+  <section id="novelty">
+    <div class="eyebrow" data-reveal>Question 03 — interactive</div>
+    <h2 data-reveal>The brain measures time in memories,<br>not minutes.</h2>
+    <div class="novelty-intro" data-reveal>
+      <p>Time doesn't accelerate because the clock speeds up. It accelerates because <strong>each year contains fewer firsts</strong>. The brain encodes novelty as memory density — and memory density is what you retrospectively experience as <em>how long something took</em>.</p>
+      <p>Run both years below. Same calendar. Different weight.</p>
+    </div>
+
+    <div class="novelty-container" data-reveal>
+      <div class="novelty-card">
+        <h4>A routine year</h4>
+        <div class="sub">Commute · screens · repeats</div>
+        <div class="novelty-grid" id="routineGrid"></div>
+        <button class="novelty-btn" id="routineBtn">+ live a routine week</button>
+        <div class="stretch-row">
+          <div class="stretch-label">
+            <span>Memory density</span>
+            <span><span id="routineCount">0</span> / 48</span>
+          </div>
+          <div class="stretch-bar"><div class="stretch-fill" id="routineStretch" style="width: 0%"></div></div>
+        </div>
+      </div>
+
+      <div class="novelty-card">
+        <h4>A novel year</h4>
+        <div class="sub">Firsts · surprises · new maps</div>
+        <div class="novelty-grid" id="novelGrid"></div>
+        <button class="novelty-btn cool" id="novelBtn">+ live a novel week</button>
+        <div class="stretch-row">
+          <div class="stretch-label">
+            <span>Memory density</span>
+            <span><span id="novelCount">0</span> / 48</span>
+          </div>
+          <div class="stretch-bar"><div class="stretch-fill cool" id="novelStretch" style="width: 0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin-top: 36px; font-family: 'Iowan Old Style', Georgia, serif; font-size: 1.4rem; line-height: 1.5; font-style: italic;" data-reveal>
+      The clock ticks the same in both. The <span class="warm">memory</span> does not.
+    </p>
+  </section>
+
+  <!-- ARTIFACT -->
+  <section id="artifact">
+    <div class="eyebrow" data-reveal>Your personalized time map</div>
+    <div class="artifact-card" data-reveal>
+      <div class="artifact-eyebrow">Generated from your age input</div>
+      <div class="artifact-title">
+        You are <span class="age" id="artifactAge">40</span>.<br>
+        Here is what that means.
+      </div>
+
+      <div class="artifact-stats">
+        <div class="artifact-stat">
+          <div class="label">Your perceived half-life</div>
+          <div class="value">age <span id="artifactHalflife">20</span></div>
+        </div>
+        <div class="artifact-stat">
+          <div class="label">Perceived life lived</div>
+          <div class="value"><span id="artifactPercieved">75</span><span class="small">%</span></div>
+        </div>
+        <div class="artifact-stat">
+          <div class="label">A year feels like</div>
+          <div class="value"><span id="artifactRatio">0.25</span><span class="small">× age 10</span></div>
+        </div>
+        <div class="artifact-stat">
+          <div class="label">Childhood-equivalent years left</div>
+          <div class="value"><span id="artifactRemaining">6.9</span></div>
+        </div>
+      </div>
+
+      <p class="muted" style="font-size: 0.82rem; margin-top: 24px;">
+        Assuming first memories at age 5 and an 80-year lifespan. Childhood-equivalent years = how many "age-10 years" your remaining time will feel like, integrated.
+      </p>
+    </div>
+  </section>
+
+  <!-- SHARE -->
+  <section id="share">
+    <div class="share-eyebrow" data-reveal>Share your time map</div>
+    <div class="share-title" data-reveal>A different kind of birthday card.</div>
+    <div class="share-bar" data-reveal id="shareBar">
+      <a class="share-btn" data-platform="x" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </a>
+      <a class="share-btn" data-platform="linkedin" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg>
+        LinkedIn
+      </a>
+      <a class="share-btn" data-platform="whatsapp" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        WhatsApp
+      </a>
+      <a class="share-btn" data-platform="reddit" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 11.779c0-1.459-1.192-2.645-2.657-2.645-.715 0-1.363.286-1.84.746-1.81-1.191-4.259-1.949-6.971-2.046l1.483-4.669 4.016.941-.006.058c0 1.193.975 2.163 2.174 2.163 1.198 0 2.172-.97 2.172-2.163s-.975-2.164-2.172-2.164c-.92 0-1.704.574-2.021 1.379l-4.329-1.015c-.189-.046-.381.063-.44.249l-1.654 5.207c-2.838.034-5.409.798-7.3 2.025-.474-.438-1.103-.712-1.799-.712-1.465 0-2.656 1.187-2.656 2.646 0 .97.533 1.811 1.317 2.271-.052.282-.086.567-.086.857 0 3.911 4.808 7.093 10.719 7.093s10.72-3.182 10.72-7.093c0-.274-.029-.544-.075-.81.832-.447 1.405-1.312 1.405-2.318m-17.224 1.816c0-.868.708-1.575 1.582-1.575.872 0 1.581.707 1.581 1.575s-.709 1.574-1.581 1.574-1.582-.706-1.582-1.574m9.061 4.438c-1.097 1.098-3.276 1.181-3.861 1.181-.584 0-2.765-.083-3.861-1.181-.166-.165-.166-.434 0-.599.165-.166.435-.166.6 0 .692.693 2.167.939 3.261.939 1.094 0 2.57-.246 3.261-.939.166-.166.436-.166.601 0 .165.165.165.434-.001.599m-.291-2.864c-.873 0-1.581-.706-1.581-1.574 0-.868.708-1.575 1.581-1.575.874 0 1.582.707 1.582 1.575s-.708 1.574-1.582 1.574"/></svg>
+        Reddit
+      </a>
+      <a class="share-btn" data-platform="threads" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.781 3.631 2.695 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.36-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 013.02.142c-.126-.742-.375-1.332-.74-1.757-.502-.578-1.278-.87-2.309-.87h-.026c-.815 0-1.918.225-2.626 1.258l-1.692-1.14c.95-1.415 2.488-2.193 4.323-2.193h.04c3.078.02 4.908 1.899 5.103 5.177.105.046.207.094.31.143 1.435.679 2.418 1.702 2.927 3.026.725 1.894.393 4.434-1.418 6.21-1.78 1.742-4.093 2.523-7.232 2.523h-.011zm.964-11.55c-.247 0-.494.012-.74.036-1.837.106-2.98.946-2.916 2.143.067 1.256 1.452 1.838 2.784 1.764 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 00-2.214-.233z"/></svg>
+        Threads
+      </a>
+    </div>
+    <p class="muted" style="font-size: 0.78rem; margin-top: 12px;" data-reveal>Your message is auto-copied to clipboard — paste into your post.</p>
+  </section>
+
+  <!-- END -->
+  <section id="end">
+    <div class="end-quote" data-reveal>
+      "In youth, we may have an absolutely new experience, subjective or objective, every hour of the day. Apprehension is vivid, retentiveness strong... But as each passing year converts some of this experience into automatic concatenation which passes so smoothly that we are not conscious of it, the days and the weeks smooth themselves out in recollection to contentless units, and the years grow hollow and collapse."
+      <span class="source">— William James, Principles of Psychology, 1890</span>
+    </div>
+
+    <div class="return-hook" data-reveal>
+      <div class="label">Why return</div>
+      <div class="text">
+        Come back next birthday. Your perceived time will have shrunk by <span class="num" id="shrinkNext">2.5</span>%. The math won't change. The fraction will.
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ============================================
+  // CONSTANTS
+  // ============================================
+  const START_AGE = 5;   // first memories
+  const END_AGE = 80;    // assumed lifespan
+  const REF_AGE = 10;    // childhood reference
+
+  // ============================================
+  // CORE MATH
+  // ============================================
+  function perceivedFractionLived(age) {
+    return Math.log(age / START_AGE) / Math.log(END_AGE / START_AGE);
+  }
+  function halfLife() {
+    return Math.sqrt(START_AGE * END_AGE); // 20
+  }
+  function childhoodYearsRemaining(age) {
+    // Integral of (10/x) dx from age to 80 = 10 * ln(80/age)
+    return 10 * Math.log(END_AGE / age);
+  }
+
+  // ============================================
+  // AGE SLIDER
+  // ============================================
+  const ageSlider = document.getElementById('ageSlider');
+  const ageDisplay = document.getElementById('ageDisplay');
+  const yearFraction = document.getElementById('yearFraction');
+  const ageRatio = document.getElementById('ageRatio');
+  const yearFeelFill = document.getElementById('yearFeelFill');
+  const ratioFill = document.getElementById('ratioFill');
+
+  function updateAge() {
+    const age = parseInt(ageSlider.value);
+    ageDisplay.textContent = age;
+
+    const frac = (1 / age) * 100;
+    yearFraction.textContent = frac.toFixed(2);
+
+    const ratio = REF_AGE / age;
+    ageRatio.textContent = ratio.toFixed(2);
+
+    const feelPercent = (START_AGE / age) * 100;
+    yearFeelFill.style.width = Math.min(feelPercent, 100) + '%';
+    ratioFill.style.width = (ratio * 100) + '%';
+
+    updateTimelineMarker(age);
+    updateArtifact(age);
+    updateShareURLs(age);
+
+    const nextYearShrink = ((1 / age) - (1 / (age + 1))) * 100;
+    document.getElementById('shrinkNext').textContent = nextYearShrink.toFixed(2);
+  }
+
+  ageSlider.addEventListener('input', updateAge);
+
+  // ============================================
+  // TIMELINE SVG
+  // ============================================
+  const timelineSvgWrap = document.getElementById('timelineSvgWrap');
+
+  function buildTimeline() {
+    const width = Math.max(timelineSvgWrap.clientWidth || 800, 320);
+    const cellH = 22;
+    const gap = 14;
+    const labelY = cellH * 2 + gap + 22;
+    const totalH = labelY + 8;
+    const totalPerceived = Math.log(END_AGE / START_AGE);
+
+    let svg = `<svg class="timeline-svg" viewBox="0 0 ${width} ${totalH}" preserveAspectRatio="none">`;
+
+    // Row labels
+    svg += `<text x="0" y="-2" fill="#8a8896" font-size="9.5" font-family="monospace" letter-spacing="1.5">CALENDAR TIME — each year identical</text>`;
+    svg += `<text x="0" y="${cellH + gap - 4}" fill="#8a8896" font-size="9.5" font-family="monospace" letter-spacing="1.5">PERCEIVED TIME — each year scales as 1/age</text>`;
+
+    // Top: chronological bar
+    const chronoCellW = width / (END_AGE - START_AGE);
+    for (let age = START_AGE; age < END_AGE; age++) {
+      const x = (age - START_AGE) * chronoCellW;
+      const isMilestone = (age === 20 || age === 40 || age === 60);
+      const fill = isMilestone ? '#5ec9d5' : '#2a2a3a';
+      svg += `<rect x="${x}" y="0" width="${Math.max(chronoCellW - 0.5, 0.3)}" height="${cellH}" fill="${fill}" opacity="${isMilestone ? 1 : 0.7}" />`;
+    }
+
+    // Bottom: perceived bar
+    let px = 0;
+    for (let age = START_AGE; age < END_AGE; age++) {
+      const frac = (1 / age) / totalPerceived;
+      const w = frac * width;
+      const isMilestone = (age === 20 || age === 40 || age === 60);
+      const opacity = 0.45 + 0.55 * (1 - (age - START_AGE) / (END_AGE - START_AGE));
+      const fill = isMilestone ? '#e94560' : '#f5a623';
+      svg += `<rect x="${px}" y="${cellH + gap}" width="${Math.max(w - 0.5, 0.3)}" height="${cellH}" fill="${fill}" opacity="${isMilestone ? 1 : opacity}" />`;
+      px += w;
+    }
+
+    // Age axis labels
+    svg += `<text x="0" y="${labelY}" fill="#8a8896" font-size="10" font-family="monospace">5</text>`;
+    svg += `<text x="${width * 0.2 - 4}" y="${labelY}" fill="#8a8896" font-size="10" font-family="monospace">20</text>`;
+    svg += `<text x="${width * 0.467 - 4}" y="${labelY}" fill="#8a8896" font-size="10" font-family="monospace">40</text>`;
+    svg += `<text x="${width * 0.733 - 4}" y="${labelY}" fill="#8a8896" font-size="10" font-family="monospace">60</text>`;
+    svg += `<text x="${width - 14}" y="${labelY}" fill="#8a8896" font-size="10" font-family="monospace">80</text>`;
+
+    // Half-life marker
+    const hlX = ((halfLife() - START_AGE) / (END_AGE - START_AGE)) * width;
+    svg += `<line x1="${hlX}" y1="-4" x2="${hlX}" y2="${cellH + gap + cellH + 4}" stroke="#e94560" stroke-width="1" stroke-dasharray="3 3" opacity="0.55" />`;
+    svg += `<text x="${hlX + 4}" y="${cellH + gap + cellH + 16}" fill="#e94560" font-size="9" font-family="monospace" letter-spacing="1">HALF-LIFE</text>`;
+
+    // Draggable marker (current age)
+    const initX = ((40 - START_AGE) / (END_AGE - START_AGE)) * width;
+    svg += `<line id="timelineMarker" x1="${initX}" y1="-8" x2="${initX}" y2="${cellH + gap + cellH + 10}" stroke="#f5a623" stroke-width="2" />`;
+    svg += `<circle id="timelineMarkerDot" cx="${initX}" cy="${cellH + gap + cellH + 10}" r="5" fill="#f5a623" />`;
+
+    svg += '</svg>';
+    timelineSvgWrap.innerHTML = svg;
+
+    // Drag handling
+    let isDragging = false;
+
+    function moveMarker(clientX) {
+      const rect = timelineSvgWrap.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const ratio = Math.max(0, Math.min(1, x / rect.width));
+      const age = Math.round(START_AGE + ratio * (END_AGE - START_AGE));
+      ageSlider.value = age;
+      updateAge();
+    }
+
+    timelineSvgWrap.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      moveMarker(e.clientX);
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) moveMarker(e.clientX);
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    timelineSvgWrap.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      moveMarker(e.touches[0].clientX);
+    }, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) moveMarker(e.touches[0].clientX);
+    }, { passive: true });
+    document.addEventListener('touchend', () => { isDragging = false; });
+  }
+
+  function updateTimelineMarker(age) {
+    const marker = document.getElementById('timelineMarker');
+    const dot = document.getElementById('timelineMarkerDot');
+    if (!marker || !dot) return;
+
+    const width = Math.max(timelineSvgWrap.clientWidth || 800, 320);
+    const x = ((age - START_AGE) / (END_AGE - START_AGE)) * width;
+    marker.setAttribute('x1', x);
+    marker.setAttribute('x2', x);
+    dot.setAttribute('cx', x);
+
+    const percLived = perceivedFractionLived(age) * 100;
+    document.getElementById('perceivedLived').textContent = Math.round(percLived);
+    document.getElementById('markerAge').textContent = age;
+
+    const flash = document.getElementById('halflifeFlash');
+    const hl = halfLife();
+    if (Math.abs(age - hl) <= 1) {
+      flash.classList.add('show');
+    } else {
+      flash.classList.remove('show');
+    }
+  }
+
+  // ============================================
+  // NOVELTY GRIDS
+  // ============================================
+  const routineGrid = document.getElementById('routineGrid');
+  const novelGrid = document.getElementById('novelGrid');
+  const TOTAL_CELLS = 48;
+
+  const novelColors = [
+    '#f5a623', '#e94560', '#5ec9d5', '#9b59b6',
+    '#27ae60', '#f39c12', '#e74c3c', '#3498db',
+    '#1abc9c', '#f1c40f', '#e67e22', '#16a085'
+  ];
+
+  let routineCount = 0;
+  let novelCount = 0;
+
+  function buildGrids() {
+    let html = '';
+    for (let i = 0; i < TOTAL_CELLS; i++) html += '<div class="novelty-cell"></div>';
+    routineGrid.innerHTML = html;
+    novelGrid.innerHTML = html;
+  }
+
+  document.getElementById('routineBtn').addEventListener('click', () => {
+    if (routineCount >= TOTAL_CELLS) return;
+    const cell = routineGrid.children[routineCount];
+    cell.style.background = '#555560';
+    cell.style.transform = 'scale(0.7)';
+    setTimeout(() => { cell.style.transform = 'scale(1)'; }, 220);
+    routineCount++;
+    document.getElementById('routineCount').textContent = routineCount;
+    document.getElementById('routineStretch').style.width = (routineCount / TOTAL_CELLS * 100) + '%';
+  });
+
+  document.getElementById('novelBtn').addEventListener('click', () => {
+    if (novelCount >= TOTAL_CELLS) return;
+    const toAdd = Math.min(2, TOTAL_CELLS - novelCount);
+    for (let i = 0; i < toAdd; i++) {
+      const cell = novelGrid.children[novelCount];
+      cell.style.background = novelColors[Math.floor(Math.random() * novelColors.length)];
+      cell.style.transform = 'scale(1.18) rotate(' + (Math.random() * 16 - 8) + 'deg)';
+      setTimeout(() => { cell.style.transform = 'scale(1) rotate(0)'; }, 280);
+      novelCount++;
+    }
+    document.getElementById('novelCount').textContent = novelCount;
+    document.getElementById('novelStretch').style.width = (novelCount / TOTAL_CELLS * 100) + '%';
+  });
+
+  // ============================================
+  // ARTIFACT
+  // ============================================
+  function updateArtifact(age) {
+    document.getElementById('artifactAge').textContent = age;
+    document.getElementById('artifactHalflife').textContent = Math.round(halfLife());
+    document.getElementById('artifactPercieved').textContent = Math.round(perceivedFractionLived(age) * 100);
+    document.getElementById('artifactRatio').textContent = (REF_AGE / age).toFixed(2);
+    document.getElementById('artifactRemaining').textContent = childhoodYearsRemaining(age).toFixed(1);
+  }
+
+  // ============================================
+  // SHARE URLS + CLIPBOARD
+  // ============================================
+  let currentMessages = {};
+
+  function updateShareURLs(age) {
+    const url = encodeURIComponent(window.location.href);
+    const hl = Math.round(halfLife());
+    const perceived = Math.round(perceivedFractionLived(age) * 100);
+    const remaining = childhoodYearsRemaining(age).toFixed(1);
+    const ratioVs10 = Math.round((REF_AGE / age) * 100);
+
+    currentMessages = {
+      x: `I'm ${age}. By age ${hl}, I'd already lived half my perceived life. Only ${remaining} "childhood-equivalent years" remain.\n\nThe neuroscience of why time accelerates →`,
+      linkedin: `The proportional theory of time perception (Paul Janet, 1877):\n\nAt age ${age}, a year feels ${ratioVs10}% as long as it did at age 10. By age ${hl}, we've already lived half of our perceived lifetime. By 40, three quarters.\n\nThis isn't just philosophy — it has real implications for how we design experiences, learning, and memory. The lever that slows time back down is novelty.\n\nInteractive explainer:`,
+      whatsapp: `Just discovered something wild: by age ${hl}, you've already lived half your *perceived* life. I'm ${age}, so I've got ${remaining} "childhood-equivalent years" left. Check your own number:`,
+      reddit: `By age ${hl}, you've already lived half of your *perceived* lifetime. The proportional theory of time perception says each year feels like 1/age of your life. I'm ${age} — what's your number? Interactive explainer inside.`,
+      threads: `By ${hl}, half your perceived life is over. By 40, 75%. By 60, 90%.\n\nI'm ${age}. I've got ${remaining} childhood-equivalent years left.\n\nThe good news? Novelty stretches the clock.`
+    };
+
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      const platform = btn.dataset.platform;
+      const text = encodeURIComponent(currentMessages[platform]);
+      let href = '';
+      switch (platform) {
+        case 'x': href = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+        case 'linkedin': href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`; break;
+        case 'whatsapp': href = `https://wa.me/?text=${text}%20${url}`; break;
+        case 'reddit': href = `https://www.reddit.com/submit?title=${text}&url=${url}`; break;
+        case 'threads': href = `https://threads.net/intent/post?text=${text}%20${url}`; break;
+      }
+      btn.href = href;
+    });
+  }
+
+  document.querySelectorAll('.share-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const platform = btn.dataset.platform;
+      const message = currentMessages[platform] || '';
+      if (navigator.clipboard && message) {
+        navigator.clipboard.writeText(message).then(() => {
+          showToast(`✓ ${platform} message copied — paste into your post`);
+        }).catch(() => {});
+      }
+    });
+  });
+
+  // ============================================
+  // TOAST
+  // ============================================
+  function showToast(text) {
+    const toast = document.getElementById('toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  // ============================================
+  // PROGRESS RAIL
+  // ============================================
+  window.addEventListener('scroll', () => {
+    const max = document.body.scrollHeight - window.innerHeight;
+    const scrollPercent = max > 0 ? (window.scrollY / max) * 100 : 0;
+    document.getElementById('progressFill').style.height = scrollPercent + '%';
+  }, { passive: true });
+
+  // ============================================
+  // SCROLL REVEAL
+  // ============================================
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+
+  // ============================================
+  // INIT
+  // ============================================
+  buildGrids();
+  buildTimeline();
+  updateAge();
+
+  // Rebuild timeline on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      buildTimeline();
+      updateTimelineMarker(parseInt(ageSlider.value));
+    }, 200);
+  });
+</script>
+</body>
+</html>
