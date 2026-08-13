@@ -131,6 +131,21 @@
     "theOneIdea": "Time doesn't accelerate because the clock speeds up — it accelerates because each year is a smaller fraction of your total lived experience, and the lever that slows it back down is novelty encoded as memory density.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "the-silence-of-the-survivors",
+  "title": "The Silence of the Survivors",
+  "subtitle": "Why armoring the bullet holes is a fatal mistake — the invisible data trap that ruins modern decisions.",
+  "slug": "the-silence-of-the-survivors",
+  "topic": "Survivorship Bias in Armor & Systems",
+  "publishedAt": "2025-01-15",
+  "artifactUrl": "artifacts/the-silence-of-the-survivors.html",
+  "tags": ["survivorship-bias", "decision-making", "data-analysis"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "You cannot optimize a system by studying only the things that survived it — the most critical data is invisible, buried in the silence of what didn't make it back.",
+    "peakEmotion": "Surprise"
+  }
 }
 
 
