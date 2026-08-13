@@ -1,18 +1,19 @@
 [
   {
-    "id": "sleep-glymphatic-cleansing",
-    "title": "The Hydraulic Brain Cleaner",
-    "subtitle": "Why your brain shrinks 60% during deep sleep to pump out metabolic toxins.",
-    "slug": "sleep-glymphatic-cleansing",
-    "topic": "Neuroscience of Sleep",
-    "publishedAt": "2026-08-13",
-    "artifactUrl": "artifacts/sleep-glymphatic-cleansing.html",
-    "tags": ["neuroscience", "health", "biology"],
-    "readTimeMinutes": 3,
-    "neuroParameters": {
-      "interactivityCeiling": "make",
-      "theOneIdea": "Sleep isn't passive rest; it's an active fluid-flushing process that clears amyloid plaque.",
-      "peakEmotion": "Awe (Scale shift of fluid dynamics in interstitial space)"
-    }
+  "id": "sleep-glymphatic-cleansing",
+  "title": "The Hydraulic Brain Cleaner",
+  "subtitle": "Why your brain shrinks 60% during deep sleep to pump out metabolic toxins.",
+  "slug": "sleep-glymphatic-cleansing",
+  "topic": "Neuroscience of Sleep",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/sleep-glymphatic-cleansing.html",
+  "tags": ["neuroscience", "health", "biology"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Sleep isn't passive rest; it's an active fluid-flushing process where brain cells shrink by 60% to sweep away neurotoxic plaques.",
+    "peakEmotion": "Awe (Scale shift of interstitial space fluid dynamics)"
   }
+}
+
 ]
