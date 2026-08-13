@@ -233,6 +233,21 @@
     "theOneIdea": "A new road doesn't add capacity — it changes the game. Traffic settles into the one outcome no driver can improve alone, and a free shortcut can rewrite that outcome into one that is worse for everyone.",
     "peakEmotion": "Awe (with a dread undertow): watching 4,000 individually perfect choices converge on a collectively worse morning"
   }
+},{
+  "id": "kelly-criterion-line-between-growth-and-ruin",
+  "title": "The Kelly Criterion: The Line Between Growth and Ruin",
+  "subtitle": "Even with a winning edge, betting too much guarantees you go broke. The Kelly fraction is the exact mathematical boundary between compounding wealth and certain ruin.",
+  "slug": "kelly-criterion-line-between-growth-and-ruin",
+  "topic": "Kelly Criterion & Optimal Bet Sizing",
+  "publishedAt": "2025-07-12",
+  "artifactUrl": "artifacts/kelly-criterion-line-between-growth-and-ruin.html",
+  "tags": ["kelly-criterion", "optimal-bet-sizing", "geometric-growth", "gambling-math", "decision-theory", "compound-growth", "ruin-probability"],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "Growth is not about maximizing expected value — it's about maximizing the geometric growth rate, which means never losing the ability to play the next round.",
+    "peakEmotion": "Awe"
+  }
 }
 
 
