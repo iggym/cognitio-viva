@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelly Criterion — The Line Between Growth and Ruin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08080d;
+            --bg-el: #12121c;
+            --fg: #e8e4df;
+            --fg-dim: #6b6b78;
+            --accent: #f0a030;
+            --accent-dim: rgba(240,160,48,0.12);
+            --growth: #00e5c8;
+            --growth-dim: rgba(0,229,200,0.10);
+            --ruin: #e03050;
+            --ruin-dim: rgba(224,48,80,0.10);
+            --card: #161622;
+            --border: #262633;
+            --radius: 10px;
+            --font-d: 'Space Grotesk', sans-serif;
+            --font-b: 'DM Sans', sans-serif;
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--fg); font-family: var(--font-b); line-height:1.65; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+
+        /* ---- SCROLL REVEAL ---- */
+        .sr { opacity:0; transform:translateY(32px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .sr.visible { opacity:1; transform:translateY(0); }
+
+        /* ---- HERO ---- */
+        #hero { position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; overflow:hidden; }
+        #heroCanvas { position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+        .hero-overlay { position:relative; z-index:1; text-align:center; padding:2rem; max-width:700px; }
+        .hero-big { font-family:var(--font-d); font-size:clamp(4rem,12vw,9rem); font-weight:700; line-height:1; color:var(--accent); opacity:0; animation: fadeUp 1s 0.3s ease forwards; }
+        .hero-sub { font-size:clamp(1rem,2.5vw,1.35rem); color:var(--fg-dim); margin-top:1rem; opacity:0; animation: fadeUp 1s 0.9s ease forwards; max-width:520px; margin-inline:auto; }
+        .hero-reveal { font-family:var(--font-d); font-size:clamp(1.2rem,3vw,1.8rem); font-weight:600; margin-top:2.5rem; opacity:0; animation: fadeUp 1s 1.8s ease forwards; }
+        .hero-reveal em { font-style:normal; color:var(--ruin); border-bottom:2px solid var(--ruin); }
+        .scroll-hint { margin-top:3rem; opacity:0; animation: fadeUp 1s 2.8s ease forwards; }
+        .scroll-hint span { display:inline-block; animation: bounce 2s infinite; color:var(--fg-dim); font-size:1.5rem; }
+
+        @keyframes fadeUp { to { opacity:1; transform:translateY(0); } from { transform:translateY(18px); } }
+        @keyframes bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(8px); } }
+
+        /* ---- SECTIONS ---- */
+        section { padding: clamp(3rem,8vw,6rem) clamp(1.5rem,4vw,3rem); max-width:960px; margin:0 auto; }
+        .sec-label { font-family:var(--font-d); font-size:0.75rem; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent); margin-bottom:1.5rem; }
+        .sec-title { font-family:var(--font-d); font-size:clamp(1.6rem,4vw,2.6rem); font-weight:700; line-height:1.15; margin-bottom:1rem; }
+        .sec-body { color:var(--fg-dim); max-width:600px; font-size:1.05rem; }
+
+        /* ---- SKIM INSIGHT ---- */
+        .skim { background:var(--accent-dim); border-left:3px solid var(--accent); padding:0.75rem 1.1rem; border-radius:0 var(--radius) var(--radius) 0; margin:1.5rem 0; font-family:var(--font-d); font-weight:500; font-size:0.95rem; }
+
+        /* ---- CANVAS WRAP ---- */
+        .canvas-wrap { position:relative; width:100%; border-radius:var(--radius); overflow:hidden; background:var(--bg-el); border:1px solid var(--border); margin:1.5rem 0; }
+        .canvas-wrap canvas { display:block; width:100%; }
+
+        /* ---- SLIDER ---- */
+        .ctrl-row { display:flex; align-items:center; gap:1rem; margin:0.8rem 0; flex-wrap:wrap; }
+        .ctrl-label { font-family:var(--font-d); font-size:0.85rem; font-weight:500; min-width:110px; }
+        .ctrl-val { font-family:var(--font-d); font-weight:600; color:var(--accent); min-width:50px; text-align:right; }
+        input[type=range] { -webkit-appearance:none; appearance:none; flex:1; min-width:120px; height:6px; border-radius:3px; background:var(--border); outline:none; cursor:pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:grab; }
+        input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); cursor:grab; }
+
+        /* ---- STATS ROW ---- */
+        .stats-row { display:flex; gap:1.5rem; flex-wrap:wrap; margin:1rem 0; }
+        .stat-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:0.75rem 1.2rem; flex:1; min-width:140px; }
+        .stat-box .stat-label { font-size:0.75rem; color:var(--fg-dim); text-transform:uppercase; letter-spacing:0.08em; font-family:var(--font-d); }
+        .stat-box .stat-val { font-family:var(--font-d); font-size:1.5rem; font-weight:700; margin-top:0.2rem; }
+        .stat-val.positive { color:var(--growth); }
+        .stat-val.negative { color:var(--ruin); }
+        .stat-val.neutral { color:var(--accent); }
+
+        /* ---- KELLY MARKER ---- */
+        .kelly-badge { display:inline-flex; align-items:center; gap:0.4rem; background:var(--growth-dim); border:1px solid var(--growth); color:var(--growth); font-family:var(--font-d); font-size:0.8rem; font-weight:600; padding:0.3rem 0.7rem; border-radius:20px; }
+
+        /* ---- FORMULA ---- */
+        .formula-box { font-family:var(--font-d); font-size:clamp(1.4rem,3.5vw,2.2rem); font-weight:300; text-align:center; padding:2rem; background:var(--bg-el); border:1px solid var(--border); border-radius:var(--radius); margin:1.5rem 0; letter-spacing:0.02em; }
+        .formula-box .hl { color:var(--accent); font-weight:600; }
+
+        /* ---- CALCULATOR ---- */
+        .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0; }
+        @media(max-width:600px){ .calc-grid { grid-template-columns:1fr; } }
+        .calc-field label { display:block; font-family:var(--font-d); font-size:0.8rem; font-weight:500; margin-bottom:0.3rem; color:var(--fg-dim); }
+        .calc-field input[type=number] { width:100%; padding:0.6rem 0.8rem; background:var(--bg-el); border:1px solid var(--border); border-radius:var(--radius); color:var(--fg); font-family:var(--font-d); font-size:1.1rem; font-weight:600; outline:none; transition: border-color 0.2s; }
+        .calc-field input[type=number]:focus { border-color:var(--accent); }
+        .result-panel { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-top:1rem; }
+        .result-panel .big-num { font-family:var(--font-d); font-size:clamp(2.5rem,6vw,4rem); font-weight:700; color:var(--growth); line-height:1; }
+        .result-panel .big-label { font-size:0.85rem; color:var(--fg-dim); margin-top:0.3rem; }
+
+        /* ---- PEAK (PATTERN BREAK) ---- */
+        #peak { background: #f5f0e8; color:#1a1a1a; border-radius:var(--radius); text-align:center; padding:clamp(4rem,10vw,8rem) clamp(2rem,5vw,4rem); margin-top:2rem; margin-bottom:2rem; }
+        #peak .peak-text { font-family:var(--font-d); font-size:clamp(1.5rem,4vw,2.8rem); font-weight:700; line-height:1.2; max-width:600px; margin:0 auto; }
+        #peak .peak-sub { color:#6b6355; margin-top:1.5rem; font-size:1.05rem; max-width:480px; margin-inline:auto; }
+        #peak .peak-accent { color:#c47a1a; }
+        #peakCanvas { display:block; margin:2rem auto 0; max-width:500px; width:100%; border-radius:var(--radius); }
+
+        /* ---- APPLICATIONS ---- */
+        .app-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:1rem; margin:1.5rem 0; }
+        .app-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem; cursor:pointer; transition: border-color 0.3s, transform 0.2s; }
+        .app-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+        .app-card h3 { font-family:var(--font-d); font-size:1.05rem; font-weight:600; margin-bottom:0.5rem; }
+        .app-card p { font-size:0.9rem; color:var(--fg-dim); }
+        .app-card .card-tag { display:inline-block; font-size:0.7rem; font-family:var(--font-d); font-weight:600; text-transform:uppercase; letter-spacing:0.1em; padding:0.2rem 0.5rem; border-radius:4px; margin-bottom:0.6rem; }
+        .tag-invest { background:var(--growth-dim); color:var(--growth); }
+        .tag-career { background:var(--accent-dim); color:var(--accent); }
+        .tag-startup { background:var(--ruin-dim); color:var(--ruin); }
+        .app-detail { max-height:0; overflow:hidden; transition: max-height 0.4s ease; }
+        .app-card.open .app-detail { max-height:300px; }
+
+        /* ---- SHARE ---- */
+        #share { text-align:center; }
+        .share-result { font-family:var(--font-d); font-size:clamp(1.4rem,3vw,2rem); font-weight:700; margin-bottom:0.5rem; }
+        .share-sub { color:var(--fg-dim); margin-bottom:2rem; }
+        .share-bar { display:flex; gap:0.7rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem; }
+        .share-btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1.2rem; border-radius:var(--radius); font-family:var(--font-d); font-size:0.85rem; font-weight:600; border:1px solid var(--border); background:var(--card); color:var(--fg); cursor:pointer; transition: all 0.2s; text-decoration:none; }
+        .share-btn:hover { border-color:var(--accent); background:var(--accent-dim); }
+        .share-btn svg { width:16px; height:16px; fill:currentColor; }
+
+        /* ---- RETURN HOOK ---- */
+        .return-hook { margin-top:3rem; padding:1.5rem; background:var(--bg-el); border:1px solid var(--border); border-radius:var(--radius); text-align:center; }
+        .return-hook p { color:var(--fg-dim); font-size:0.95rem; }
+        .return-hook strong { color:var(--accent); font-family:var(--font-d); }
+
+        /* ---- TOAST ---- */
+        .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card); border:1px solid var(--accent); color:var(--fg); padding:0.7rem 1.4rem; border-radius:var(--radius); font-family:var(--font-d); font-size:0.9rem; z-index:999; transition: transform 0.3s ease; pointer-events:none; }
+        .toast.show { transform:translateX(-50%) translateY(0); }
+
+        /* ---- REDUCED MOTION ---- */
+        @media(prefers-reduced-motion:reduce){
+            .sr { transition:none; opacity:1; transform:none; }
+            .hero-big,.hero-sub,.hero-reveal,.scroll-hint { animation:none; opacity:1; }
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media(max-width:600px){
+            .stats-row { flex-direction:column; }
+            .ctrl-row { flex-direction:column; align-items:stretch; }
+            .ctrl-label { min-width:unset; }
+            .ctrl-val { text-align:left; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-overlay">
+        <div class="hero-big">60%</div>
+        <p class="hero-sub">You have a 60% chance of winning an even-money bet. Each round, positive expected value. The math says you profit.</p>
+        <p class="hero-reveal">Bet everything each round.<br>You go broke with <em>certainty</em>.</p>
+        <div class="scroll-hint"><span>&#8595;</span></div>
+    </div>
+</section>
+
+<!-- ===== SIMULATION ===== -->
+<section id="simulation" class="sr">
+    <div class="sec-label">The Line Between Growth and Ruin</div>
+    <div class="skim">Even with a favorable bet, there exists a precise fraction — bet more and you decay, bet less and you leave money on the table.</div>
+    <div class="canvas-wrap"><canvas id="simCanvas" height="360"></canvas></div>
+    <div class="ctrl-row">
+        <span class="ctrl-label">Bet Fraction</span>
+        <input type="range" id="fracSlider" min="0" max="100" value="20" step="1">
+        <span class="ctrl-val" id="fracVal">20%</span>
+        <span class="kelly-badge">Kelly = 20%</span>
+    </div>
+    <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Surviving Paths</div><div class="stat-val neutral" id="statSurv">—</div></div>
+        <div class="stat-box"><div class="stat-label">Growth Rate / Round</div><div class="stat-val neutral" id="statGrowth">—</div></div>
+        <div class="stat-box"><div class="stat-label">Wealth After 100 Rounds</div><div class="stat-val neutral" id="statWealth">—</div></div>
+    </div>
+    <p style="color:var(--fg-dim); font-size:0.88rem; margin-top:0.8rem;">30 simulated paths. Same random outcomes, same 60% edge. Only the bet fraction changes. Drag the slider past 20% and watch what happens.</p>
+</section>
+
+<!-- ===== FORMULA ===== -->
+<section id="formula" class="sr">
+    <div class="sec-label">The Kelly Formula</div>
+    <div class="skim">The optimal fraction is not intuition — it's a derivable closed-form solution.</div>
+    <div class="formula-box">
+        f<sup>*</sup> = (<span class="hl">b</span> &times; <span class="hl">p</span> &minus; <span class="hl">q</span>) / <span class="hl">b</span>
+    </div>
+    <div class="ctrl-row">
+        <span class="ctrl-label">Win Prob (p)</span>
+        <input type="range" id="pSlider" min="1" max="99" value="60" step="1">
+        <span class="ctrl-val" id="pVal">0.60</span>
+    </div>
+    <div class="ctrl-row">
+        <span class="ctrl-label">Net Odds (b)</span>
+        <input type="range" id="bSlider" min="10" max="500" value="100" step="5">
+        <span class="ctrl-val" id="bVal">1.0</span>
+    </div>
+    <div class="stats-row">
+        <div class="stat-box"><div class="stat-label">Kelly Fraction f*</div><div class="stat-val neutral" id="kellyF">—</div></div>
+        <div class="stat-box"><div class="stat-label">Expected Edge</div><div class="stat-val neutral" id="edgeVal">—</div></div>
+        <div class="stat-box"><div class="stat-label">Growth Rate at f*</div><div class="stat-val neutral" id="kellyGrowth">—</div></div>
+    </div>
+    <p style="color:var(--fg-dim); font-size:0.88rem; margin-top:0.8rem;">Adjust win probability and payout odds. The Kelly fraction updates instantly. Notice: when edge is zero, Kelly says bet nothing.</p>
+</section>
+
+<!-- ===== CALCULATOR ===== -->
+<section id="calculator" class="sr">
+    <div class="sec-label">Your Scenario</div>
+    <div class="sec-title">What's your edge?</div>
+    <div class="sec-body">Enter your own scenario. The calculator returns your Kelly fraction, growth rate, and projected wealth.</div>
+    <div class="calc-grid">
+        <div class="calc-field"><label>Win Probability (%)</label><input type="number" id="calcP" value="55" min="1" max="99" step="1"></div>
+        <div class="calc-field"><label>Net Odds (e.g. 2 = 2:1 payout)</label><input type="number" id="calcB" value="1.5" min="0.1" max="50" step="0.1"></div>
+        <div class="calc-field"><label>Starting Bankroll ($)</label><input type="number" id="calcBank" value="10000" min="1" step="100"></div>
+        <div class="calc-field"><label>Number of Rounds</label><input type="number" id="calcN" value="200" min="1" max="1000" step="10"></div>
+    </div>
+    <div class="result-panel">
+        <div class="big-num" id="calcResult">—</div>
+        <div class="big-label" id="calcResultLabel">Your Kelly fraction</div>
+    </div>
+    <div class="stats-row" id="calcStats" style="margin-top:1rem;">
+        <div class="stat-box"><div class="stat-label">Growth Rate / Round</div><div class="stat-val neutral" id="calcGrowth">—</div></div>
+        <div class="stat-box"><div class="stat-label">Projected Wealth</div><div class="stat-val neutral" id="calcWealth">—</div></div>
+        <div class="stat-box"><div class="stat-label">Half-Kelly Growth</div><div class="stat-val neutral" id="calcHalf">—</div></div>
+    </div>
+</section>
+
+<!-- ===== PEAK (PATTERN BREAK) ===== -->
+<section id="peak" class="sr">
+    <div class="peak-text">
+        Growth is not about <span class="peak-accent">how much you win</span>.<br>
+        It's about never losing the ability to play the next round.
+    </div>
+    <p class="peak-sub">The arithmetic mean says "bet big." The geometric mean says "bet Kelly." Compounding doesn't care about your best day — it cares about your worst.</p>
+    <canvas id="peakCanvas" height="260"></canvas>
+</section>
+
+<!-- ===== APPLICATIONS ===== -->
+<section id="applications" class="sr">
+    <div class="sec-label">Beyond the Casino</div>
+    <div class="sec-title">Kelly shapes decisions you make every day</div>
+    <div class="app-cards">
+        <div class="app-card" data-app="invest">
+            <span class="card-tag tag-invest">Investing</span>
+            <h3>Portfolio Sizing</h3>
+            <p>Warren Buffett and Ed Thorp both use Kelly to size positions. Over-concentration is over-betting.</p>
+            <div class="app-detail" id="appInvest"></div>
+        </div>
+        <div class="app-card" data-app="career">
+            <span class="card-tag tag-career">Career</span>
+            <h3>Asymmetric Bets</h3>
+            <p>A career pivot with 40% success but 5x upside? Kelly says allocate — but don't go all-in on the pivot.</p>
+            <div class="app-detail" id="appCareer"></div>
+        </div>
+        <div class="app-card" data-app="startup">
+            <span class="card-tag tag-startup">Startups</span>
+            <h3>Runway Preservation</h3>
+            <p>Burning cash too fast is over-betting. Kelly says pace your spend to maximize the chance you survive to product-market fit.</p>
+            <div class="app-detail" id="appStartup"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== SHARE ===== -->
+<section id="share" class="sr">
+    <div class="sec-label">Your Result</div>
+    <div class="share-result" id="shareResult">Your Kelly number: —</div>
+    <div class="share-sub" id="shareSub">Enter your scenario above to generate your personalized result.</div>
+    <div class="share-bar" id="shareBar">
+        <button class="share-btn" data-platform="x">
+            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.492 11.24H16.17l-5.214-6.84L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.571 5.451-6.571zm-1.164 17.52h1.834L7.084 4.126H5.078L17.08 19.77z"/></svg>
+            X
+        </button>
+        <button class="share-btn" data-platform="linkedin">
+            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.438-.526-2.421-1.803-2.421-1.205 0-1.801.813-1.801 2.421v5.569H8.736V9h3.554v1.438h.049c.494-.95 1.703-1.95 3.504-1.95 3.748 0 4.444 2.45 4.444 5.652v5.312zM5.092 7.092a2.074 2.074 0 11-.001-4.147 2.074 2.074 0 01.001 4.147zM4.5 20.452h1.184V9H4.5v11.452z"/></svg>
+            LinkedIn
+        </button>
+        <button class="share-btn" data-platform="whatsapp">
+            <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.05-.66.149-.19.198-.703.671-.872.836-.17.166-.34.223-.528.062-.187-.16-.876-.78-1.28-1.055-.403-.276-.703-.453-.92-.398-.218.054-.478.328-.748.648-.27.320-.53.453-.53.223 0-.229.042-.632.198-1.046.156-.413.583-.903.928-1.17.345-.268.66-.38.947-.254.287.126.603.504.942.964.34.46.65.772.822.66.172-.112.247-.405.508-.882.262-.477.543-.986.758-1.197.216-.21.503-.238.733-.07.23.168.752.564 1.276.912.524.347.988.708 1.14.827.152.12.198.21.08.368-.118.158-.643.1.064-.248.707-.348 1.414-.874 2.04-1.492z"/></svg>
+            WhatsApp
+        </button>
+        <button class="share-btn" data-platform="reddit">
+            <svg viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.56 1.25 1.249a1.25 1.25 0 0 1-2.498.061l-2.31-.462a.48.48 0 0 0-.4.115l-2.39 2.07a.6.6 0 0 0 .06.9l2.2 1.38a3.7 3.7 0 0 0-.44 1.76c0 2.07 1.7 3.75 3.79 3.75 2.09 0 3.79-1.68 3.79-3.75s-1.7-3.75-3.79-3.75c-.53 0-1.03.11-1.49.3L10.76 5.4a.48.48 0 0 0-.06-.82l2.47-1.27a.48.48 0 0 1 .5.04z"/></svg>
+            Reddit
+        </button>
+        <button class="share-btn" data-platform="threads">
+            <svg viewBox="0 0 24 24"><path d="M12.186 24c-4.126 0-7.2-1.927-8.878-4.737C5.63 21.347 9.073 22 12.186 22c6.627 0 12-5.373 12-12S18.813-2 12.186-2C9.073-2 5.63-.653 3.308 1.263 4.986-1.547 8.06-3 12.186-3 18.813-3 24.186 2.373 24.186 9c0 4.126-1.927 7.2-4.737 8.878C21.347 16.37 22 12.927 22 9.186 22 4.56 17.627.186 12 .186z"/></svg>
+            Threads
+        </button>
+    </div>
+</section>
+
+<!-- ===== RETURN HOOK ===== -->
+<div style="max-width:960px; margin:0 auto; padding:0 clamp(1.5rem,4vw,3rem);">
+    <div class="return-hook">
+        <p>Your edge shifts with every new variable. When the odds change, your <strong>Kelly number</strong> changes with them.</p>
+        <p style="margin-top:0.5rem;">Bookmark this and recalculate when your situation evolves.</p>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================
+   STATE & CONSTANTS
+   ============================================ */
+const STATE = {
+    winProb: 0.6,
+    odds: 1,
+    fraction: 0.2,
+    calcP: 0.55,
+    calcB: 1.5,
+    calcBank: 10000,
+    calcN: 200,
+    kellyResult: 0.2,
+    growthResult: 0
+};
+
+const N_PATHS = 30;
+const N_ROUNDS = 100;
+
+/* Pre-generate random outcomes for consistent paths */
+const rngOutcomes = [];
+for (let i = 0; i < N_PATHS; i++) {
+    const row = [];
+    for (let t = 0; t < N_ROUNDS; t++) row.push(Math.random());
+    rngOutcomes.push(row);
+}
+
+/* ============================================
+   UTILITY
+   ============================================ */
+function kellyF(p, b) {
+    const q = 1 - p;
+    if (b <= 0) return 0;
+    const f = (b * p - q) / b;
+    return Math.max(0, f);
+}
+
+function growthRate(f, p, b) {
+    if (f <= 0 || f >= 1) return -Infinity;
+    const q = 1 - p;
+    const win = 1 + f * b;
+    const lose = 1 - f;
+    if (win <= 0 || lose <= 0) return -Infinity;
+    return p * Math.log(win) + q * Math.log(lose);
+}
+
+function computePaths(frac, p, b) {
+    const paths = [];
+    for (let i = 0; i < N_PATHS; i++) {
+        let w = 1;
+        const path = [w];
+        for (let t = 0; t < N_ROUNDS; t++) {
+            if (rngOutcomes[i][t] < p) {
+                w *= (1 + frac * b);
+            } else {
+                w *= (1 - frac);
+            }
+            if (w < 1e-6) w = 0;
+            path.push(w);
+        }
+        paths.push(path);
+    }
+    return paths;
+}
+
+function fmtPct(v, d=1) { return (v * 100).toFixed(d) + '%'; }
+function fmtNum(v) {
+    if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1) + 'M';
+    if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1) + 'K';
+    return v.toFixed(1);
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============================================
+   CANVAS HELPERS
+   ============================================ */
+function setupCanvas(canvas, w, h) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    return ctx;
+}
+
+/* ============================================
+   HERO CANVAS
+   ============================================ */
+function initHero() {
+    const canvas = document.getElementById('heroCanvas');
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const ctx = setupCanvas(canvas, w, h);
+
+    /* Generate two specific paths: Kelly vs All-In */
+    const rng = [];
+    for (let t = 0; t < 120; t++) rng.push(Math.random());
+
+    const kellyPath = [1];
+    const allInPath = [1];
+    let kw = 1, aw = 1;
+    for (let t = 0; t < 120; t++) {
+        const win = rng[t] < 0.6;
+        kw *= win ? 1.2 : 0.8;
+        aw *= win ? 2 : 0;
+        if (kw < 1e-6) kw = 0;
+        if (aw < 1e-6) aw = 0;
+        kellyPath.push(kw);
+        allInPath.push(aw);
+    }
+
+    let frame = 0;
+    const totalFrames = 180;
+    const pad = 60;
+
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+
+        /* Subtle grid */
+        ctx.strokeStyle = 'rgba(42,42,53,0.25)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 10; i++) {
+            const y = pad + (h - 2 * pad) * i / 9;
+            ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w - pad, y); ctx.stroke();
+        }
+
+        const progress = Math.min(frame / totalFrames, 1);
+        const n = Math.floor(progress * 120);
+        if (n < 2) { frame++; requestAnimationFrame(draw); return; }
+
+        const logMax = 5;
+        function yMap(val) {
+            const lv = Math.log10(Math.max(val, 1e-4));
+            return h - pad - ((lv + 3) / (logMax + 3)) * (h - 2 * pad);
+        }
+
+        /* Kelly path (growth) */
+        ctx.strokeStyle = '#00e5c8';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = 'rgba(0,229,200,0.4)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        for (let t = 0; t <= n; t++) {
+            const x = pad + (t / 120) * (w - 2 * pad);
+            const y = yMap(kellyPath[t]);
+            t === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        /* All-in path (ruin) */
+        ctx.strokeStyle = '#e03050';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = 'rgba(224,48,80,0.4)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        for (let t = 0; t <= n; t++) {
+            const x = pad + (t / 120) * (w - 2 * pad);
+            const y = yMap(allInPath[t]);
+            t === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        /* Labels */
+        if (n > 10) {
+            ctx.font = '600 13px Space Grotesk, sans-serif';
+            const lx = pad + (n / 120) * (w - 2 * pad) + 8;
+            ctx.fillStyle = '#00e5c8';
+            ctx.fillText('Kelly: 20% per round', Math.min(lx, w - 200), yMap(kellyPath[n]) - 6);
+            ctx.fillStyle = '#e03050';
+            const ay = allInPath[n] > 0 ? yMap(allInPath[n]) - 6 : h - pad + 18;
+            ctx.fillText('All-in: 100% per round', Math.min(lx, w - 200), ay);
+        }
+
+        /* Axis labels */
+        ctx.fillStyle = 'rgba(107,107,120,0.6)';
+        ctx.font = '500 11px Space Grotesk, sans-serif';
+        ctx.fillText('Rounds →', w / 2, h - 16);
+        ctx.save();
+        ctx.translate(16, h / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText('Wealth (log scale)', 0, 0);
+        ctx.restore();
+
+        if (frame < totalFrames + 40) {
+            frame++;
+            requestAnimationFrame(draw);
+        }
+    }
+    requestAnimationFrame(draw);
+
+    /* Resize handler */
+    window.addEventListener('resize', () => {
+        const nw = window.innerWidth, nh = window.innerHeight;
+        setupCanvas(canvas, nw, nh);
+        frame = 0;
+        draw();
+    });
+}
+
+/* ============================================
+   SIMULATION CANVAS
+   ============================================ */
+function drawSimulation() {
+    const canvas = document.getElementById('simCanvas');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const w = Math.floor(rect.width);
+    const h = 360;
+    const ctx = setupCanvas(canvas, w, h);
+    const pad = { l: 50, r: 20, t: 20, b: 36 };
+    const cw = w - pad.l - pad.r;
+    const ch = h - pad.t - pad.b;
+
+    const frac = STATE.fraction;
+    const p = STATE.winProb;
+    const b = STATE.odds;
+    const paths = computePaths(frac, p, b);
+    const kelly = kellyF(p, b);
+
+    /* Background */
+    ctx.fillStyle = '#12121c';
+    ctx.fillRect(0, 0, w, h);
+
+    /* Grid */
+    ctx.strokeStyle = 'rgba(42,42,53,0.4)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+        const y = pad.t + ch * i / 5;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+    }
+
+    /* Log scale mapping */
+    const logMin = -3, logMax = 4;
+    function yMap(val) {
+        const lv = Math.log10(Math.max(val, 1e-4));
+        const norm = (lv - logMin) / (logMax - logMin);
+        return pad.t + ch * (1 - norm);
+    }
+
+    /* Draw paths */
+    for (let i = 0; i < paths.length; i++) {
+        const path = paths[i];
+        const alive = path[path.length - 1] > 0.01;
+        const endW = path[path.length - 1];
+        if (alive) {
+            const alpha = 0.15 + 0.5 * Math.min(endW / 10, 1);
+            ctx.strokeStyle = `rgba(0,229,200,${alpha.toFixed(2)})`;
+            ctx.lineWidth = 1.2;
+        } else {
+            ctx.strokeStyle = 'rgba(224,48,80,0.12)';
+            ctx.lineWidth = 0.8;
+        }
+        ctx.beginPath();
+        for (let t = 0; t <= N_ROUNDS; t++) {
+            const x = pad.l + (t / N_ROUNDS) * cw;
+            const y = Math.max(pad.t, Math.min(h - pad.b, yMap(path[t])));
+            t === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    /* Kelly line label */
+    const kellyY = yMap(1);
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(240,160,48,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, kellyY); ctx.lineTo(w - pad.r, kellyY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(240,160,48,0.7)';
+    ctx.font = '500 10px Space Grotesk, sans-serif';
+    ctx.fillText('1x', pad.l - 28, kellyY + 3);
+
+    /* Axis labels */
+    ctx.fillStyle = 'rgba(107,107,120,0.6)';
+    ctx.font = '500 10px Space Grotesk, sans-serif';
+    ctx.fillText('Rounds', w / 2 - 20, h - 8);
+    const logLabels = ['0.001', '0.01', '0.1', '1', '10', '100', '1000'];
+    for (let i = 0; i < logLabels.length; i++) {
+        const val = Math.pow(10, i - 3);
+        const y = yMap(val);
+        if (y > pad.t && y < h - pad.b) {
+            ctx.fillText(logLabels[i], pad.l - 44, y + 3);
+        }
+    }
+
+    /* Update stats */
+    const surviving = paths.filter(p => p[p.length - 1] > 0.01).length;
+    const gr = growthRate(frac, p, b);
+    const medianW = Math.exp(gr * N_ROUNDS);
+
+    document.getElementById('statSurv').textContent = surviving + '/' + N_PATHS;
+    document.getElementById('statSurv').className = 'stat-val ' + (surviving > N_PATHS * 0.7 ? 'positive' : surviving > N_PATHS * 0.3 ? 'neutral' : 'negative');
+
+    document.getElementById('statGrowth').textContent = gr > -Infinity ? (gr * 100).toFixed(2) + '%' : '-∞';
+    document.getElementById('statGrowth').className = 'stat-val ' + (gr > 0 ? 'positive' : gr > -0.005 ? 'neutral' : 'negative');
+
+    document.getElementById('statWealth').textContent = gr > -Infinity ? fmtNum(medianW) + 'x' : '0x';
+    document.getElementById('statWealth').className = 'stat-val ' + (medianW > 1 ? 'positive' : medianW > 0.1 ? 'neutral' : 'negative');
+}
+
+/* ============================================
+   FORMULA INTERACTIVITY
+   ============================================ */
+function updateFormula() {
+    const p = parseInt(document.getElementById('pSlider').value) / 100;
+    const b = parseInt(document.getElementById('bSlider').value) / 100;
+    const q = 1 - p;
+    const k = kellyF(p, b);
+    const gr = growthRate(k, p, b);
+    const edge = b * p - q;
+
+    document.getElementById('pVal').textContent = p.toFixed(2);
+    document.getElementById('bVal').textContent = b.toFixed(1);
+    document.getElementById('kellyF').textContent = fmtPct(k);
+    document.getElementById('kellyF').className = 'stat-val ' + (k > 0 ? 'positive' : 'negative');
+    document.getElementById('edgeVal').textContent = fmtPct(edge);
+    document.getElementById('edgeVal').className = 'stat-val ' + (edge > 0 ? 'positive' : 'negative');
+    document.getElementById('kellyGrowth').textContent = gr > -Infinity ? (gr * 100).toFixed(3) + '%' : '—';
+    document.getElementById('kellyGrowth').className = 'stat-val ' + (gr > 0 ? 'positive' : 'negative');
+}
+
+/* ============================================
+   CALCULATOR
+   ============================================ */
+function updateCalculator() {
+    const p = parseFloat(document.getElementById('calcP').value) / 100;
+    const b = parseFloat(document.getElementById('calcB').value);
+    const bank = parseFloat(document.getElementById('calcBank').value);
+    const n = parseInt(document.getElementById('calcN').value);
+
+    if (isNaN(p) || isNaN(b) || isNaN(bank) || isNaN(n) || p <= 0 || p >= 1 || b <= 0) {
+        document.getElementById('calcResult').textContent = '—';
+        return;
+    }
+
+    const k = kellyF(p, b);
+    const gr = growthRate(k, p, b);
+    const halfK = k / 2;
+    const halfGr = growthRate(halfK, p, b);
+    const projectedWealth = bank * Math.exp(gr * n);
+    const halfWealth = bank * Math.exp(halfGr * n);
+
+    STATE.calcP = p;
+    STATE.calcB = b;
+    STATE.calcBank = bank;
+    STATE.calcN = n;
+    STATE.kellyResult = k;
+    STATE.growthResult = gr;
+
+    document.getElementById('calcResult').textContent = fmtPct(k, 1);
+    document.getElementById('calcResult').style.color = k > 0 ? 'var(--growth)' : 'var(--ruin)';
+    document.getElementById('calcResultLabel').textContent = k > 0 ? 'Your Kelly fraction — bet this, no more' : 'No positive edge — Kelly says sit out';
+
+    document.getElementById('calcGrowth').textContent = gr > -Infinity ? (gr * 100).toFixed(3) + '%' : '—';
+    document.getElementById('calcGrowth').className = 'stat-val ' + (gr > 0 ? 'positive' : 'negative');
+
+    document.getElementById('calcWealth').textContent = projectedWealth > 1e15 ? '∞' : '$' + fmtNum(projectedWealth);
+    document.getElementById('calcWealth').className = 'stat-val ' + (projectedWealth > bank ? 'positive' : 'negative');
+
+    document.getElementById('calcHalf').textContent = halfGr > -Infinity ? (halfGr * 100).toFixed(3) + '%' : '—';
+    document.getElementById('calcHalf').className = 'stat-val neutral';
+
+    /* Update share section */
+    updateShareResult(k, gr, projectedWealth, bank, p, b);
+}
+
+function updateShareResult(k, gr, wealth, bank, p, b) {
+    document.getElementById('shareResult').textContent = 'Your Kelly number: ' + fmtPct(k, 1);
+    const edgeStr = fmtPct(b * p - (1 - p));
+    document.getElementById('shareSub').textContent = k > 0
+        ? 'With a ' + fmtPct(p, 0) + ' win rate at ' + b.toFixed(1) + ':1 odds, betting more than ' + fmtPct(k, 1) + ' per round guarantees long-term decline.'
+        : 'No edge detected. Kelly says preserve your capital.';
+}
+
+/* ============================================
+   PEAK CANVAS (Geometric vs Arithmetic Mean)
+   ============================================ */
+function drawPeak() {
+    const canvas = document.getElementById('peakCanvas');
+    const w = Math.min(500, canvas.parentElement.getBoundingClientRect().width);
+    const h = 260;
+    const ctx = setupCanvas(canvas, w, h);
+    const pad = { l: 45, r: 15, t: 15, b: 35 };
+    const cw = w - pad.l - pad.r;
+    const ch = h - pad.t - pad.b;
+
+    const p = 0.6, b = 1;
+    const kelly = kellyF(p, b);
+
+    /* Background */
+    ctx.fillStyle = '#f5f0e8';
+    ctx.fillRect(0, 0, w, h);
+
+    /* Compute curves */
+    const nPts = 200;
+    const geoCurve = [];
+    const maxGR = 0.03;
+    const minGR = -0.06;
+
+    for (let i = 0; i <= nPts; i++) {
+        const f = i / nPts;
+        const gr = growthRate(f, p, b);
+        geoCurve.push(gr);
+    }
+
+    function yMap(v) {
+        const norm = (v - minGR) / (maxGR - minGR);
+        return pad.t + ch * (1 - norm);
+    }
+
+    /* Zero line */
+    const zeroY = yMap(0);
+    ctx.strokeStyle = 'rgba(100,90,70,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(pad.l, zeroY); ctx.lineTo(w - pad.r, zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#6b6355';
+    ctx.font = '500 10px Space Grotesk, sans-serif';
+    ctx.fillText('0', pad.l - 14, zeroY + 3);
+
+    /* Shade ruin zone */
+    ctx.fillStyle = 'rgba(224,48,80,0.08)';
+    ctx.beginPath();
+    ctx.moveTo(pad.l, zeroY);
+    for (let i = 0; i <= nPts; i++) {
+        const x = pad.l + (i / nPts) * cw;
+        const y = Math.max(zeroY, Math.min(h - pad.b, yMap(geoCurve[i])));
+        ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w - pad.r, zeroY);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Shade growth zone */
+    ctx.fillStyle = 'rgba(0,180,160,0.08)';
+    ctx.beginPath();
+    ctx.moveTo(pad.l, zeroY);
+    for (let i = 0; i <= nPts; i++) {
+        const x = pad.l + (i / nPts) * cw;
+        const y = Math.min(zeroY, Math.max(pad.t, yMap(geoCurve[i])));
+        ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w - pad.r, zeroY);
+    ctx.closePath();
+    ctx.fill();
+
+    /* Geometric growth curve */
+    ctx.strokeStyle = '#c47a1a';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i <= nPts; i++) {
+        const f = i / nPts;
+        if (f >= 0.99) break;
+        const x = pad.l + (i / nPts) * cw;
+        const y = Math.max(pad.t, Math.min(h - pad.b, yMap(geoCurve[i])));
+        if (!started) { ctx.moveTo(x, y); started = true; }
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    /* Kelly vertical */
+    const kx = pad.l + kelly * cw;
+    ctx.strokeStyle = '#00a89a';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(kx, pad.t); ctx.lineTo(kx, h - pad.b); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#00a89a';
+    ctx.font = '600 11px Space Grotesk, sans-serif';
+    ctx.fillText('f* = 20%', kx + 5, pad.t + 14);
+
+    /* Axis */
+    ctx.fillStyle = '#6b6355';
+    ctx.font = '500 10px Space Grotesk, sans-serif';
+    ctx.fillText('Bet Fraction →', w / 2 - 35, h - 6);
+    for (let i = 0; i <= 4; i++) {
+        const fVal = i * 0.25;
+        const x = pad.l + fVal * cw;
+        ctx.fillText(fmtPct(fVal, 0), x - 10, h - pad.b + 14);
+    }
+
+    /* Labels */
+    ctx.font = '600 10px Space Grotesk, sans-serif';
+    ctx.fillStyle = '#c47a1a';
+    ctx.fillText('Geometric Growth Rate', pad.l + 5, pad.t + 12);
+    ctx.fillStyle = 'rgba(224,48,80,0.6)';
+    ctx.fillText('Ruin Zone', w - pad.r - 60, h - pad.b - 8);
+    ctx.fillStyle = 'rgba(0,180,160,0.7)';
+    ctx.fillText('Growth Zone', pad.l + 5, zeroY - 8);
+}
+
+/* ============================================
+   APPLICATION CARDS
+   ============================================ */
+function initAppCards() {
+    document.querySelectorAll('.app-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const wasOpen = card.classList.contains('open');
+            document.querySelectorAll('.app-card').forEach(c => c.classList.remove('open'));
+            if (!wasOpen) {
+                card.classList.add('open');
+                const app = card.dataset.app;
+                const detail = card.querySelector('.app-detail');
+                if (app === 'invest' && !detail.innerHTML) {
+                    const k = kellyF(0.55, 1);
+                    detail.innerHTML = `<div style="padding:0.8rem 0; font-size:0.9rem; color:var(--fg-dim);">If a stock has 55% chance of a 2x return (odds=1), Kelly says allocate <strong style="color:var(--growth)">${fmtPct(k)}</strong> of your portfolio. Most investors over-concentrate — the equivalent of over-betting.</div>`;
+                } else if (app === 'career' && !detail.innerHTML) {
+                    const k = kellyF(0.4, 5);
+                    detail.innerHTML = `<div style="padding:0.8rem 0; font-size:0.9rem; color:var(--fg-dim);">40% success, 5:1 payout → Kelly = <strong style="color:var(--growth)">${fmtPct(k)}</strong>. Keep your day job — but allocate real time to the pivot. Full commitment is over-betting.</div>`;
+                } else if (app === 'startup' && !detail.innerHTML) {
+                    detail.innerHTML = `<div style="padding:0.8rem 0; font-size:0.9rem; color:var(--fg-dim);">A startup burning $50K/month on $600K runway has ~12 months. Kelly logic: pace spend so you survive to the pivot. Raising too little and spending too fast is the same as betting beyond Kelly — you hit zero before the edge compounds.</div>`;
+                }
+            }
+        });
+    });
+}
+
+/* ============================================
+   SHARE ENGINE
+   ============================================ */
+function initShare() {
+    document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const platform = btn.dataset.platform;
+            const k = STATE.kellyResult;
+            const p = STATE.calcP;
+            const b = STATE.calcB;
+            const kStr = fmtPct(k, 1);
+            const edgeStr = fmtPct(b * p - (1 - p));
+            const url = window.location.href;
+
+            let text, shareUrl;
+            switch(platform) {
+                case 'x':
+                    text = `My Kelly number is ${kStr}. Betting more than that on a positive-edge scenario guarantees long-term decline. The math is unforgiving. #KellyCriterion #DecisionMath`;
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+                case 'linkedin':
+                    text = `Kelly Criterion Insight: With a ${fmtPct(p,0)} win rate at ${b.toFixed(1)}:1 odds, the optimal bet size is exactly ${kStr} of bankroll. Bet more — even with positive expected value — and geometric compounding turns against you. This mental model applies to portfolio sizing, career bets, and startup runway management.`;
+                    navigator.clipboard.writeText(text).then(() => showToast('LinkedIn text copied to clipboard'));
+                    break;
+                case 'whatsapp':
+                    text = `Check this out — my Kelly number is ${kStr}. It's the exact fraction of my bankroll I should bet to maximize long-term growth without risking ruin. Any more and I decline over time, even with a winning edge!`;
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+                case 'reddit':
+                    text = `I calculated my Kelly fraction (${kStr}) for a ${fmtPct(p,0)} win-rate scenario. The counter-intuitive part: betting MORE than Kelly guarantees long-term decline even with positive EV. Why does over-betting a winning bet destroy you?`;
+                    navigator.clipboard.writeText(text).then(() => showToast('Reddit post text copied'));
+                    break;
+                case 'threads':
+                    text = `Your edge doesn't tell you how much to bet. Kelly does. My number: ${kStr}. The line between growth and ruin is thinner than you think.`;
+                    navigator.clipboard.writeText(text).then(() => showToast('Threads text copied'));
+                    break;
+            }
+        });
+    });
+}
+
+/* ============================================
+   SCROLL REVEAL
+   ============================================ */
+function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                /* Trigger specific draws on first reveal */
+                if (entry.target.id === 'simulation') drawSimulation();
+                if (entry.target.id === 'peak') drawPeak();
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.sr').forEach(el => observer.observe(el));
+}
+
+/* ============================================
+   EVENT LISTENERS
+   ============================================ */
+function initListeners() {
+    /* Simulation slider */
+    const fracSlider = document.getElementById('fracSlider');
+    fracSlider.addEventListener('input', () => {
+        STATE.fraction = parseInt(fracSlider.value) / 100;
+        document.getElementById('fracVal').textContent = fracSlider.value + '%';
+        drawSimulation();
+    });
+
+    /* Formula sliders */
+    document.getElementById('pSlider').addEventListener('input', updateFormula);
+    document.getElementById('bSlider').addEventListener('input', updateFormula);
+
+    /* Calculator inputs */
+    ['calcP', 'calcB', 'calcBank', 'calcN'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateCalculator);
+    });
+
+    /* Resize */
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            drawSimulation();
+            drawPeak();
+        }, 150);
+    });
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    initHero();
+    initListeners();
+    initAppCards();
+    initShare();
+    initScrollReveal();
+    updateFormula();
+    updateCalculator();
+
+    /* Draw simulation after a short delay to ensure layout is settled */
+    setTimeout(drawSimulation, 200);
+    setTimeout(drawPeak, 400);
+});
+</script>
+</body>
+</html>
