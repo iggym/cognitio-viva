@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitio Viva — Living Interactive Cognition</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --card-bg: #141418;
+      --card-border: #24242c;
+      --card-hover: #2e2e38;
+      --text-main: #f0f0f5;
+      --text-muted: #8e8e9a;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --tag-bg: #1e1e28;
+      --tag-text: #a5b4fc;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      padding: 3rem 2rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      border-radius: 6px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    /* Controls Bar */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .search-input {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      flex: 1;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Tag Toggle Button */
+    .toggle-tags-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-tags-btn:hover,
+    .toggle-tags-btn.active {
+      color: var(--text-main);
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* Collapsible Tag Filter Tray */
+    .tag-filters-tray {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin 0.2s ease;
+      opacity: 0;
+      margin-top: 0;
+      overflow: hidden;
+    }
+
+    .tag-filters-tray.expanded {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 0.5rem;
+    }
+
+    .tag-filters {
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+
+    .tag-btn {
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tag-btn:hover,
+    .tag-btn.active {
+      color: var(--tag-text);
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.15);
+    }
+
+    /* Gallery Grid */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+      width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      text-align: left;
+    }
+
+    .card:hover, .card:focus-visible {
+      transform: translateY(-4px);
+      border-color: var(--card-hover);
+      outline: none;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-topic {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .card-subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--card-border);
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-height: 2.25rem;
+    }
+
+    /* Card Mini-Tags (Hidden by default, visible when tag view active) */
+    .card-tags {
+      display: none;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .show-card-tags .card-tags {
+      display: flex;
+    }
+
+    .mini-tag {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--tag-text);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .mini-tag:hover {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    /* Modal Viewer */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 1000;
+    }
+
+    .modal.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-header {
+      height: 60px;
+      padding: 0 1.5rem;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+
+    .close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 60px);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <h1>Cognitio Viva</h1>
+    </div>
+    <p class="subtitle">Interactive, animated web experiences engineered against the neuroscience of attention, memory, and agency.</p>
+
+    <div class="controls">
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search experiences or insights..." aria-label="Search experiences">
+        <button type="button" id="toggleTagsBtn" class="toggle-tags-btn" aria-expanded="false" aria-controls="tagFiltersTray">
+          <span>🏷️ Tags</span>
+        </button>
+      </div>
+
+      <div class="tag-filters-tray" id="tagFiltersTray">
+        <div class="tag-filters" id="tagFilters" role="group" aria-label="Filter by tag">
+          <button type="button" class="tag-btn active" data-tag="all" aria-pressed="true">All</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="experienceGrid">
+      <!-- Cards rendered dynamically via JS -->
+    </div>
+  </main>
+
+  <!-- Modal Preview Window -->
+  <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Experience Preview</h2>
+      <button type="button" class="close-btn" id="closeModal" aria-label="Close preview">&times;</button>
+    </div>
+    <div class="modal-body">
+      <iframe id="artifactFrame" src="about:blank" title="Interactive Artifact Viewer"></iframe>
+    </div>
+  </div>
+
+  <script>
+    let experiences = [];
+    let activeTag = 'all';
+    let tagsVisible = false;
+
+    const searchInput = document.getElementById('searchInput');
+    const toggleTagsBtn = document.getElementById('toggleTagsBtn');
+    const tagFiltersTray = document.getElementById('tagFiltersTray');
+    const tagFilters = document.getElementById('tagFilters');
+    const experienceGrid = document.getElementById('experienceGrid');
+    const previewModal = document.getElementById('previewModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const artifactFrame = document.getElementById('artifactFrame');
+    const closeModal = document.getElementById('closeModal');
+
+    // Fetch and Initialize Database
+    async function loadDatabase() {
+      try {
+        const response = await fetch('database.json');
+        experiences = await response.json();
+        renderTagFilters();
+        parseHashState();
+        renderGrid();
+      } catch (err) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>Unable to load database.json. Ensure file exists and is served properly.</p>
+          </div>`;
+      }
+    }
+
+    // Toggle Tag Tray and Mini-Tags Visibility
+    function setTagVisibility(show) {
+      tagsVisible = show;
+      toggleTagsBtn.classList.toggle('active', tagsVisible);
+      toggleTagsBtn.setAttribute('aria-expanded', tagsVisible ? 'true' : 'false');
+      tagFiltersTray.classList.toggle('expanded', tagsVisible);
+      experienceGrid.classList.toggle('show-card-tags', tagsVisible);
+    }
+
+    toggleTagsBtn.addEventListener('click', () => {
+      setTagVisibility(!tagsVisible);
+    });
+
+    // Extract unique tags and build filter buttons
+    function renderTagFilters() {
+      const tags = new Set();
+      experiences.forEach(item => item.tags?.forEach(t => tags.add(t)));
+
+      tags.forEach(tag => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tag-btn';
+        btn.dataset.tag = tag;
+        btn.textContent = `#${tag}`;
+        btn.setAttribute('aria-pressed', 'false');
+        tagFilters.appendChild(btn);
+      });
+
+      tagFilters.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tag-btn');
+        if (!btn) return;
+        selectTag(btn.dataset.tag);
+      });
+    }
+
+    function selectTag(tag) {
+      activeTag = tag;
+      document.querySelectorAll('.tag-btn').forEach(b => {
+        const isActive = b.dataset.tag === activeTag;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+
+      if (activeTag === 'all') {
+        history.replaceState(null, '', location.pathname);
+      } else {
+        location.hash = `tag=${encodeURIComponent(activeTag)}`;
+      }
+      renderGrid();
+    }
+
+    function parseHashState() {
+      const match = location.hash.match(/tag=([^&]+)/);
+      if (match) {
+        const tag = decodeURIComponent(match[1]);
+        activeTag = tag;
+        setTagVisibility(true);
+      }
+    }
+
+    window.addEventListener('hashchange', () => {
+      parseHashState();
+      selectTag(activeTag);
+    });
+
+    // Render experience cards based on search query and active tag
+    function renderGrid() {
+      const query = searchInput.value.toLowerCase().trim();
+
+      const filtered = experiences.filter(item => {
+        const matchesTag = activeTag === 'all' || item.tags?.includes(activeTag);
+        const matchesSearch = item.title.toLowerCase().includes(query) ||
+                              item.subtitle.toLowerCase().includes(query) ||
+                              item.topic.toLowerCase().includes(query) ||
+                              (item.tags || []).some(t => t.toLowerCase().includes(query));
+        return matchesTag && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        experienceGrid.innerHTML = `
+          <div class="empty-state">
+            <p>No interactive experiences matched your criteria.</p>
+          </div>`;
+        return;
+      }
+
+      experienceGrid.innerHTML = filtered.map((item, index) => `
+        <article class="card"
+                 tabindex="0"
+                 role="button"
+                 data-index="${index}"
+                 aria-label="Launch preview for ${escapeQuotes(item.title)}">
+          <div>
+            <div class="card-topic">${item.topic}</div>
+            <h2 class="card-title">${item.title}</h2>
+            <p class="card-subtitle">${item.subtitle}</p>
+          </div>
+          <div class="card-footer">
+            <div class="card-tags">
+              ${(item.tags || []).map(t => `<span class="mini-tag" data-tag="${t}">#${t}</span>`).join('')}
+            </div>
+            <span>${item.readTimeMinutes || 3} min explore</span>
+          </div>
+        </article>
+      `).join('');
+
+      // Attach Card Interactions
+      document.querySelectorAll('.card').forEach((cardEl, idx) => {
+        const item = filtered[idx];
+
+        cardEl.addEventListener('click', (e) => {
+          const tagSpan = e.target.closest('.mini-tag');
+          if (tagSpan) {
+            e.stopPropagation();
+            setTagVisibility(true);
+            selectTag(tagSpan.dataset.tag);
+            return;
+          }
+          openModal(item.artifactUrl, item.title);
+        });
+
+        cardEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openModal(item.artifactUrl, item.title);
+          }
+        });
+      });
+    }
+
+    function openModal(url, title) {
+      artifactFrame.src = url;
+      modalTitle.textContent = title;
+      previewModal.classList.add('open');
+      previewModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      closeModal.focus();
+    }
+
+    function closeModalHandler() {
+      previewModal.classList.remove('open');
+      previewModal.setAttribute('aria-hidden', 'true');
+      artifactFrame.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    function escapeQuotes(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', renderGrid);
+    closeModal.addEventListener('click', closeModalHandler);
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) closeModalHandler();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && previewModal.classList.contains('open')) {
+        closeModalHandler();
+      }
+    });
+
+    // Boot
+    loadDatabase();
+  </script>
+</body>
+</html>
