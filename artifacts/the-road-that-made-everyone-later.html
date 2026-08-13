@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Road That Made Everyone Later — Braess's Paradox, Playable</title>
+<style>
+/* ============================================================
+   THE ROAD THAT MADE EVERYONE LATER
+   Design language: Autobahn signage × night control room.
+   Display: heavy sign-face uppercase. Narrative: serif. Data: mono.
+   ============================================================ */
+:root{
+  --bg:#0e1114; --bg2:#12161b; --panel:#161b21; --edge:#2b333d; --edge2:#3a4450;
+  --paint:#f2efe6; --dim:#96a1ab; --yellow:#f7c500; --yellow2:#ffd93b;
+  --red:#ff4b3a; --green:#3fd68c; --cyan:#59d3ea; --ink:#111; --paper:#f0e7d3;
+  --disp:"Arial Black","Arial Bold",Impact,"Helvetica Neue",sans-serif;
+  --body:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--paint);font-family:var(--body);font-size:17px;line-height:1.55;overflow-x:hidden}
+::selection{background:var(--yellow);color:var(--ink)}
+h1,h2,h3,.disp{font-family:var(--disp);text-transform:uppercase;letter-spacing:.01em;line-height:1.02}
+.mono{font-family:var(--mono)}
+button{font-family:var(--mono);cursor:pointer}
+main{position:relative;z-index:2}
+
+/* ---------- ambient living background ---------- */
+#bgLanes{position:fixed;left:14px;top:0;bottom:0;width:6px;z-index:0;opacity:.5;
+  background:repeating-linear-gradient(180deg,var(--yellow) 0 26px,transparent 26px 64px);
+  animation:laneFlow 1.4s linear infinite}
+@keyframes laneFlow{to{background-position-y:64px}}
+.ticker{position:sticky;top:0;z-index:50;background:var(--yellow);color:var(--ink);
+  font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.14em;
+  overflow:hidden;white-space:nowrap;border-bottom:3px solid var(--ink)}
+.tickerInner{display:inline-block;padding:6px 0;animation:tick 26s linear infinite}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* ---------- generic layout ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:72px 28px}
+section{position:relative;border-top:2px dashed var(--edge)}
+.exitTab{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.18em;
+  background:var(--bg2);border:1px solid var(--edge2);color:var(--dim);padding:5px 12px;border-radius:4px;margin-bottom:16px}
+h2{font-size:clamp(30px,4.6vw,52px);margin-bottom:14px}
+.lede{color:var(--dim);font-size:18px;max-width:64ch;font-style:italic}
+.km{position:absolute;top:-13px;right:28px;font-family:var(--mono);font-size:11px;letter-spacing:.15em;
+  background:var(--bg);border:1px solid var(--edge);color:var(--dim);padding:3px 10px;border-radius:20px}
+
+/* buttons */
+.btn{display:inline-block;background:var(--yellow);color:var(--ink);border:3px solid var(--ink);
+  font-weight:700;font-size:14px;letter-spacing:.08em;padding:12px 20px;border-radius:6px;
+  box-shadow:0 5px 0 var(--ink);transition:transform .12s ease,box-shadow .12s ease,background .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--ink);background:var(--yellow2)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.ghost{background:transparent;color:var(--paint);border-color:var(--edge2);box-shadow:0 5px 0 #000}
+.btn.red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:0 3px 0 var(--ink)}
+.btn.small{padding:8px 14px;font-size:12px}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- OPENER ---------- */
+#ribbon{border-top:none;padding-top:0}
+.openerGrid{display:grid;grid-template-columns:1.6fr .9fr;gap:36px;align-items:start;max-width:1120px;margin:0 auto;padding:64px 28px 40px}
+.bigSign{background:var(--yellow);color:var(--ink);border:5px solid var(--ink);border-radius:10px;
+  padding:34px 34px 30px;position:relative;box-shadow:0 14px 0 rgba(0,0,0,.45), 0 30px 60px rgba(0,0,0,.5);
+  transform:perspective(900px) rotateX(4deg)}
+.bigSign .kicker{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.24em;margin-bottom:14px;display:flex;justify-content:space-between}
+#signClaim{font-family:var(--disp);font-size:clamp(34px,5.4vw,66px);text-transform:uppercase;line-height:.98}
+#signClaim .pct{color:var(--red)}
+.bigSign.glitch{animation:glitch .5s steps(2) 1}
+@keyframes glitch{0%{transform:perspective(900px) rotateX(4deg) skewX(0)}25%{transform:perspective(900px) rotateX(6deg) skewX(-6deg) translateX(-8px);filter:hue-rotate(40deg)}55%{transform:perspective(900px) rotateX(2deg) skewX(4deg) translateX(6px)}100%{transform:perspective(900px) rotateX(4deg)}}
+.ribbonStrip{position:absolute;left:-14px;right:-14px;top:52%;height:16px;background:var(--red);
+  box-shadow:0 3px 0 rgba(0,0,0,.4);transition:transform .6s ease,opacity .6s ease;z-index:3}
+.ribbonStrip::before{content:"GRAND OPENING ✂";position:absolute;left:50%;transform:translateX(-50%);top:-2px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.3em;color:#fff;line-height:20px}
+.ribbonStrip.cutL{transform:rotate(9deg) translate(-20%,60px);opacity:0}
+.ribbonStrip.cutR{transform:rotate(-9deg) translate(20%,60px);opacity:0}
+.signSub{margin-top:18px;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.05em;min-height:2.4em;opacity:0;transition:opacity .8s}
+.signSub.show{opacity:1}
+.gaugeCol{display:flex;flex-direction:column;gap:18px}
+.gauge{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:20px}
+.gauge .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--dim)}
+.gauge .val{font-family:var(--disp);font-size:64px;color:var(--paint);transition:color .4s}
+.gauge .val.bad{color:var(--red);text-shadow:0 0 24px rgba(255,75,58,.5)}
+.gauge .unit{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.deltaChip{font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;background:#2a1210;color:var(--red);border:1px solid var(--red);visibility:hidden}
+.deltaChip.show{visibility:visible;animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.5)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.fileChips{display:flex;flex-wrap:wrap;gap:12px;max-width:1120px;margin:8px auto 0;padding:0 28px 64px}
+.fileChip{font-family:var(--mono);font-size:12.5px;text-align:left;background:var(--bg2);color:var(--paint);
+  border:1px solid var(--edge2);border-left:6px solid var(--red);border-radius:6px;padding:12px 16px;flex:1 1 300px;
+  transition:border-color .4s,transform .2s}
+.fileChip:hover{transform:translateY(-2px)}
+.fileChip b{color:var(--yellow);letter-spacing:.12em}
+.fileChip.closed{border-left-color:var(--green);color:var(--dim)}
+.fileChip.closed .st{color:var(--green)}
+.skipRow{max-width:1120px;margin:0 auto;padding:0 28px 30px}
+
+/* ---------- GAME ---------- */
+.gameGrid{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;margin-top:26px}
+.canvasWrap{position:relative;background:var(--bg2);border:1px solid var(--edge);border-radius:12px;overflow:hidden;min-height:380px}
+.canvasWrap canvas{display:block;width:100%;height:100%}
+#odoWrap{position:absolute;top:14px;right:14px;background:rgba(10,12,15,.85);border:1px solid var(--edge2);
+  border-radius:8px;padding:10px 16px;text-align:right}
+.odoLabel{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--dim)}
+#odo{font-family:var(--disp);font-size:44px;color:var(--yellow)}
+#odo.bad{color:var(--red)}
+#odo.good{color:var(--green)}
+.odoUnit{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.gamePanel{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px}
+#morningSign{font-family:var(--disp);font-size:24px;background:var(--yellow);color:var(--ink);
+  display:inline-block;padding:6px 14px;border-radius:6px;border:3px solid var(--ink);align-self:flex-start}
+#flavor{color:var(--dim);font-size:15px;font-style:italic;min-height:3.2em}
+#routeBtns{display:flex;flex-direction:column;gap:10px}
+.routeBtn{text-align:left;background:var(--bg2);border:2px solid var(--edge2);color:var(--paint);border-radius:8px;padding:12px 14px;transition:.15s}
+.routeBtn:hover{border-color:var(--yellow)}
+.routeBtn.sel{border-color:var(--yellow);background:#221e08;box-shadow:0 0 0 2px rgba(247,197,0,.25)}
+.routeBtn .rn{font-family:var(--disp);font-size:15px;text-transform:uppercase;display:block}
+.routeBtn .rf{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.routeBtn:disabled{opacity:.4;cursor:not-allowed}
+#resultStrip{background:var(--bg2);border:1px dashed var(--edge2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.7}
+#resultStrip .you{color:var(--yellow);font-weight:700}
+#resultStrip .city{color:var(--cyan)}
+.lockNote{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.1em}
+
+/* ---------- BUILD ---------- */
+.blueprint{background:#0b2740;border:1px solid #1c4a6e;border-radius:12px;padding:26px;position:relative;overflow:hidden;margin-top:26px;
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 34px),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 34px)}
+.blueprint h3{color:var(--cyan);font-size:22px;margin-bottom:8px}
+.blueprint p{color:#bfe6f2;font-style:italic;font-size:15px;max-width:56ch}
+.bpCanvasWrap{position:relative;margin-top:18px;border:1px solid #1c4a6e;border-radius:10px;overflow:hidden;height:280px}
+#slotBtn{position:absolute;left:46%;top:51%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;
+  border:3px dashed var(--cyan);background:rgba(89,211,234,.12);color:var(--cyan);font-size:26px;font-weight:700;
+  animation:slotPulse 1.6s ease-in-out infinite;z-index:4}
+@keyframes slotPulse{0%,100%{box-shadow:0 0 0 0 rgba(89,211,234,.5)}50%{box-shadow:0 0 0 16px rgba(89,211,234,0)}}
+#slotBtn:disabled{animation:none;opacity:.2;cursor:default}
+.approvedStamp{position:absolute;left:46%;top:51%;transform:translate(-50%,-50%) rotate(-9deg);z-index:5;
+  border:4px solid var(--green);color:var(--green);font-family:var(--disp);font-size:14px;letter-spacing:.1em;
+  padding:6px 12px;background:rgba(4,20,14,.8);animation:slam .45s cubic-bezier(.2,2,.4,1) 1;pointer-events:none}
+.bpActions{margin-top:18px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+#openLockNote{font-family:var(--mono);font-size:11px;color:#7fb6c9;letter-spacing:.1em}
+
+/* ---------- PATTERN BREAK OVERLAY ---------- */
+#breakOverlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:#0b2740;
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 40px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 40px)}
+#breakOverlay.on{display:flex;animation:bpIn .3s ease}
+@keyframes bpIn{from{opacity:0}to{opacity:1}}
+.bpInner{text-align:center;padding:30px;max-width:820px}
+.bpStamp{display:inline-block;border:7px solid var(--red);color:var(--red);font-family:var(--disp);
+  font-size:clamp(30px,6vw,64px);text-transform:uppercase;padding:12px 30px;transform:rotate(-6deg);
+  animation:slam .55s cubic-bezier(.2,2.4,.4,1) 1;background:rgba(10,10,14,.35)}
+@keyframes slam{0%{transform:rotate(-6deg) scale(3.2);opacity:0}60%{transform:rotate(-6deg) scale(.94);opacity:1}100%{transform:rotate(-6deg) scale(1)}}
+.bpIdea{margin:34px auto 10px;font-size:clamp(19px,2.6vw,27px);color:#eaf7fb;max-width:30ch;font-style:italic;opacity:0;animation:fadeUp .8s ease .5s forwards}
+.bpNote{font-family:var(--mono);font-size:13px;color:var(--cyan);letter-spacing:.2em;margin-bottom:30px;opacity:0;animation:fadeUp .8s ease .9s forwards}
+#bpClose{opacity:0;animation:fadeUp .8s ease 1.3s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ---------- VERDICT ---------- */
+.verdictBox{margin-top:26px;border:2px solid var(--red);border-radius:12px;padding:30px;background:var(--panel)}
+.verdictBox h3{color:var(--red);font-size:24px}
+.vQ{font-size:20px;font-style:italic;color:var(--paint);margin:12px 0 22px;max-width:56ch}
+.vBtns{display:flex;gap:18px;flex-wrap:wrap}
+.vStamp{display:none;margin-top:24px;font-family:var(--disp);font-size:20px;color:var(--green);border:4px solid var(--green);
+  padding:8px 18px;transform:rotate(-4deg);width:max-content;animation:slam .5s cubic-bezier(.2,2.2,.4,1) 1}
+.vStamp.keep{color:var(--yellow);border-color:var(--yellow)}
+.vStamp.show{display:block}
+
+/* ---------- CASE FILES ---------- */
+.filesGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:28px}
+.fileCard{perspective:900px;height:230px;cursor:pointer}
+.fileInner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,1.4,.5,1);transform-style:preserve-3d}
+.fileCard.flipped .fileInner{transform:rotateY(180deg)}
+.fileFace{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;padding:20px;border:1px solid var(--edge2)}
+.fileFront{background:var(--bg2);display:flex;flex-direction:column;justify-content:space-between}
+.fileFront .yr{font-family:var(--disp);font-size:34px;color:var(--yellow)}
+.fileFront .city{font-family:var(--mono);font-size:13px;letter-spacing:.2em;color:var(--dim)}
+.fileFront .open{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:.24em}
+.fileBack{background:var(--panel);transform:rotateY(180deg);font-size:14px;display:flex;flex-direction:column;gap:8px}
+.fileBack .tag{font-family:var(--mono);font-size:10px;letter-spacing:.24em;color:var(--red)}
+.fileBack b{color:var(--yellow);font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+#loop1Closed{display:none;margin-top:22px;font-family:var(--mono);color:var(--green);letter-spacing:.2em;font-weight:700}
+#loop1Closed.show{display:block;animation:pop .5s ease}
+
+/* ---------- HOOD (answer engine) ---------- */
+.stepper{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 16px}
+.stepChip{background:var(--bg2);border:2px solid var(--edge2);color:var(--dim);border-radius:6px;padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.08em}
+.stepChip.on{background:var(--yellow);color:var(--ink);border-color:var(--ink)}
+.hoodGrid{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+.hoodCanvasWrap{background:var(--bg2);border:1px solid var(--edge);border-radius:12px;overflow:hidden;height:340px}
+.hoodSide{display:flex;flex-direction:column;gap:16px}
+#stepCaption{font-style:italic;color:var(--paint);font-size:15.5px;min-height:7.5em}
+.costBars{display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:18px}
+.cbarRow .cl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim)}
+.cbarTrack{height:22px;background:var(--bg2);border-radius:4px;margin-top:4px;overflow:hidden}
+.cbarFill{height:100%;width:0;border-radius:4px;transition:width 1s cubic-bezier(.3,1,.4,1)}
+.cbarFill.before{background:var(--green)}
+.cbarFill.after{background:var(--red)}
+.cbarRow .cv{font-family:var(--disp);font-size:20px}
+.sliderBox{margin-top:34px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:24px}
+.sliderBox h3{font-size:19px;margin-bottom:6px}
+.sliderBox .hint{color:var(--dim);font-style:italic;font-size:14px;max-width:70ch}
+#popSlider{width:100%;margin:20px 0 6px;accent-color:var(--yellow);height:6px}
+.popReadout{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:13px}
+#popStamp{font-family:var(--disp);font-size:18px;border:4px solid;padding:4px 14px;transform:rotate(-3deg)}
+#popStamp.trap{color:var(--red);border-color:var(--red)}
+#popStamp.gift{color:var(--green);border-color:var(--green)}
+#popStamp.noop{color:var(--dim);border-color:var(--edge2)}
+#popChart{width:100%;height:190px;margin-top:16px;display:block}
+
+/* ---------- SLIME ---------- */
+.slimeGrid{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-top:24px}
+.slimeWrap{background:#141a10;border:1px solid #2e3b20;border-radius:12px;overflow:hidden;height:300px;position:relative}
+#slimeCanvas{width:100%;height:100%;display:block}
+.slimeSide{display:flex;flex-direction:column;gap:14px}
+#slimeStatus{font-style:italic;color:var(--paint);font-size:15.5px;min-height:6em}
+#loop3Closed{display:none;font-family:var(--mono);color:var(--green);font-weight:700;letter-spacing:.2em}
+#loop3Closed.show{display:block;animation:pop .5s ease}
+
+/* ---------- ARTIFACT & SHARE ---------- */
+.licCard{max-width:640px;margin:28px auto 0;background:linear-gradient(160deg,#1c2129,#14181e);
+  border:2px solid var(--yellow);border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.licTop{background:var(--yellow);color:var(--ink);font-family:var(--disp);padding:10px 20px;display:flex;justify-content:space-between;font-size:15px;letter-spacing:.06em}
+.licBody{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+.licField .fl{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--dim)}
+.licField .fv{font-family:var(--disp);font-size:22px;text-transform:uppercase}
+.licField .fv.gold{color:var(--yellow)}
+.licField .fv.grn{color:var(--green)}
+.licField .fv.rd{color:var(--red)}
+.licBar{grid-column:1/-1;border-top:1px dashed var(--edge2);padding-top:12px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.14em}
+.shareBar{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:28px}
+.shareBtn{display:flex;align-items:center;gap:9px;background:var(--panel);border:2px solid var(--edge2);color:var(--paint);
+  border-radius:8px;padding:11px 18px;font-size:13px;font-weight:700;letter-spacing:.06em;transition:.15s}
+.shareBtn:hover{border-color:var(--yellow);transform:translateY(-2px)}
+.shareBtn svg{width:17px;height:17px;fill:currentColor}
+.shareBtn.x:hover{color:#fff;border-color:#fff}
+.shareBtn.li:hover{color:#7cc4ff;border-color:#7cc4ff}
+.shareBtn.wa:hover{color:#4fe3a1;border-color:#4fe3a1}
+.shareBtn.rd:hover{color:#ff7a5c;border-color:#ff7a5c}
+.shareBtn.th:hover{color:#f2c4ff;border-color:#f2c4ff}
+
+/* ---------- FINALE ---------- */
+#night{border-top:none}
+.nightWrap{position:relative;min-height:92vh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+#nightCanvas{position:absolute;inset:0;width:100%;height:100%}
+.nightCopy{position:relative;z-index:3;padding:60px 28px 90px;max-width:1120px;margin:0 auto;width:100%;
+  background:linear-gradient(180deg,transparent,rgba(8,10,14,.88) 30%)}
+.nightLine{font-family:var(--disp);text-transform:uppercase;font-size:clamp(26px,4.4vw,50px);line-height:1.06;
+  opacity:0;transform:translateY(30px);transition:opacity 1s ease,transform 1s ease;margin-bottom:22px}
+.nightLine.in{opacity:1;transform:none}
+.nightLine em{color:var(--yellow);font-style:normal}
+.returnHook{margin-top:26px;border:2px dashed var(--edge2);border-radius:12px;padding:22px;max-width:640px;background:rgba(14,17,20,.8)}
+.returnHook .rh{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--yellow)}
+.returnHook p{color:var(--dim);font-style:italic;margin:8px 0 16px}
+.credits{margin-top:44px;font-family:var(--mono);font-size:11px;color:#4d5862;letter-spacing:.18em}
+
+/* ---------- SKIM DOCK & TOAST ---------- */
+#skim{position:fixed;left:18px;bottom:18px;z-index:120}
+#skimToggle{background:var(--yellow);color:var(--ink);border:3px solid var(--ink);border-radius:30px;
+  font-weight:700;font-size:12px;letter-spacing:.12em;padding:10px 18px;box-shadow:0 4px 0 var(--ink)}
+#skimPanel{display:none;position:absolute;bottom:52px;left:0;width:330px;background:var(--panel);border:1px solid var(--edge2);
+  border-radius:12px;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+#skimPanel.on{display:block;animation:fadeUp .25s ease}
+#skimPanel h4{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--dim);margin-bottom:12px}
+.skimStop{display:block;width:100%;text-align:left;background:var(--bg2);border:1px solid var(--edge2);border-left:5px solid var(--yellow);
+  color:var(--paint);border-radius:6px;padding:9px 12px;margin-bottom:8px;font-size:12px;font-weight:700;letter-spacing:.06em}
+.skimStop:hover{border-left-color:var(--red);transform:translateX(3px)}
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);z-index:300;opacity:0;
+  background:var(--paint);color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:700;
+  padding:12px 20px;border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.5);transition:.3s;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:880px){
+  .openerGrid,.gameGrid,.hoodGrid,.slimeGrid{grid-template-columns:1fr}
+  .gaugeCol{flex-direction:row}
+  .gauge{flex:1}
+  #bgLanes{display:none}
+  .licBody{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:40px;font-family:monospace">This experience needs JavaScript — it's a traffic simulation, not a poster.</p></noscript>
+
+<div id="bgLanes" aria-hidden="true"></div>
+<div class="ticker" aria-hidden="true"><div class="tickerInner" id="tickerInner"></div></div>
+
+<main>
+
+<!-- ══════════════ OPENER : THE FALSE RIBBON ══════════════ -->
+<section id="ribbon">
+  <div class="openerGrid">
+    <div class="bigSign" id="bigSign">
+      <div class="ribbonStrip" id="ribbonL" style="clip-path:inset(0 50% 0 0)"></div>
+      <div class="ribbonStrip" id="ribbonR" style="clip-path:inset(0 0 0 50%)"></div>
+      <div class="kicker"><span>CITY OF EQUILIBRIA · TRAFFIC AUTHORITY</span><span>EXIT 1</span></div>
+      <h1 id="signClaim">NEW SPUR ROAD CUTS COMMUTES <span class="pct">23%</span></h1>
+      <div class="signSub" id="signSub"></div>
+    </div>
+    <div class="gaugeCol">
+      <div class="gauge">
+        <div class="lbl">AVERAGE COMMUTE</div>
+        <div class="val" id="openerOdo">65</div>
+        <div class="unit">MINUTES · 4,000 DRIVERS <span class="deltaChip" id="deltaChip">▲ +23%</span></div>
+      </div>
+      <div class="gauge">
+        <div class="lbl">OPEN FILES</div>
+        <div class="val" id="filesOpen">3</div>
+        <div class="unit">UNRESOLVED · WILL CLOSE AS YOU DRIVE</div>
+      </div>
+    </div>
+  </div>
+  <div class="fileChips">
+    <button class="fileChip" id="chip1"><b>FILE №1 · STUTTGART, 1969</b><br>Why did engineers delete a brand-new road days after opening it? <span class="st">● OPEN</span></button>
+    <button class="fileChip" id="chip2"><b>FILE №2 · THE ONLY SLOT</b><br>There is exactly one place left to build a road here. We're going to let you build it. We know what happens. <span class="st">● OPEN</span></button>
+    <button class="fileChip" id="chip3"><b>FILE №3 · THE BRAINLESS ONE</b><br>A single-celled slime with no neurons never falls for this. What does it know? <span class="st">● OPEN</span></button>
+  </div>
+  <div class="skipRow">
+    <button class="btn ghost small" id="skipBtn">✂ CUT THE RIBBON — SKIP TO THE WHEEL</button>
+  </div>
+</section>
+
+<!-- ══════════════ THE GAME ══════════════ -->
+<section id="game">
+  <span class="km">KM 06</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 2 · THE GAME</div>
+      <h2>Six mornings behind the wheel</h2>
+      <p class="lede">You are Driver #2,001. Cold glass under your palms, coffee going lukewarm in the cupholder, rain gloss on the asphalt. Every morning you pick a route. Every morning, 3,999 strangers do the same — and none of you can see each other.</p>
+    </div>
+    <div class="gameGrid reveal">
+      <div class="canvasWrap"><canvas id="netCanvas"></canvas>
+        <div id="odoWrap"><span class="odoLabel">YOUR COMMUTE</span><span id="odo">0</span><span class="odoUnit"> MIN</span></div>
+      </div>
+      <aside class="gamePanel">
+        <div id="morningSign">MORNING 1 / 6</div>
+        <p id="flavor"></p>
+        <div id="routeBtns"></div>
+        <button class="btn" id="commitBtn" disabled>LOCK ROUTE →</button>
+        <div id="resultStrip" hidden></div>
+        <button class="btn ghost" id="nextBtn" hidden>NEXT MORNING →</button>
+        <div class="lockNote" id="gameLock"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ THE BUILD ══════════════ -->
+<section id="build">
+  <span class="km">KM 14</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 3 · THE BLUEPRINT</div>
+      <h2>The city has budget for exactly one road</h2>
+      <p class="lede">Engineers found one unused corridor on the map: a free connector between the Bridge junction and the River junction. Zero minutes, they promise. It can only be built once you've driven three mornings. Fair warning — File №2 is watching.</p>
+    </div>
+    <div class="blueprint reveal">
+      <h3>CONSTRUCTION PERMIT №B-1968</h3>
+      <p>Click the blinking slot to stamp the permit. Then open it to traffic and keep driving. Whatever happens next is game theory, not bad luck.</p>
+      <div class="bpCanvasWrap">
+        <canvas id="bpCanvas"></canvas>
+        <button id="slotBtn" title="Build the Spur" aria-label="Build the Spur">＋</button>
+      </div>
+      <div class="bpActions">
+        <button class="btn" id="openBtn" disabled>OPEN THE SPUR TO TRAFFIC →</button>
+        <span id="openLockNote">🔒 PLACE THE SPUR FIRST</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ VERDICT ══════════════ -->
+<section id="verdict">
+  <span class="km">KM 22</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 4 · THE VERDICT</div>
+      <h2>One question. Your call.</h2>
+    </div>
+    <div class="verdictBox reveal" id="verdictBox">
+      <h3 class="disp">CITY COUNCIL — EMERGENCY SESSION</h3>
+      <p class="vQ" id="verdictQ">The Spur is open. Every commute in town is stuck at 80 minutes. The old routes now take 85 if anyone dares defect. You've driven six mornings. You've seen the machine. What do we do with the new road?</p>
+      <div class="vBtns">
+        <button class="btn red" id="tearBtn">🔨 TEAR IT DOWN</button>
+        <button class="btn ghost" id="keepBtn">KEEP IT OPEN</button>
+      </div>
+      <div class="vStamp" id="vStamp"></div>
+      <p class="lockNote" style="margin-top:16px" id="verdictLock">🔒 FINISH ALL SIX MORNINGS FIRST</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CASE FILES ══════════════ -->
+<section id="files">
+  <span class="km">KM 27</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 5 · CLOSED FILES</div>
+      <h2>Cities that deleted a road — and won</h2>
+      <p class="lede">Flip each file. All three really happened.</p>
+    </div>
+    <div class="filesGrid reveal">
+      <div class="fileCard" data-f="0"><div class="fileInner">
+        <div class="fileFace fileFront"><div><div class="city">GERMANY</div><div class="yr">1969</div><div style="font-family:var(--disp)">STUTTGART</div></div><div class="open">TAP TO OPEN FILE №1 ▸</div></div>
+        <div class="fileFace fileBack"><span class="tag">THE ORIGINAL PARADOX</span><div><b>THE PLAN</b> — A brand-new connector to ease the city center.</div><div><b>WHAT HAPPENED</b> — Traffic got worse. So they closed the road.</div><div><b>THEN</b> — Flow came back. Mathematician Dietrich Braess published the reason the same year: a new road can rewrite the only stable outcome of the whole game.</div></div>
+      </div></div>
+      <div class="fileCard" data-f="1"><div class="fileInner">
+        <div class="fileFace fileFront"><div><div class="city">SOUTH KOREA</div><div class="yr">2003</div><div style="font-family:var(--disp)">SEOUL</div></div><div class="open">TAP TO OPEN FILE ▸</div></div>
+        <div class="fileFace fileBack"><span class="tag">THE ROAD DIET</span><div><b>THE PLAN</b> — Demolish a six-lane elevated highway. Forecasts promised gridlock.</div><div><b>WHAT HAPPENED</b> — Through-traffic evaporated into other modes and routes. Bus speeds rose. A buried river was brought back into daylight.</div><div><b>THEN</b> — The Cheonggyecheon became the city's most famous street.</div></div>
+      </div></div>
+      <div class="fileCard" data-f="2"><div class="fileInner">
+        <div class="fileFace fileFront"><div><div class="city">USA</div><div class="yr">2009</div><div style="font-family:var(--disp)">NEW YORK</div></div><div class="open">TAP TO OPEN FILE ▸</div></div>
+        <div class="fileFace fileBack"><span class="tag">THE PLAZA GAMBIT</span><div><b>THE PLAN</b> — Close Broadway through Times Square to cars.</div><div><b>WHAT HAPPENED</b> — Injuries fell sharply, travel times on the avenues improved, and the "temporary" experiment became permanent plaza.</div><div><b>THEN</b> — Removing capacity behaved like adding it. Because it was never about capacity.</div></div>
+      </div></div>
+    </div>
+    <div id="loop1Closed">■ FILE №1 · CLOSED — THE ROAD WAS DELETED BECAUSE IT WAS A TRAP. SAME ONE YOU JUST BUILT.</div>
+  </div>
+</section>
+
+<!-- ══════════════ UNDER THE HOOD ══════════════ -->
+<section id="hood">
+  <span class="km">KM 33</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 6 · UNDER THE HOOD</div>
+      <h2>The machine, in four states</h2>
+      <p class="lede">No lecture. Tap through the four states of the trap on the canonical 4,000-driver city and watch the numbers that drove you there.</p>
+    </div>
+    <div class="stepper reveal" id="stepper">
+      <button class="stepChip on" data-s="0">01 · TWO ROADS, ONE TRUTH</button>
+      <button class="stepChip" data-s="1">02 · THE FREE LINK WHISPERS</button>
+      <button class="stepChip" data-s="2">03 · EVERYONE HEARS IT</button>
+      <button class="stepChip" data-s="3">04 · THE TRAP SHUTS</button>
+    </div>
+    <div class="hoodGrid reveal">
+      <div class="hoodCanvasWrap"><canvas id="hoodCanvas"></canvas></div>
+      <div class="hoodSide">
+        <p id="stepCaption"></p>
+        <div class="costBars">
+          <div class="cbarRow"><span class="cl">BEFORE THE SPUR</span><div class="cbarTrack"><div class="cbarFill before" id="barBefore"></div></div><span class="cv" id="valBefore">65 MIN</span></div>
+          <div class="cbarRow"><span class="cl">AFTER THE SPUR</span><div class="cbarTrack"><div class="cbarFill after" id="barAfter"></div></div><span class="cv" id="valAfter">65 MIN</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="sliderBox reveal">
+      <h3 class="disp">The trap has a temperature</h3>
+      <p class="hint">Braess's paradox is falsifiable — it only bites inside a window of demand. Slide the population of your city and watch the same road change its nature. Your intuition cannot feel this boundary. The math can.</p>
+      <input type="range" id="popSlider" min="500" max="12000" step="100" value="4000" aria-label="City population slider">
+      <div class="popReadout">
+        <span id="popN" style="color:var(--yellow);font-weight:700">N = 4,000 DRIVERS</span>
+        <span id="popWith">WITH SPUR: 80 MIN</span>
+        <span id="popWithout">WITHOUT: 65 MIN</span>
+        <span id="popStamp" class="trap">TRAP</span>
+      </div>
+      <canvas id="popChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SLIME ══════════════ -->
+<section id="slime">
+  <span class="km">KM 41</span>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="exitTab">EXIT 7 · FILE №3</div>
+      <h2>The commuter with no brain</h2>
+      <p class="lede">Physarum polycephalum — one cell, zero neurons, no mayor. Experiments show its networks can stumble into the exact same trap… and then solve it. Press the button and watch.</p>
+    </div>
+    <div class="slimeGrid reveal">
+      <div class="slimeWrap"><canvas id="slimeCanvas"></canvas></div>
+      <div class="slimeSide">
+        <p id="slimeStatus">A slime mold grows a transport network between food sources. Pulses of nutrients flow through its tubes — exactly like cars through streets.</p>
+        <div><button class="btn" id="slimeBtn">🧫 ADD A "FREE" CHANNEL</button></div>
+        <div id="loop3Closed">■ FILE №3 · CLOSED — IT VOTES WITH ITS OWN BODY, AND DEMOLISHES BAD ROADS.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ARTIFACT + SHARE ══════════════ -->
+<section id="artifact">
+  <span class="km">KM 48</span>
+  <div class="wrap">
+    <div class="reveal" style="text-align:center">
+      <div class="exitTab">EXIT 8 · YOUR LICENSE</div>
+      <h2>Your Braess Quotient</h2>
+      <p class="lede" style="margin:0 auto" id="artifactLede">Six mornings. One verdict. One number that measures how well you see games — not roads.</p>
+    </div>
+    <div class="licCard reveal" id="licCard">
+      <div class="licTop"><span>EQUILIBRIA DRIVER LICENSE</span><span>CLASS-B · PARADOX</span></div>
+      <div class="licBody" id="licBody">
+        <div class="licField" style="grid-column:1/-1"><div class="fl">STATUS</div><div class="fv" style="font-size:16px">🔒 FINISH THE DRIVE TO PRINT</div></div>
+      </div>
+      <div class="licBar">ISSUED BY THE DEPARTMENT OF GAME THEORY · NON-TRANSFERABLE · THE EQUILIBRIUM IS WATCHING</div>
+    </div>
+    <div class="shareBar reveal" id="shareBar">
+      <button class="shareBtn x" data-p="x"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-6.8 7.8L23.3 22h-6.3l-4.9-6.5L6.4 22H3.3l7.3-8.3L1 2h6.5l4.4 5.9L18.9 2zm-1.1 18h1.7L7.1 3.9H5.3L17.8 20z"/></svg>Post on X</button>
+      <button class="shareBtn li" data-p="li"><svg viewBox="0 0 24 24"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.24 8.3h4.7V24H.24V8.3zM8.34 8.3h4.5v2.1h.1c.6-1.2 2.2-2.4 4.5-2.4 4.8 0 5.7 3.2 5.7 7.3V24h-4.7v-7.6c0-1.8 0-4.1-2.5-4.1s-2.9 2-2.9 4V24h-4.7V8.3z"/></svg>LinkedIn</button>
+      <button class="shareBtn wa" data-p="wa"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-1.8-.1a16 16 0 0 1-1.6-.6c-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.9 2.1c.1.2.1.4 0 .6l-.4.6-.5.6c-.2.2-.3.4-.1.7.2.3.8 1.4 1.8 2.2 1.2 1.1 2.3 1.5 2.6 1.6.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.6.4 0 .1 0 .7-.2 1.3z"/></svg>WhatsApp</button>
+      <button class="shareBtn rd" data-p="rd"><svg viewBox="0 0 24 24"><path d="M24 12a2.4 2.4 0 0 0-4.1-1.7 11.9 11.9 0 0 0-6.5-2.1l1.1-3.5 3 .7a1.7 1.7 0 1 0 .2-.9l-3.5-.8a.4.4 0 0 0-.5.3L12.3 9.2a12 12 0 0 0-6.6 2.1A2.4 2.4 0 0 0 1.6 12c0 .8.4 1.4.9 1.9v.5c0 3.4 4 6.2 8.9 6.2s8.9-2.8 8.9-6.2v-.5a2.4 2.4 0 0 0 2.7-1.9zM7 13.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm8.8 4.2c-1 1-2.7 1.1-3.8 1.1s-2.8-.1-3.8-1.1a.4.4 0 0 1 .6-.6c.7.7 2 1 3.2 1s2.5-.3 3.2-1a.4.4 0 1 1 .6.6zm-.9-2.7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>Reddit</button>
+      <button class="shareBtn th" data-p="th"><svg viewBox="0 0 24 24"><path d="M12.2 24c-3.6 0-6.3-1.2-8-3.5C2.6 18.3 1.8 15.3 1.7 11.6v-.2c.1-3.7.9-6.7 2.5-8.9C5.9.2 8.6-1 12.2-1c3.1 0 5.6.9 7.4 2.6 1.5 1.5 2.5 3.5 2.9 6l-2.4.4c-.6-4.1-3.1-6.1-7.9-6.1-2.9 0-5 .8-6.3 2.5-1.2 1.7-1.9 4.2-2 7.5.1 3.3.8 5.8 2 7.5 1.3 1.7 3.4 2.5 6.3 2.5 2.7 0 4.6-.6 6.1-2 .9-.8 1.4-1.8 1.6-2.9-1 .5-2.1.8-3.3 1-1.3.2-2.7.1-3.9-.3-3-.9-4.8-3.3-4.5-6.1.2-2.4 2.1-4.2 4.8-4.5 1.8-.2 3.6 0 5.1.7l-.6 2.3c-1.2-.5-2.7-.7-4.1-.5-1.5.2-2.5 1-2.6 2.2-.2 1.6.9 3 2.6 3.5 1 .3 2.1.4 3.2.2 2-.3 3.5-1.1 4.4-2.5.7-1.1 1-2.5.9-4.3l2.5-.2c.2 4.3-1.5 7.5-4.8 9-1.4.6-3 .9-4.8.9z" transform="translate(0 1)"/></svg>Threads</button>
+      <button class="shareBtn" data-p="copy" id="copyAll">⧉ COPY FULL CARD</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FINALE ══════════════ -->
+<section id="night">
+  <div class="nightWrap">
+    <canvas id="nightCanvas"></canvas>
+    <div class="nightCopy">
+      <div class="nightLine">Nobody designed this. Nobody wanted it.</div>
+      <div class="nightLine">4,000 perfectly rational choices added up to <em>one perfectly bad morning.</em></div>
+      <div class="nightLine">Next time a city promises a shortcut, you'll <em>feel the game</em> before you see the road.</div>
+      <div class="returnHook">
+        <div class="rh">◈ REASON TO RETURN</div>
+        <p>Tomorrow's rush hour re-seeds at midnight with a new driver count — and the trap moves with it. Some days the Spur will genuinely help. That's the dangerous part: you won't be able to feel the difference.</p>
+        <button class="btn small" id="replayBtn">↺ REPLAY MORNING 1 (N=4,000)</button>
+        <button class="btn ghost small" id="tomorrowBtn"></button>
+      </div>
+      <div class="credits">DRIVE SAFE · THE EQUILIBRIUM IS WATCHING · BRAESS (1968) · WARDROP (1952) · SEOUL (2003) · PHYSARUM (FOREVER)</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- PATTERN BREAK -->
+<div id="breakOverlay" role="alertdialog" aria-label="Paradox reveal">
+  <div class="bpInner">
+    <div class="bpStamp" id="bpStamp">PARADOX CONFIRMED</div>
+    <p class="bpIdea" id="bpIdea">Traffic isn't plumbing. It's a game. A new road doesn't add capacity — it rewrites the one outcome no driver can escape alone.</p>
+    <div class="bpNote" id="bpNote">65 → 80 MIN · 4,000 DRIVERS · 0 MISTAKES MADE</div>
+    <button class="btn" id="bpClose">KEEP DRIVING →</button>
+  </div>
+</div>
+
+<!-- SKIM DOCK -->
+<nav id="skim" aria-label="30 second skim path">
+  <div id="skimPanel">
+    <h4>⚡ 30-SECOND SKIM — EXPRESS LANE</h4>
+    <button class="skimStop" data-t="#ribbon" data-s="New roads don't add capacity. They change a game 4,000 players are already locked into.">01 · THE FALSE RIBBON</button>
+    <button class="skimStop" data-t="#game" data-s="Every 'smart' individual choice converges on one outcome nobody collectively chose. That's an equilibrium.">02 · SIX MORNINGS</button>
+    <button class="skimStop" data-t="#build" data-s="A free shortcut rewrites the equilibrium: 65 minutes becomes 80. For everyone. No one is wrong; everyone loses.">03 · THE TRAP</button>
+    <button class="skimStop" data-t="#files" data-s="Stuttgart 1969, Seoul 2003, NYC 2009: closing roads made traffic better. Demolition is a traffic tool.">04 · THE TEARDOWN</button>
+    <button class="skimStop" data-t="#artifact" data-s="Your Braess Quotient measures how well you see games, not roads.">05 · YOUR SCORE</button>
+  </div>
+  <button id="skimToggle">⚡ 30-SECOND SKIM</button>
+</nav>
+
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+/* ═══════════════ STATE ═══════════════ */
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const S = { N:4000, morning:1, hasSpur:false, built:false, tornDown:false,
+  picks:[], verdict:null, selected:null, busy:false, breakShown:false };
+const $ = id => document.getElementById(id);
+const BASE = () => 45 + S.N/200;
+
+/* ═══════════════ EQUILIBRIUM MATH (analytic Wardrop) ═══════════════ */
+function equilibrium(N, spur, ur){
+  const u=[0,0,0]; if(ur!=null) u[ur]=1;
+  const sim = ur==null ? N : N-1;
+  let L=[0,0,0];
+  if(!spur){ L[0]=Math.round(sim/2); L[1]=sim-L[0]; }
+  else if(N<=4500){ L[2]=sim; }
+  else if(N<9000){ L[2]=Math.max(0,9000-N); if(L[2]>sim)L[2]=sim; const rem=sim-L[2]; L[0]=Math.round(rem/2); L[1]=rem-L[0]; }
+  else { L[0]=Math.round(sim/2); L[1]=sim-L[0]; }
+  const fSA=(L[0]+L[2]+u[0]+u[2])/100, fBE=(L[1]+L[2]+u[1]+u[2])/100;
+  const C=[fSA+45, 45+fBE, spur?(fSA+fBE):Infinity];
+  let sum=0,n=0;
+  for(let r=0;r<3;r++){ if(L[r]>0 && isFinite(C[r])){sum+=L[r]*C[r];n+=L[r];} }
+  if(ur!=null && isFinite(C[ur])){sum+=C[ur];n++;}
+  return {loads:L, costs:C, userCost: ur!=null?C[ur]:(sum/n), cityAvg:sum/n};
+}
+
+/* ═══════════════ NETWORK RENDERER ═══════════════ */
+function geom(W,H){ return {S:[.07*W,.52*H], A:[.46*W,.20*H], B:[.46*W,.82*H], E:[.93*W,.52*H]}; }
+class NetView{
+  constructor(canvas, opts={}){
+    this.c=canvas; this.ctx=canvas.getContext("2d");
+    this.labels=opts.labels!==false; this.night=!!opts.night; this.bp=!!opts.bp;
+    this.state={loads:[2000,2000,0], hasSpur:false, userRoute:null, ghostSpur:false, flashSpur:0};
+    this.particles=[]; this.dash=0; this.resize();
+    addEventListener("resize",()=>this.resize());
+    this.set(this.state);
+  }
+  resize(){
+    const r=this.c.parentElement.getBoundingClientRect(), d=devicePixelRatio||1;
+    this.W=Math.max(300,r.width); this.H=Math.max(220,r.height);
+    this.c.width=this.W*d; this.c.height=this.H*d; this.ctx.setTransform(d,0,0,d,0,0);
+  }
+  pathFor(route){
+    const g=geom(this.W,this.H);
+    if(route===0) return [g.S,g.A,g.E];
+    if(route===1) return [g.S,g.B,g.E];
+    return [g.S,g.A,g.B,g.E];
+  }
+  set(st){
+    this.state=Object.assign({},this.state,st);
+    const active=[0,1]; if(this.state.hasSpur) active.push(2);
+    const tot=active.reduce((a,r)=>a+this.state.loads[r],0)||1;
+    const P=this.night?70:110, target=[];
+    active.forEach(r=>target[r]=Math.max(1,Math.round(P*this.state.loads[r]/tot)));
+    this.particles=[];
+    active.forEach(r=>{ for(let i=0;i<(target[r]||0);i++) this.particles.push({r, t:Math.random(), hue:Math.random()}); });
+  }
+  cost(route){
+    const s=this.state, fSA=(s.loads[0]+s.loads[2])/100, fBE=(s.loads[1]+s.loads[2])/100;
+    if(route===0)return fSA+45; if(route===1)return 45+fBE; return fSA+fBE;
+  }
+  pos(route,t){
+    const pts=this.pathFor(route), segs=pts.length-1;
+    const f=Math.min(.9999,t*segs), i=Math.floor(f), k=f-i;
+    return [pts[i][0]+(pts[i+1][0]-pts[i][0])*k, pts[i][1]+(pts[i+1][1]-pts[i][1])*k];
+  }
+  frame(dt,time){
+    const x=this.ctx,W=this.W,H=this.H,s=this.state,g=geom(W,H);
+    x.clearRect(0,0,W,H);
+    x.fillStyle=this.night?"#0a0e16":(this.bp?"#0b2740":"#12161b"); x.fillRect(0,0,W,H);
+    // links
+    const links=[["S","A"],["A","E"],["S","B"],["B","E"],["A","B"]];
+    const flows=[s.loads[0],s.loads[0],s.loads[1],s.loads[1],s.loads[2]];
+    links.forEach((lk,i)=>{
+      const isSpur=(i===4);
+      if(isSpur && !s.hasSpur && !s.ghostSpur) return;
+      const p1=g[lk[0]],p2=g[lk[1]];
+      const w=10+Math.min(8,flows[i]/500);
+      x.lineCap="round";
+      if(isSpur&&s.ghostSpur&&!s.hasSpur){ x.strokeStyle="rgba(89,211,234,.5)"; x.setLineDash([6,8]); x.lineWidth=6; }
+      else if(isSpur&&s.flashSpur>0){ x.strokeStyle=Math.floor(time*8)%2?"#ff4b3a":"#5a1512"; x.setLineDash([]); x.lineWidth=w; }
+      else { x.strokeStyle=this.night?"#1d2433":(this.bp?"#173a57":"#262d36"); x.setLineDash([]); x.lineWidth=w; }
+      x.beginPath(); x.moveTo(p1[0],p1[1]); x.lineTo(p2[0],p2[1]); x.stroke(); x.setLineDash([]);
+      // centerline
+      x.strokeStyle=isSpur&&!s.hasSpur?"rgba(89,211,234,.8)":"rgba(247,197,0,.75)";
+      x.lineWidth=1.6; x.setLineDash([9,11]); x.lineDashOffset=-time*30;
+      x.beginPath(); x.moveTo(p1[0],p1[1]); x.lineTo(p2[0],p2[1]); x.stroke(); x.setLineDash([]);
+      // label
+      if(this.labels){
+        const mx=(p1[0]+p2[0])/2,my=(p1[1]+p2[1])/2;
+        const costTxt = i===1||i===2 ? "45m" : Math.round(flows[i])/100+"m";
+        const txt=(isSpur&&!s.hasSpur)?"0m · ?":flows[i]+" · "+costTxt;
+        x.font="10px "+getComputedStyle(document.body).getPropertyValue("--mono");
+        const tw=x.measureText(txt).width+12;
+        x.fillStyle="rgba(10,13,17,.82)"; x.fillRect(mx-tw/2,my-9,tw,15);
+        x.fillStyle=isSpur?"#59d3ea":"#96a1ab"; x.textAlign="center"; x.textBaseline="middle";
+        x.fillText(txt,mx,my-1);
+      }
+    });
+    // nodes
+    [["S","START"],["A","JCT A"],["B","JCT B"],["E","WORK"]].forEach(([k,sub])=>{
+      const p=g[k];
+      x.fillStyle=this.bp?"#0b2740":"#0e1114"; x.beginPath(); x.arc(p[0],p[1],13,0,7); x.fill();
+      x.strokeStyle=this.bp?"#59d3ea":"#f7c500"; x.lineWidth=2.5; x.stroke();
+      x.fillStyle=this.bp?"#59d3ea":"#f2efe6"; x.font="bold 11px "+getComputedStyle(document.body).getPropertyValue("--mono");
+      x.textAlign="center"; x.textBaseline="middle"; x.fillText(k,p[0],p[1]);
+    });
+    // particles
+    this.dash+=dt;
+    this.particles.forEach(p=>{
+      const dur=Math.max(2.4,this.cost(p.r)/13);
+      p.t+=dt/dur; if(p.t>1)p.t-=1;
+      const [px,py]=this.pos(p.r,p.t);
+      x.fillStyle=this.night?(p.hue>.5?"#ffd9a0":"#ffefcf"):(this.bp?"#8fe3f5":"#e8e2d2");
+      x.globalAlpha=.9; x.beginPath(); x.arc(px,py,this.night?1.8:2.4,0,7); x.fill(); x.globalAlpha=1;
+    });
+    // YOU marker
+    if(s.userRoute!=null && (s.userRoute<2 || s.hasSpur)){
+      const [px,py]=this.pos(s.userRoute,(time*.16)%1);
+      x.fillStyle="#ff4b3a"; x.shadowColor="#ff4b3a"; x.shadowBlur=14;
+      x.beginPath(); x.arc(px,py,6,0,7); x.fill(); x.shadowBlur=0;
+      x.fillStyle="#fff"; x.font="bold 8px sans-serif"; x.textAlign="center"; x.textBaseline="middle"; x.fillText("YOU",px,py-11);
+    }
+  }
+}
+const mainView=new NetView($("netCanvas"));
+const bpView=new NetView($("bpCanvas"),{labels:false}); bpView.set({loads:[2000,2000,0],ghostSpur:true});
+const hoodView=new NetView($("hoodCanvas"));
+const nightView=new NetView($("nightCanvas"),{night:true,labels:false});
+
+/* ═══════════════ GLOBAL RAF ═══════════════ */
+let last=performance.now(), odometer=null;
+function tick(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now;
+  [mainView,bpView,hoodView,nightView].forEach(v=>{ try{v.frame(dt,now/1000);}catch(e){} });
+  if(S.state) {} // noop
+  if(odometer){ const p=Math.min(1,(now-odometer.t0)/odometer.dur), e=1-Math.pow(1-p,3);
+    odometer.el.textContent=Math.round(odometer.from+(odometer.to-odometer.from)*e);
+    if(p>=1) odometer=null; }
+  slimeFrame(dt,now/1000);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+function rollOdo(el,from,to,dur){ odometer={el,from,to,dur,t0:performance.now()}; }
+
+/* ═══════════════ OPENER SEQUENCE ═══════════════ */
+const FLAVOR=[
+ "Cold start. Coffee steaming in the cupholder, rain gloss on the asphalt. Two ways into town: the Bridge Line or the River Line.",
+ "Same two lanes. Your radio insists traffic 'feels worse.' Your radio is data-blind. Watch the loads instead.",
+ "You know the rhythm now. Two routes, thousands of strangers, one shared answer settling over the city like weather.",
+ "Fresh black asphalt gleaming under the streetlights. The Spur is OPEN. Zero minutes, it promises. Everyone's GPS agrees with you — for now.",
+ "The Spur is 'the obvious choice' this morning. Watch what obvious does to 4,000 people at once.",
+ "Last morning. The dashboards are screaming. Drive first — the city has a question for you after."];
+(function opener(){
+  const t=$("tickerInner"); const msg="⚠ ROUTE ADVISORY · EXPECT DELAYS · NEW LINK OPENS TODAY · ALL FORECASTS PROBABLY WRONG · 65 MIN BASELINE · ";
+  t.textContent=(msg+msg).repeat(3);
+  const run=()=>{
+    setTimeout(()=>{
+      $("bigSign").classList.add("glitch");
+      $("ribbonL").classList.add("cutL"); $("ribbonR").classList.add("cutR");
+      setTimeout(()=>{
+        $("signClaim").innerHTML="NEW SPUR ROAD <u>ADDED</u> <span class='pct'>23%</span> TO EVERYONE'S COMMUTE";
+        $("openerOdo").classList.add("bad");
+        rollOdo($("openerOdo"),65,80,RM?10:1600);
+        $("deltaChip").classList.add("show");
+        const sub=$("signSub");
+        sub.textContent="Stuttgart noticed in 1969 and deleted the road. You're about to feel why. Scroll down — you're Driver #2,001.";
+        sub.classList.add("show");
+        $("bigSign").classList.remove("glitch");
+      },RM?50:520);
+    },RM?200:1700);
+  };
+  run();
+  $("skipBtn").onclick=()=>{ document.querySelector("#game").scrollIntoView({behavior:RM?"auto":"smooth"}); toast("Ribbon cut. You're behind the wheel."); };
+})();
+
+/* ═══════════════ GAME FLOW ═══════════════ */
+const ROUTE_META=[
+ {name:"BRIDGE LINE",tag:"S → A → E",f:"crowding/100 + 45"},
+ {name:"RIVER LINE",tag:"S → B → E",f:"45 + crowding/100"},
+ {name:"THE SPUR",tag:"S → A → B → E",f:"crowding/100 + 0 + crowding/100"}];
+function renderRoutes(){
+  const box=$("routeBtns"); box.innerHTML="";
+  const avail=S.hasSpur?3:2;
+  for(let r=0;r<avail;r++){
+    const b=document.createElement("button");
+    b.className="routeBtn"; b.dataset.r=r;
+    b.innerHTML=`<span class="rn">${ROUTE_META[r].name}</span><span class="rf">${ROUTE_META[r].tag} · ${ROUTE_META[r].f}</span>`;
+    b.onclick=()=>{ if(S.busy)return; S.selected=r;
+      [...box.children].forEach(c=>c.classList.toggle("sel",+c.dataset.r===r));
+      $("commitBtn").disabled=false; };
+    box.appendChild(b);
+  }
+}
+function updateHUD(){
+  $("morningSign").textContent=`MORNING ${S.morning} / 6`;
+  $("flavor").textContent=FLAVOR[S.morning-1]||"";
+}
+function lockStates(){
+  const played=S.picks.length;
+  $("gameLock").textContent = S.morning>=4&&!S.hasSpur ? "🔒 THE SPUR MUST BE BUILT — SEE THE BLUEPRINT BELOW" : "";
+  $("openBtn").disabled = !(S.built) || S.hasSpur;
+  $("openLockNote").textContent = S.hasSpur ? "✔ SPUR OPEN TO TRAFFIC" : (S.built ? "✔ PERMIT STAMPED — READY TO OPEN" : "🔒 PLACE THE SPUR FIRST");
+  const vd=S.picks.length>=6;
+  $("tearBtn").disabled=$("keepBtn").disabled=!vd||S.verdict;
+  $("verdictLock").style.display=vd?"none":"block";
+}
+function commitRoute(){
+  if(S.selected==null||S.busy)return;
+  S.busy=true; const r=S.selected;
+  const eq=equilibrium(S.N,S.hasSpur,r);
+  S.picks.push({m:S.morning,route:r,user:eq.userCost,city:eq.cityAvg,loads:eq.loads.slice(),spur:S.hasSpur});
+  mainView.set({loads:eq.loads,hasSpur:S.hasSpur,userRoute:r});
+  const odo=$("odo"); odo.className=r===2&&S.hasSpur?"bad":"";
+  rollOdo(odo,0,Math.round(eq.userCost),RM?200:3100);
+  $("commitBtn").disabled=true;
+  [...$("routeBtns").children].forEach(c=>c.disabled=true);
+  setTimeout(()=>{
+    const rs=$("resultStrip"); rs.hidden=false;
+    rs.innerHTML=`<span class="you">YOU: ${eq.userCost.toFixed(0)} MIN</span> · <span class="city">CITY AVG: ${eq.cityAvg.toFixed(0)} MIN</span><br>LOADS — BRIDGE ${eq.loads[0].toLocaleString()} · RIVER ${eq.loads[1].toLocaleString()}${S.hasSpur?` · SPUR ${eq.loads[2].toLocaleString()}`:""}`;
+    S.busy=false;
+    const nb=$("nextBtn"); nb.hidden=false;
+    if(S.morning===3&&!S.hasSpur){ nb.textContent="GO TO THE BLUEPRINT ↓"; }
+    else if(S.morning===6){ nb.textContent="TO THE VERDICT →"; }
+    else { nb.textContent="NEXT MORNING →"; }
+    // pattern break on first trap morning
+    if(S.morning===4&&S.hasSpur&&!S.breakShown){ S.breakShown=true; setTimeout(()=>showBreak(),600); }
+  },RM?300:3300);
+}
+$("commitBtn").onclick=commitRoute;
+$("nextBtn").onclick=()=>{
+  $("resultStrip").hidden=true; $("nextBtn").hidden=true; $("odo").textContent="0";
+  if(S.morning===3&&!S.hasSpur){ document.querySelector("#build").scrollIntoView({behavior:RM?"auto":"smooth"}); toast("FILE №2: one slot. One chance. Build it."); return; }
+  if(S.morning>=6){ document.querySelector("#verdict").scrollIntoView({behavior:RM?"auto":"smooth"}); return; }
+  S.morning++; S.selected=null; renderRoutes(); updateHUD(); lockStates();
+};
+
+/* ═══════════════ BUILD ═══════════════ */
+$("slotBtn").onclick=()=>{
+  if(S.built)return; S.built=true;
+  $("slotBtn").disabled=true; $("slotBtn").style.display="none";
+  const st=document.createElement("div"); st.className="approvedStamp"; st.textContent="SPUR APPROVED · 0 MIN";
+  st.style.position="absolute"; document.querySelector(".bpCanvasWrap").appendChild(st);
+  bpView.set({hasSpur:true,loads:[1500,1500,1000]});
+  toast("Permit stamped. File №2 is arming…"); lockStates();
+};
+$("openBtn").onclick=()=>{
+  if(!S.built||S.hasSpur)return;
+  S.hasSpur=true; S.morning=4; S.selected=null;
+  mainView.set({loads:[1333,1333,1334],hasSpur:true});
+  renderRoutes(); updateHUD(); lockStates();
+  document.querySelector("#game").scrollIntoView({behavior:RM?"auto":"smooth"});
+  toast("THE SPUR IS OPEN. Zero minutes, they promised.");
+};
+
+/* ═══════════════ PATTERN BREAK ═══════════════ */
+function showBreak(){
+  const eqBefore=equilibrium(S.N,false,null).cityAvg;
+  const eqAfter=equilibrium(S.N,true,null).cityAvg;
+  const trap=eqAfter>=eqBefore-1;
+  $("bpStamp").textContent=trap?"PARADOX CONFIRMED":"THE SPUR… WORKS?!";
+  $("bpNote").textContent=trap
+    ? `${eqBefore.toFixed(0)} → ${eqAfter.toFixed(0)} MIN · ${S.N.toLocaleString()} DRIVERS · 0 MISTAKES MADE`
+    : `${eqBefore.toFixed(0)} → ${eqAfter.toFixed(0)} MIN · TODAY'S DEMAND IS LOW — THAT'S THE DANGEROUS PART`;
+  $("breakOverlay").classList.add("on");
+}
+$("bpClose").onclick=()=>$("breakOverlay").classList.remove("on");
+addEventListener("keydown",e=>{ if(e.key==="Escape") $("breakOverlay").classList.remove("on"); });
+
+/* ═══════════════ VERDICT ═══════════════ */
+function doVerdict(v){
+  if(S.verdict)return; S.verdict=v;
+  const st=$("vStamp");
+  if(v==="teardown"){
+    S.tornDown=true; S.hasSpur=false;
+    mainView.set({loads:[S.N/2,S.N/2,0],hasSpur:false,userRoute:null,flashSpur:1});
+    setTimeout(()=>mainView.set({loads:[S.N/2,S.N/2,0],hasSpur:false,userRoute:null,flashSpur:0}),1400);
+    rollOdo($("odo"),80,Math.round(BASE()),1600); $("odo").className="good";
+    st.textContent="STUTTGART WOULD BE PROUD — 65 MINUTES RESTORED";
+    toast("The Spur is gone. The commute exhales.");
+  } else {
+    st.textContent="THE SPUR STAYS. THE 80 STAYS."; st.classList.add("keep");
+    toast("Seoul did it the other way. The files below explain.");
+  }
+  st.classList.add("show");
+  closeChip(2); lockStates(); renderLicense();
+}
+$("tearBtn").onclick=()=>doVerdict("teardown");
+$("keepBtn").onclick=()=>doVerdict("keep");
+
+/* ═══════════════ LOOP CHIPS ═══════════════ */
+let openFiles=3;
+function closeChip(n){
+  const chip=$("chip"+n); if(chip.classList.contains("closed"))return;
+  chip.classList.add("closed"); chip.querySelector(".st").textContent="● CLOSED";
+  openFiles--; $("filesOpen").textContent=openFiles;
+}
+[["chip1","#files"],["chip2","#build"],["chip3","#slime"]].forEach(([id,t])=>{ $(id).onclick=()=>document.querySelector(t).scrollIntoView({behavior:RM?"auto":"smooth"}); });
+
+/* ═══════════════ CASE FILES ═══════════════ */
+const flipped=new Set();
+document.querySelectorAll(".fileCard").forEach(c=>{
+  c.onclick=()=>{ c.classList.toggle("flipped");
+    if(c.classList.contains("flipped")){ flipped.add(c.dataset.f);
+      if(flipped.size===3){ closeChip(1); $("loop1Closed").classList.add("show"); } } };
+});
+
+/* ═══════════════ HOOD STEPPER ═══════════════ */
+const STEPS=[
+ {loads:[2000,2000,0],spur:false,ghost:false,cap:"4,000 drivers split evenly. Each road carries 2,000: twenty minutes of crowding plus a fixed forty-five = 65. Nobody can shave a minute by switching. This is the equilibrium — the answer the city arrives at without anyone choosing it.",after:65},
+ {loads:[2000,2000,0],spur:false,ghost:true,cap:"Now look with one driver's eyes. If YOU alone take the free link: twenty plus zero plus twenty = 40 minutes. Everyone else still sits at 65. No individual would be wrong to switch. The whisper is mathematically true.",after:65},
+ {loads:[600,600,2800],spur:true,ghost:false,cap:"So each morning, a few hundred test it. Each one saves time. The news spreads at the speed of group chats. Loads slide toward the whisper…",after:74},
+ {loads:[0,0,4000],spur:true,ghost:false,cap:"All 4,000 on the 'free' road: forty plus zero plus forty = 80. Defect back to either old route? Eighty-five. The rational move, for everyone, alone: stay. The trap isn't a mistake. It's the answer.",after:80}];
+function setStep(i){
+  document.querySelectorAll(".stepChip").forEach((c,j)=>c.classList.toggle("on",j===i));
+  const s=STEPS[i];
+  hoodView.set({loads:s.loads,hasSpur:s.spur,ghostSpur:s.ghost,userRoute:i===1?2:null});
+  $("stepCaption").textContent=s.cap;
+  $("barBefore").style.width=(65/85*100)+"%"; $("valBefore").textContent="65 MIN";
+  $("barAfter").style.width=(s.after/85*100)+"%"; $("valAfter").textContent=s.after+" MIN";
+  $("valAfter").style.color=s.after>65?"var(--red)":"var(--green)";
+}
+document.querySelectorAll(".stepChip").forEach(c=>c.onclick=()=>setStep(+c.dataset.s));
+setStep(0);
+
+/* ═══════════════ SLIDER EXPLORER ═══════════════ */
+const costNo=N=>45+N/200;
+const costWith=N=>N<=4500?N/50:(N<9000?90:45+N/200);
+function verdictZone(N){ return N<3000?"gift":(N<9000?"trap":"noop"); }
+function drawChart(N){
+  const c=$("popChart"),d=devicePixelRatio||1;
+  const W=c.parentElement.clientWidth-48,H=190;
+  c.width=W*d;c.height=H*d;c.style.width=W+"px";c.style.height=H+"px";
+  const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);
+  x.fillStyle="#12161b";x.fillRect(0,0,W,H);
+  const X=n=>20+(n-500)/(12000-500)*(W-30), Y=m=>H-14-(m-20)/(130-20)*(H-30);
+  // zones
+  x.fillStyle="rgba(63,214,140,.07)";x.fillRect(X(500),0,X(3000)-X(500),H);
+  x.fillStyle="rgba(255,75,58,.07)";x.fillRect(X(3000),0,X(9000)-X(3000),H);
+  x.font="9px monospace";x.fillStyle="#5c6873";
+  x.fillText("GIFT",X(1500),12);x.fillText("TRAP",X(5800),12);x.fillText("NO-OP",X(10200),12);
+  const line=(fn,col)=>{x.strokeStyle=col;x.lineWidth=2;x.beginPath();
+    for(let n=500;n<=12000;n+=150){const px=X(n),py=Y(fn(n));n===500?x.moveTo(px,py):x.lineTo(px,py);}x.stroke();};
+  line(costNo,"#3fd68c"); line(costWith,"#ff4b3a");
+  // marker
+  x.strokeStyle="#f7c500";x.setLineDash([4,4]);x.beginPath();x.moveTo(X(N),8);x.lineTo(X(N),H-8);x.stroke();x.setLineDash([]);
+  x.fillStyle="#f7c500";x.beginPath();x.arc(X(N),Y(costWith(N)),5,0,7);x.fill();
+}
+function sliderUpdate(){
+  const N=+$("popSlider").value;
+  const w=costWith(N),wo=costNo(N),z=verdictZone(N);
+  $("popN").textContent=`N = ${N.toLocaleString()} DRIVERS`;
+  $("popWith").textContent=`WITH SPUR: ${w.toFixed(0)} MIN`;
+  $("popWithout").textContent=`WITHOUT: ${wo.toFixed(0)} MIN`;
+  const st=$("popStamp"); st.className=z;
+  st.textContent=z==="trap"?"TRAP":z==="gift"?"GIFT":"NO-OP";
+  drawChart(N);
+}
+$("popSlider").oninput=sliderUpdate;
+addEventListener("resize",()=>sliderUpdate());
+sliderUpdate();
+
+/* ═══════════════ SLIME ═══════════════ */
+const slimeC=$("slimeCanvas");let slimeT=0,slimePhase="idle",slimeT0=0;
+const oats=[[.15,.5],[.42,.22],[.42,.78],[.72,.35],[.72,.65],[.9,.5]];
+const baseTubes=[[0,1],[0,2],[1,3],[2,4],[3,5],[4,5],[1,2],[3,4]];
+let slimeTubes=baseTubes.map(t=>({a:t[0],b:t[1],extra:false}));
+function slimeFrame(dt,time){
+  slimeT+=dt;
+  const r=slimeC.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;
+  if(slimeC.width!==Math.floor(r.width*d)){slimeC.width=r.width*d;slimeC.height=r.height*d;}
+  const x=slimeC.getContext("2d");x.setTransform(d,0,0,d,0,0);
+  const W=r.width,H=r.height;
+  x.fillStyle="#141a10";x.fillRect(0,0,W,H);
+  const speed=slimePhase==="congested"?.35:1;
+  if(slimePhase==="pruning"&&slimeT-slimeT0>2.4){
+    slimeTubes=slimeTubes.filter(t=>!t.extra);slimePhase="restored";slimeT0=slimeT;
+    $("slimeStatus").textContent="Demolished. The bad channel dissolves back into the body. Flow snaps back to full speed. No committee. No five-year study. It votes with its own body.";
+    $("slimeBtn").disabled=false;$("slimeBtn").textContent="🧫 ADD ANOTHER \"FREE\" CHANNEL";
+    closeChip(3);$("loop3Closed").classList.add("show");
+  }
+  slimeTubes.forEach(tb=>{
+    const p1=[oats[tb.a][0]*W,oats[tb.a][1]*H],p2=[oats[tb.b][0]*W,oats[tb.b][1]*H];
+    let w=6;
+    if(tb.extra){ if(slimePhase==="congested")w=8; if(slimePhase==="pruning")w=Math.max(.5,8-((slimeT-slimeT0)/2.4)*8); }
+    x.strokeStyle=tb.extra?(slimePhase==="pruning"?"rgba(255,75,58,.8)":"rgba(214,255,120,.75)"):"rgba(190,225,110,.55)";
+    x.lineWidth=w;x.lineCap="round";x.beginPath();x.moveTo(p1[0],p1[1]);x.lineTo(p2[0],p2[1]);x.stroke();
+    // pulse
+    const pt=(slimeT*speed*.4+tb.a*.13)%1;
+    x.fillStyle="#eaffb0";x.beginPath();
+    x.arc(p1[0]+(p2[0]-p1[0])*pt,p1[1]+(p2[1]-p1[1])*pt,2.2,0,7);x.fill();
+  });
+  oats.forEach((o,i)=>{
+    x.fillStyle="#d8c98f";x.beginPath();x.arc(o[0]*W,o[1]*H,9,0,7);x.fill();
+    x.strokeStyle="#8f834f";x.stroke();
+  });
+}
+$("slimeBtn").onclick=()=>{
+  if(slimePhase==="congested"||slimePhase==="pruning")return;
+  slimeTubes.push({a:1,b:4,extra:true}); slimePhase="congested"; slimeT0=slimeT;
+  $("slimeBtn").disabled=true;
+  $("slimeStatus").textContent="A shortcut appears across the middle. Nutrients flood toward it — just like drivers. And the whole network SLOWS DOWN. The slime feels the paradox you just drove through…";
+  setTimeout(()=>{ if(slimePhase==="congested"){slimePhase="pruning";slimeT0=slimeT;
+    $("slimeStatus").textContent="…so it starts eating the shortcut. Pruning the trap link, tube by tube…";}},2200);
+};
+
+/* ═══════════════ SCORING & LICENSE ═══════════════ */
+function score(){
+  let bq=40,beat=0,defect=0;
+  S.picks.forEach(p=>{
+    if(p.user<p.city-.5)beat++;
+    if(p.spur&&p.route!==2){const sh=p.loads[2]/(S.N-1); if(sh>.6)defect++;}
+  });
+  bq+=beat*8+defect*8;
+  if(S.verdict==="teardown")bq+=22;
+  const uAvg=S.picks.reduce((a,p)=>a+p.user,0)/Math.max(1,S.picks.length);
+  const cAvg=S.picks.reduce((a,p)=>a+p.city,0)/Math.max(1,S.picks.length);
+  if(uAvg<cAvg)bq+=6;
+  bq=Math.max(5,Math.min(100,bq));
+  const title=bq>=85?"ROAD DIET SURGEON":bq>=65?"EQUILIBRIUM WHISPERER":bq>=45?"HONEST COMMUTER":"RIBBON-CUTTING ENTHUSIAST";
+  const lost=Math.round(S.picks.reduce((a,p)=>a+p.user,0)-S.picks.length*BASE());
+  return {bq,title,uAvg,cAvg,lost,beat,defect};
+}
+function renderLicense(){
+  const r=score();
+  $("licBody").innerHTML=`
+   <div class="licField"><div class="fl">DRIVER</div><div class="fv">#2,001</div></div>
+   <div class="licField"><div class="fl">MORNINGS DRIVEN</div><div class="fv">${S.picks.length} / 6</div></div>
+   <div class="licField"><div class="fl">YOUR AVG COMMUTE</div><div class="fv gold">${r.uAvg.toFixed(1)} MIN</div></div>
+   <div class="licField"><div class="fl">CITY AVG</div><div class="fv">${r.cAvg.toFixed(1)} MIN</div></div>
+   <div class="licField"><div class="fl">VERDICT</div><div class="fv ${S.verdict==="teardown"?"grn":"rd"}">${S.verdict==="teardown"?"TORN DOWN":"KEPT OPEN"}</div></div>
+   <div class="licField"><div class="fl">MINUTES vs BASELINE</div><div class="fv ${r.lost>0?"rd":"grn"}">${r.lost>0?"+":""}${r.lost} MIN</div></div>
+   <div class="licField"><div class="fl">TITLE EARNED</div><div class="fv gold" style="font-size:17px">${r.title}</div></div>
+   <div class="licField"><div class="fl">BRAESS QUOTIENT</div><div class="fv gold">${r.bq}/100</div></div>
+   <div class="licBar">HERD BEATEN ×${r.beat} · TRAP DEFECTED ×${r.defect} · N=${S.N.toLocaleString()} · ISSUED ${new Date().toDateString().toUpperCase()}</div>`;
+}
+/* ═══════════════ SHARE ENGINE (5 platforms) ═══════════════ */
+function shareTexts(){
+  const r=score(), url=location.href.split("#")[0];
+  const x=`I built a shortcut in a traffic sim and everyone's commute went UP ${r.lost>0?Math.round(100*(r.uAvg-BASE())/BASE()):23}%. 4,000 drivers, zero mistakes, one trap. Braess's Paradox, playable. My Braess Quotient: ${r.bq}/100 — "${r.title}". ${url} #BraessParadox #GameTheory #ComplexSystems`;
+  const linkedin=`Mental model that changes how you read infrastructure news: Braess's Paradox.\n\nIn a game-theory simulation I just played, adding a free road pushed every one of 4,000 commutes from 65 to 80 minutes — because traffic settles into the one outcome no individual driver can improve alone, and a shortcut can rewrite that outcome into a worse one. Stuttgart (1969), Seoul (2003) and NYC (2009) all closed roads and saw flow improve.\n\nMy result: ${r.title} · Braess Quotient ${r.bq}/100 · verdict: ${S.verdict==="teardown"?"tear it down":"keep it"}.\n\nPlay it: ${url}`;
+  const whatsapp=`Hey — I just got outplayed by a road 😅 Built a "free" shortcut in a traffic sim and every commute got worse. There's a whole interactive thing, including a slime mold that's smarter than city planners. My score: ${r.bq}/100 ("${r.title}"). Try to beat it: ${url}`;
+  const reddit=`I built a shortcut in a traffic simulator and everyone's commute got 23% worse — the game theory behind it is wild (playable). What's the worst "improvement" your city ever built?`;
+  const threads=`Day 1: 65-minute commute.\nDay 4: city opens a free shortcut.\nDay 6: 80-minute commute. Everyone's.\n\nThe math checks out — it's called Braess's Paradox, and it's playable. My verdict: ${S.verdict==="teardown"?"TEAR IT DOWN 🔨":"KEEP IT"}. Score ${r.bq}/100 — "${r.title}". ${url}`;
+  return {x,linkedin,whatsapp,reddit,threads,url,r};
+}
+function copyText(t,msg){
+  const done=()=>toast(msg||"Copied to clipboard");
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t,done));}
+  else fallbackCopy(t,done);
+}
+function fallbackCopy(t,done){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();done();}
+document.querySelectorAll(".shareBtn").forEach(b=>{
+  b.onclick=()=>{
+    const t=shareTexts(),p=b.dataset.p;
+    if(!S.verdict&&p!=="copy"){toast("Finish the six mornings first — your score isn't printed yet.");return;}
+    if(p==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(t.x),"_blank");
+    else if(p==="li"){copyText(t.linkedin,"LinkedIn caption copied — paste it after the share page opens.");setTimeout(()=>window.open("https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(t.url),"_blank"),350);}
+    else if(p==="wa")window.open("https://wa.me/?text="+encodeURIComponent(t.whatsapp),"_blank");
+    else if(p==="rd")window.open("https://www.reddit.com/submit?url="+encodeURIComponent(t.url)+"&title="+encodeURIComponent(t.reddit),"_blank");
+    else if(p==="th")window.open("https://www.threads.net/intent/post?text="+encodeURIComponent(t.threads),"_blank");
+    else if(p==="copy")copyText(shareTexts().linkedin.split("\n\n").slice(0,2).join("\n\n")+"\n\nFull result: "+t.x,"Full card copied");
+  };
+});
+
+/* ═══════════════ SKIM DOCK ═══════════════ */
+$("skimToggle").onclick=()=>$("skimPanel").classList.toggle("on");
+document.querySelectorAll(".skimStop").forEach(b=>{
+  b.onclick=()=>{ document.querySelector(b.dataset.t).scrollIntoView({behavior:RM?"auto":"smooth"});
+    $("skimPanel").classList.remove("on"); toast("⚡ "+b.dataset.s,4200); };
+});
+
+/* ═══════════════ TOAST ═══════════════ */
+let toastTimer;
+function toast(msg,ms=2800){
+  const t=$("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),ms);
+}
+
+/* ═══════════════ REVEALS / FINALE ═══════════════ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in");}),{threshold:.18});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in");}),{threshold:.5});
+document.querySelectorAll(".nightLine").forEach(el=>io2.observe(el));
+
+/* return hook: daily re-seeded network */
+const doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5);
+const dailyN=3200+(doy*137)%2600;
+$("tomorrowBtn").textContent=`▶ PLAY THE RE-SEEDED NETWORK (N=${dailyN.toLocaleString()})`;
+function resetGame(N){
+  Object.assign(S,{N,morning:1,hasSpur:false,built:false,tornDown:false,picks:[],verdict:null,selected:null,busy:false,breakShown:false});
+  mainView.set({loads:[N/2,N/2,0],hasSpur:false,userRoute:null});
+  bpView.set({loads:[N/2,N/2,0],hasSpur:false,ghostSpur:true});
+  const st=document.querySelector(".approvedStamp");if(st)st.remove();
+  $("slotBtn").style.display="";$("slotBtn").disabled=false;
+  $("vStamp").className="vStamp";$("resultStrip").hidden=true;$("nextBtn").hidden=true;$("odo").textContent="0";$("odo").className="";
+  renderRoutes();updateHUD();lockStates();
+  document.querySelector("#game").scrollIntoView({behavior:RM?"auto":"smooth"});
+  toast(`Network re-seeded: ${N.toLocaleString()} drivers. The trap has moved.`);
+}
+$("replayBtn").onclick=()=>resetGame(4000);
+$("tomorrowBtn").onclick=()=>resetGame(dailyN);
+
+/* returning-driver banner */
+try{
+  if(localStorage.getItem("braess-visited")){
+    setTimeout(()=>toast(`RETURNING DRIVER — today's rush re-seeded at N=${dailyN.toLocaleString()}. The trap has moved.`,5000),1200);
+  }
+  if(S.verdict===null) addEventListener("beforeunload",()=>{try{localStorage.setItem("braess-visited","1");}catch(e){}});
+  else localStorage.setItem("braess-visited","1");
+  localStorage.setItem("braess-visited","1");
+}catch(e){}
+
+/* boot */
+renderRoutes();updateHUD();lockStates();
+nightView.set({loads:[2000,2000,0],hasSpur:false});
+})();
+</script>
+</body>
+</html>
