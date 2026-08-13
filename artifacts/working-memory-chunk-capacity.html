@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>The Magic Number Everyone Knows Is Wrong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Literata:ital,opsz,wght@0,16..30,400;0,16..30,500;1,16..30,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2EFE9;
+    --bg-2:#E7E2D6;
+    --bg-3:#DCD5C4;
+    --ink:#1E2A38;
+    --ink-soft:#4B5A68;
+    --ink-faint:#8A94A0;
+    --coral:#D85A34;
+    --coral-bright:#E97449;
+    --sage:#3F7A67;
+    --sage-bright:#4F9680;
+    --rule: rgba(30,42,56,0.16);
+    --rule-strong: rgba(30,42,56,0.32);
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Literata', serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:18px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.01ms !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;} }
+  .wrap{max-width:740px; margin:0 auto; padding:0 24px;}
+  section{padding:60px 0;}
+  hr{border:none; border-top:2px solid var(--ink); margin:0;}
+  .tag-row{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); padding:14px 0; border-bottom:1px solid var(--rule);}
+  h1,h2,h3{font-family:var(--font-display); font-weight:500; margin:0 0 0.3em 0; line-height:1.08;}
+  h1{font-size:clamp(36px,7.5vw,58px);}
+  h2{font-size:clamp(28px,5vw,40px);}
+  h3{font-size:clamp(20px,3.6vw,26px);}
+  p{margin:0 0 1em 0;}
+  .lede{font-size:1.12em; color:var(--ink-soft);}
+  a{color:var(--coral);}
+
+  .skim{background:var(--bg-2); border:1px solid var(--rule-strong); border-radius:6px; padding:18px 20px; margin-top:26px; font-family:var(--font-mono); font-size:13px; color:var(--ink-soft);}
+  .skim b{color:var(--ink);}
+  .skim a{display:inline-block; margin-top:6px; font-weight:700;}
+
+  .old-number{font-family:var(--font-display); font-size:clamp(80px,18vw,140px); color:var(--bg-3); line-height:0.9; margin:10px 0; position:relative; display:inline-block;}
+  .old-number .strike{position:absolute; left:-4%; top:48%; width:108%; height:6px; background:var(--coral); transform:rotate(-4deg); border-radius:3px;}
+  .new-number{font-family:var(--font-display); font-size:clamp(40px,9vw,64px); color:var(--sage); display:inline-block; margin-left:12px;}
+
+  .loop-item{display:flex; gap:14px; padding:18px 0; border-bottom:1px solid var(--rule);}
+  .loop-item:first-child{border-top:1px solid var(--rule);}
+  .loop-num{font-family:var(--font-mono); font-size:13px; color:var(--coral); width:26px; flex-shrink:0; padding-top:3px;}
+  .loop-tag{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);}
+  .pending{color:var(--coral-bright); font-family:var(--font-mono); font-size:12px;}
+
+  .panel{background:var(--bg-2); border:1px solid var(--rule-strong); border-radius:6px; padding:26px; margin:24px 0;}
+
+  /* slot visualization */
+  .slots{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:22px 0;}
+  .slot{width:52px; height:64px; border:2px solid var(--ink); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:22px; font-weight:700; background:var(--bg); transition:all 0.25s;}
+  .slot.filled{background:var(--sage); color:var(--bg); border-color:var(--sage);}
+  .slot.empty{opacity:0.3;}
+
+  .test-stage{text-align:center; padding:20px 0;}
+  .flash-display{font-family:var(--font-mono); font-size:clamp(36px,10vw,56px); font-weight:700; color:var(--ink); min-height:70px; display:flex; align-items:center; justify-content:center; letter-spacing:0.15em;}
+  .test-btn{font-family:var(--font-mono); font-size:14px; padding:12px 22px; border:2px solid var(--ink); background:var(--ink); color:var(--bg); border-radius:6px; cursor:pointer; font-weight:700; margin-top:14px;}
+  .test-btn:hover{background:var(--coral); border-color:var(--coral);}
+  .test-btn:disabled{opacity:0.4; cursor:default;}
+  .recall-input{font-family:var(--font-mono); font-size:20px; padding:10px 14px; border:2px solid var(--ink); border-radius:6px; width:220px; text-align:center; margin-top:10px; letter-spacing:0.1em;}
+  .test-feedback{font-family:var(--font-mono); font-size:14px; margin-top:14px; min-height:20px;}
+  .test-status{font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.06em; margin-top:6px;}
+
+  /* chunk demo */
+  .demo-toggle{display:flex; gap:8px; justify-content:center; margin:18px 0;}
+  .demo-btn{font-family:var(--font-mono); font-size:13px; padding:9px 16px; border:2px solid var(--ink); background:transparent; color:var(--ink); border-radius:20px; cursor:pointer;}
+  .demo-btn.active{background:var(--ink); color:var(--bg);}
+  .demo-display{font-family:var(--font-mono); font-size:clamp(26px,6vw,36px); font-weight:700; text-align:center; padding:24px 0; letter-spacing:0.08em; color:var(--ink);}
+  .demo-display .grp{display:inline-block; padding:0 8px; border-radius:4px;}
+  .demo-note{font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); text-align:center;}
+
+  .peak{background:var(--ink); color:var(--bg); padding:56px 32px; border-radius:6px; text-align:center; margin:20px 0;}
+  .peak h2{color:var(--bg);}
+  .peak .idea{font-family:var(--font-display); font-size:clamp(22px,4.2vw,30px); color:var(--coral-bright); margin-top:16px; line-height:1.25;}
+
+  .artifact-card{background:var(--bg); border:2px solid var(--ink); border-radius:8px; padding:30px; text-align:center; margin:24px 0;}
+  .artifact-badge{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);}
+  .artifact-num{font-family:var(--font-display); font-size:clamp(52px,11vw,84px); color:var(--sage); line-height:1; margin:6px 0;}
+  .artifact-tier{font-family:var(--font-mono); font-size:14px; font-weight:700; padding:6px 14px; border-radius:20px; display:inline-block; margin-top:8px;}
+
+  .share-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; justify-content:center;}
+  .share-btn{font-family:var(--font-mono); font-size:12px; padding:10px 16px; border-radius:20px; border:1px solid var(--ink); background:var(--bg); color:var(--ink); cursor:pointer; transition:all 0.2s;}
+  .share-btn:hover{background:var(--ink); color:var(--bg);}
+
+  .return-hook{text-align:center; padding:56px 0 40px 0;}
+  .return-hook .cta{font-family:var(--font-mono); font-size:13px; color:var(--ink-faint); margin-top:10px;}
+  footer{padding:28px 0 56px 0; font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <div class="tag-row"><span>Working Memory / Capacity</span><span>Entry No. 001</span></div>
+    <h1>The most famous number in psychology is off by almost half.</h1>
+    <div style="margin:20px 0;">
+      <span class="old-number">7<span class="strike"></span></span><span class="new-number">≈ 4</span>
+    </div>
+    <p class="lede">"The magic number seven, plus or minus two" has been taught in classrooms for almost 70 years. When later researchers designed tests that stopped people from silently rehearsing or grouping items, the real number of things you can hold in mind at once turned out to be closer to four.</p>
+    <div class="skim">
+      <b>30-second version:</b> Your working memory holds about four independent "slots," not seven. Experts don't get more slots — they get better at packing more into each one. That packing trick is called chunking, and it's why phone numbers have dashes in them.
+      <br><a href="#peak">Skip to the one idea ↓</a>
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="tag-row"><span>Open Loops</span><span>Entry No. 002</span></div>
+    <h2>Three things that don't add up yet.</h2>
+    <div class="loop-item"><div class="loop-num">01</div><div><div class="loop-tag">The Real Number</div><p>If it's not seven, what is your actual capacity — and can you measure your own? <span class="pending">— unresolved</span></p></div></div>
+    <div class="loop-item"><div class="loop-num">02</div><div><div class="loop-tag">The Expert Trick</div><p>Chess grandmasters and waitstaff who never write down an order don't have bigger working memory than you. So where does their edge come from? <span class="pending">— unresolved</span></p></div></div>
+    <div class="loop-item"><div class="loop-num">03</div><div><div class="loop-tag">The Hidden Design</div><p>Every phone number, license plate, and credit card number is secretly built around this limit. <span class="pending">— unresolved</span></p></div></div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="tag-row"><span>Live Test</span><span>Entry No. 003</span></div>
+    <h2>Find your real number.</h2>
+    <p>Digits will flash on screen, one at a time, then disappear. Type them back in order. The sequence gets longer each time you succeed — until it finds the edge of what you can actually hold.</p>
+    <div class="panel">
+      <div class="slots" id="slotDisplay"></div>
+      <div class="test-stage">
+        <div class="flash-display" id="flashDisplay">Press start</div>
+        <input type="text" id="recallInput" class="recall-input" placeholder="type the sequence" inputmode="numeric" style="display:none;">
+        <div><button class="test-btn" id="startBtn">Start test</button></div>
+        <div class="test-feedback" id="testFeedback"></div>
+        <div class="test-status" id="testStatus">Current length: —</div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="tag-row"><span>Loop 02 &amp; 03, Resolved</span><span>Entry No. 004</span></div>
+    <h2>The trick isn't more slots. It's bigger boxes.</h2>
+    <p>Same nine digits, two ways. Toggle between them and notice which one your eyes even attempt to hold onto.</p>
+    <div class="panel">
+      <div class="demo-toggle">
+        <button class="demo-btn active" id="rawBtn">Raw string</button>
+        <button class="demo-btn" id="chunkBtn">Chunked</button>
+      </div>
+      <div class="demo-display" id="demoDisplay">484219763</div>
+      <div class="demo-note" id="demoNote">9 independent items — well past a 4-item capacity.</div>
+    </div>
+    <p>Chess grandmasters do the same thing with board positions: a beginner sees dozens of individual pieces, a grandmaster sees a handful of familiar <em>patterns</em> — openings, formations, threats — each pattern occupying one slot instead of one piece per slot. The slot count doesn't change with expertise. What fits in each slot does.</p>
+  </section>
+
+  <hr>
+
+  <section id="peak">
+    <div class="peak">
+      <div class="tag-row" style="border-color:rgba(242,239,233,0.2); color:rgba(242,239,233,0.5);"><span>The Peak</span><span>Entry No. 005</span></div>
+      <h2>Expertise isn't more memory.</h2>
+      <div class="idea">You don't get more working memory slots with practice — you get better boxes to put things in. The same four slots, holding more per slot.</div>
+    </div>
+  </section>
+
+  <hr>
+
+  <section>
+    <div class="tag-row"><span>Your Result</span><span>Entry No. 006</span></div>
+    <h2>Your working memory span.</h2>
+    <div class="artifact-card">
+      <div class="artifact-badge">Digits held in sequence, no chunking</div>
+      <div class="artifact-num" id="artifactNum">—</div>
+      <div class="artifact-tier" id="artifactTier">Take the test above</div>
+      <div style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); margin-top:14px;">Textbook average: <b style="color:var(--ink);">4 chunks</b> · commonly cited myth: <b style="color:var(--ink);">7 items</b></div>
+
+      <div class="share-row">
+        <button class="share-btn" data-platform="x">Share on X</button>
+        <button class="share-btn" data-platform="linkedin">Share on LinkedIn</button>
+        <button class="share-btn" data-platform="whatsapp">Send on WhatsApp</button>
+        <button class="share-btn" data-platform="reddit">Post to Reddit</button>
+        <button class="share-btn" data-platform="threads">Share on Threads</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="return-hook">
+    <h3>Try it with letters, or after learning to chunk on purpose.</h3>
+    <p>Your span for random letters, words, or shapes won't match your digit span exactly — and once you deliberately group information into meaningful chunks, the same four slots suddenly hold a lot more.</p>
+    <div class="cta">Run the test again on a different item type and see what changes.</div>
+  </section>
+
+  <footer>Working memory capacity · Cowan (2001), ~4 chunks · Miller (1956), "7±2"</footer>
+</div>
+
+<script>
+(function(){
+  // ---- span test ----
+  const slotDisplay = document.getElementById('slotDisplay');
+  const flashDisplay = document.getElementById('flashDisplay');
+  const recallInput = document.getElementById('recallInput');
+  const startBtn = document.getElementById('startBtn');
+  const testFeedback = document.getElementById('testFeedback');
+  const testStatus = document.getElementById('testStatus');
+  const artifactNum = document.getElementById('artifactNum');
+  const artifactTier = document.getElementById('artifactTier');
+
+  let length = 3;
+  let sequence = [];
+  let bestSpan = 0;
+  let fails = 0;
+  let phase = 'idle';
+
+  function renderSlots(n, filledCount){
+    slotDisplay.innerHTML = '';
+    for(let i=0;i<n;i++){
+      const d = document.createElement('div');
+      d.className = 'slot ' + (i<filledCount ? 'filled' : 'empty');
+      d.textContent = i<filledCount ? sequence[i] : '';
+      slotDisplay.appendChild(d);
+    }
+  }
+
+  function randDigit(){ return Math.floor(Math.random()*10); }
+
+  function runSequence(){
+    sequence = Array.from({length}, randDigit);
+    renderSlots(length, 0);
+    recallInput.style.display = 'none';
+    recallInput.value = '';
+    testFeedback.textContent = '';
+    startBtn.disabled = true;
+    testStatus.textContent = 'Current length: ' + length;
+    let i = 0;
+    phase = 'showing';
+    function showNext(){
+      if(i < sequence.length){
+        flashDisplay.textContent = sequence[i];
+        renderSlots(length, i+1);
+        i++;
+        setTimeout(()=>{ flashDisplay.textContent=''; setTimeout(showNext, 250); }, 650);
+      } else {
+        flashDisplay.textContent = '?';
+        recallInput.style.display = 'inline-block';
+        recallInput.focus();
+        phase = 'recall';
+      }
+    }
+    showNext();
+  }
+
+  function checkRecall(){
+    const guess = recallInput.value.trim();
+    const correct = guess === sequence.join('');
+    if(correct){
+      fails = 0;
+      bestSpan = length;
+      testFeedback.style.color = '#3F7A67';
+      testFeedback.textContent = 'Correct — ' + sequence.join('') + '. Going longer.';
+      length += 1;
+    } else {
+      fails += 1;
+      testFeedback.style.color = '#D85A34';
+      testFeedback.textContent = 'You typed ' + (guess||'(nothing)') + ' — it was ' + sequence.join('') + '.';
+    }
+    recallInput.style.display = 'none';
+    startBtn.disabled = false;
+    startBtn.textContent = fails>=2 ? 'See final result' : 'Next round';
+
+    if(fails>=2){
+      phase = 'done';
+      artifactNum.textContent = bestSpan > 0 ? bestSpan : '< 3';
+      let tier, bg, col;
+      if(bestSpan<=3){ tier='Below typical range'; bg='rgba(216,90,52,0.15)'; col='#D85A34'; }
+      else if(bestSpan<=5){ tier='Typical range'; bg='rgba(63,122,103,0.15)'; col='#3F7A67'; }
+      else { tier='Above typical — likely chunking already'; bg='rgba(63,122,103,0.2)'; col='#3F7A67'; }
+      artifactTier.textContent = tier;
+      artifactTier.style.background = bg;
+      artifactTier.style.color = col;
+      document.querySelector('.artifact-card').scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+
+  startBtn.addEventListener('click', function(){
+    if(phase==='done'){
+      length = 3; fails = 0; bestSpan = 0;
+      startBtn.textContent = 'Start test';
+    }
+    runSequence();
+  });
+
+  recallInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter') checkRecall();
+  });
+
+  // ---- chunk demo ----
+  const rawBtn = document.getElementById('rawBtn');
+  const chunkBtn = document.getElementById('chunkBtn');
+  const demoDisplay = document.getElementById('demoDisplay');
+  const demoNote = document.getElementById('demoNote');
+
+  rawBtn.addEventListener('click', function(){
+    rawBtn.classList.add('active'); chunkBtn.classList.remove('active');
+    demoDisplay.innerHTML = '484219763';
+    demoNote.textContent = '9 independent items — well past a 4-item capacity.';
+  });
+  chunkBtn.addEventListener('click', function(){
+    chunkBtn.classList.add('active'); rawBtn.classList.remove('active');
+    demoDisplay.innerHTML = '<span class="grp" style="background:rgba(63,122,103,0.18);">484</span> <span class="grp" style="background:rgba(216,90,52,0.15);">219</span> <span class="grp" style="background:rgba(63,122,103,0.18);">763</span>';
+    demoNote.textContent = '3 chunks — the same 9 digits, now inside your capacity.';
+  });
+
+  // ---- share engine ----
+  function shareText(){
+    const num = document.getElementById('artifactNum').textContent;
+    return { num: num==='—' ? '4' : num, url: window.location.href };
+  }
+  document.querySelectorAll('.share-btn').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const {num,url} = shareText();
+      const platform = btn.dataset.platform;
+      const baseMsg = 'My working memory span just tested at ' + num + ' digits — turns out the "magic number seven" everyone learned in school is wrong:';
+      let shareUrl = '';
+      if(platform==='x'){ shareUrl = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(baseMsg)+'&url='+encodeURIComponent(url); }
+      else if(platform==='linkedin'){ shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(url); }
+      else if(platform==='whatsapp'){ shareUrl = 'https://wa.me/?text='+encodeURIComponent(baseMsg+' '+url); }
+      else if(platform==='reddit'){ shareUrl = 'https://www.reddit.com/submit?url='+encodeURIComponent(url)+'&title='+encodeURIComponent('The "magic number seven" in psychology is wrong — the real number is closer to four'); }
+      else if(platform==='threads'){ shareUrl = 'https://www.threads.net/intent/post?text='+encodeURIComponent(baseMsg+' '+url); }
+      window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=500');
+    });
+  });
+})();
+</script>
+</body>
+</html>
