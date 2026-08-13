@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Brain Shrinks 60% Every Night — The Hidden Wash Cycle</title>
+<meta name="description" content="Every night your brain's interstitial space expands 60% as cerebrospinal fluid flushes toxic waste. Calculate your Brain Wash Score.">
+<style>
+:root {
+  --bg: #050817;
+  --bg-2: #0a0f24;
+  --bg-3: #0d1430;
+  --card: #111a3a;
+  --card-2: #0a1228;
+  --border: #1e2a55;
+  --border-bright: #2e3d75;
+  --text: #e8edff;
+  --text-dim: #8a96c4;
+  --text-faint: #5a6593;
+  --cyan: #22d3ee;
+  --cyan-bright: #67e8f9;
+  --cyan-deep: #0891b2;
+  --pink: #f472b6;
+  --pink-bright: #ff4f8b;
+  --gold: #fbbf24;
+  --red: #ef4444;
+  --green: #34d399;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  overflow-x: hidden;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(34, 211, 238, 0.09), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(244, 114, 182, 0.06), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+main { position: relative; z-index: 1; }
+
+/* === HERO === */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  overflow: hidden;
+}
+
+#heroCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 820px;
+}
+
+.hero-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid var(--border-bright);
+  border-radius: 100px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 28px;
+  background: rgba(34, 211, 238, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.hero-number {
+  font-family: var(--font-display);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 24px;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+}
+
+.num-prefix {
+  font-size: 24px;
+  color: var(--text-dim);
+  font-style: italic;
+  align-self: center;
+  margin-top: 24px;
+}
+
+.num-main {
+  font-size: clamp(110px, 18vw, 200px);
+  font-weight: 900;
+  background: linear-gradient(180deg, var(--cyan-bright), var(--cyan) 55%, var(--cyan-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.06em;
+  filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.35));
+  animation: numberPulse 4s ease-in-out infinite;
+}
+
+@keyframes numberPulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(34, 211, 238, 0.35)); }
+  50% { filter: drop-shadow(0 0 50px rgba(34, 211, 238, 0.55)); }
+}
+
+.num-suffix {
+  font-size: clamp(40px, 7vw, 80px);
+  font-weight: 300;
+  color: var(--text-dim);
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(24px, 4vw, 42px);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin-bottom: 18px;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-title em {
+  color: var(--cyan-bright);
+  font-style: italic;
+}
+
+.hero-sub {
+  color: var(--text-dim);
+  font-size: 17px;
+  max-width: 580px;
+  margin: 0 auto 40px;
+  line-height: 1.55;
+}
+
+.scroll-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-faint);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.scroll-hint::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--text-faint);
+  animation: scrollLine 2s infinite;
+}
+
+@keyframes scrollLine {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
+
+/* === SECTIONS === */
+section { padding: 100px 24px; position: relative; }
+.section-wrap { max-width: 1100px; margin: 0 auto; }
+
+.loop-marker {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loop-marker::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--cyan);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-bottom: 24px;
+  max-width: 820px;
+}
+
+.section-intro {
+  font-size: 18px;
+  color: var(--text-dim);
+  max-width: 680px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.section-intro strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* === REVEAL BUTTON === */
+.reveal-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--card);
+  border: 1px solid var(--border-bright);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 32px;
+}
+
+.reveal-trigger:hover {
+  background: var(--cyan-deep);
+  border-color: var(--cyan);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.2);
+}
+
+.reveal-trigger .arrow {
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+.reveal-trigger.revealed .arrow { transform: rotate(180deg); }
+
+.reveal-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-content.open { max-height: 2000px; }
+
+/* === VIZ FRAME === */
+.viz-frame {
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-top: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.viz-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+
+.viz-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.05), transparent);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.viz-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.viz-legend {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.viz-caption {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--text-dim);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.viz-caption strong { color: var(--text); font-style: normal; font-weight: 500; }
+
+/* === TIME SLIDER === */
+.time-slider-wrap { margin-top: 16px; }
+
+.time-display {
+  font-family: var(--font-mono);
+  font-size: clamp(36px, 6vw, 56px);
+  color: var(--cyan-bright);
+  font-weight: 300;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.time-label {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  min-height: 20px;
+}
+
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, var(--border), var(--cyan-deep), var(--border));
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--cyan);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2), 0 0 20px rgba(34, 211, 238, 0.4);
+  transition: transform 0.2s;
+}
+
+.slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: var(--cyan);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.2);
+}
+
+.scale-readout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.readout-cell {
+  padding: 18px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.readout-cell:hover { border-color: var(--cyan-deep); }
+
+.readout-value {
+  font-family: var(--font-mono);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 300;
+  color: var(--cyan-bright);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+  transition: color 0.3s;
+}
+
+.readout-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* === WASTE SIMULATOR === */
+.waste-frame {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.waste-canvas-wrap {
+  aspect-ratio: 1;
+  background: radial-gradient(circle at center, rgba(244, 114, 182, 0.08), transparent);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.waste-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.control-group label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.control-group .value {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-size: 16px;
+  float: right;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.waste-status-box {
+  padding: 16px;
+  background: var(--bg-3);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  border-left: 3px solid var(--green);
+  transition: border-color 0.4s;
+}
+
+.waste-status-box.warn { border-left-color: var(--gold); }
+.waste-status-box.bad { border-left-color: var(--red); }
+
+.waste-status-title {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .waste-frame { grid-template-columns: 1fr; }
+}
+
+/* === CALCULATOR === */
+.calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.calc-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.calc-input {
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.calc-input label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.calc-input .value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--cyan-bright);
+  font-weight: 300;
+  float: right;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.bedtime-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.bedtime-option {
+  padding: 10px 4px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.bedtime-option:hover {
+  border-color: var(--cyan-deep);
+  color: var(--text);
+}
+
+.bedtime-option.active {
+  background: var(--cyan-deep);
+  border-color: var(--cyan);
+  color: white;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.quality-options {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.quality-option {
+  flex: 1;
+  padding: 12px 4px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-dim);
+}
+
+.quality-option:hover {
+  border-color: var(--cyan-deep);
+  color: var(--text);
+}
+
+.quality-option.active {
+  background: var(--cyan-deep);
+  border-color: var(--cyan);
+  color: white;
+}
+
+/* === SCORE CARD === */
+.score-card {
+  background: linear-gradient(135deg, var(--card), var(--card-2));
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.1), transparent 50%);
+  pointer-events: none;
+}
+
+.score-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.score-display { position: relative; }
+
+.score-number {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 9vw, 84px);
+  font-weight: 900;
+  line-height: 0.9;
+  background: linear-gradient(180deg, var(--cyan-bright), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: all 0.5s;
+}
+
+.score-suffix {
+  font-size: 24px;
+  color: var(--text-dim);
+  margin-left: 4px;
+  font-weight: 300;
+}
+
+.score-bar {
+  height: 8px;
+  background: var(--bg-3);
+  border-radius: 4px;
+  margin: 24px 0 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--red), var(--gold) 50%, var(--green));
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-tiers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+}
+
+.score-insights {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  position: relative;
+}
+
+.insight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.insight-row:last-child { border-bottom: none; }
+.insight-label { color: var(--text-dim); }
+.insight-value {
+  font-family: var(--font-mono);
+  color: var(--cyan-bright);
+}
+
+.insight-value.warn { color: var(--gold); }
+.insight-value.bad { color: var(--red); }
+.insight-value.good { color: var(--green); }
+
+@media (max-width: 768px) {
+  .calc-grid { grid-template-columns: 1fr; }
+}
+
+/* === SHARE ENGINE === */
+.share-section {
+  padding: 80px 24px;
+  background: linear-gradient(180deg, var(--bg), var(--bg-2));
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.share-section .section-wrap {
+  max-width: 760px;
+  text-align: center;
+}
+
+.share-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 400;
+  margin-bottom: 14px;
+  font-style: italic;
+}
+
+.share-sub {
+  color: var(--text-dim);
+  margin-bottom: 36px;
+  font-size: 16px;
+}
+
+.share-preview {
+  background: var(--card-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  padding: 28px 24px 24px;
+  margin-bottom: 28px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.65;
+  min-height: 100px;
+  position: relative;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.share-preview::before {
+  content: 'Preview';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: var(--bg);
+  padding: 0 12px;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.platform-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.platform-tab {
+  padding: 10px 16px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.platform-tab:hover {
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+
+.platform-tab.active {
+  background: var(--cyan-deep);
+  border-color: var(--cyan);
+  color: white;
+}
+
+.platform-tab svg {
+  width: 16px;
+  height: 16px;
+}
+
+.share-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 13px 26px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--cyan);
+  color: var(--bg);
+  border-color: var(--cyan);
+}
+
+.btn-primary:hover {
+  background: var(--cyan-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34, 211, 238, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-bright);
+}
+
+.btn-secondary:hover {
+  background: var(--card);
+  border-color: var(--cyan);
+}
+
+/* === TOAST === */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--card);
+  border: 1px solid var(--cyan);
+  color: var(--text);
+  padding: 14px 24px;
+  border-radius: 100px;
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(34, 211, 238, 0.2);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* === PATTERN BREAK === */
+.pattern-break {
+  background: #000;
+  padding: 100px 24px;
+  text-align: center;
+  position: relative;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+}
+
+.pattern-break-canvas {
+  width: 100%;
+  height: 280px;
+  display: block;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.pattern-break-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(22px, 3vw, 32px);
+  color: var(--text);
+  max-width: 620px;
+  margin: 28px auto 0;
+  line-height: 1.3;
+}
+
+.pattern-break-text em {
+  color: var(--cyan-bright);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* === ENDING === */
+.ending {
+  padding: 120px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ending-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+.ending-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ending-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.ending-title em {
+  color: var(--cyan);
+  font-style: italic;
+}
+
+.ending-text {
+  color: var(--text-dim);
+  font-size: 17px;
+  max-width: 560px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+
+.ritual-card {
+  background: var(--card-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 36px;
+  max-width: 520px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.ritual-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--pink), var(--cyan));
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.ritual-time {
+  font-family: var(--font-mono);
+  font-size: clamp(40px, 7vw, 56px);
+  color: var(--cyan-bright);
+  font-weight: 300;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.ritual-label {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 24px;
+}
+
+.ritual-list {
+  text-align: left;
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.8;
+}
+
+.ritual-list li {
+  list-style: none;
+  padding-left: 24px;
+  position: relative;
+}
+
+.ritual-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 12px;
+  height: 1px;
+  background: var(--cyan);
+}
+
+.return-hook {
+  margin-top: 40px;
+  padding: 24px;
+  background: rgba(34, 211, 238, 0.05);
+  border: 1px dashed var(--border-bright);
+  border-radius: 12px;
+  display: inline-block;
+  max-width: 460px;
+  text-align: left;
+}
+
+.return-hook-title {
+  font-size: 12px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.return-hook-text {
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+footer {
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  line-height: 1.7;
+}
+
+footer em { color: var(--text-dim); }
+
+/* === UTILITY === */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.skim-path {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(17, 26, 58, 0.85);
+  border: 1px solid var(--border-bright);
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--text-dim);
+  z-index: 100;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(10px);
+  font-family: var(--font-body);
+}
+
+.skim-path:hover {
+  border-color: var(--cyan);
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  section { padding: 70px 20px; }
+  .scale-readout { grid-template-columns: 1fr; }
+  .bedtime-grid { grid-template-columns: repeat(3, 1fr); }
+  .num-prefix { font-size: 16px; margin-top: 14px; }
+  .viz-frame { padding: 18px; }
+  .calc-input { padding: 16px; }
+  .score-card { padding: 24px; }
+  .ritual-card { padding: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="skim-path" id="skimPath">↯ 30-second skim</div>
+
+<main>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">A Neuroscience Brief</div>
+    <div class="hero-number">
+      <span class="num-prefix">up to</span>
+      <span class="num-main">60</span>
+      <span class="num-suffix">%</span>
+    </div>
+    <h1 class="hero-title">Every night, the channels inside your brain <em>expand by sixty percent</em> — and a hidden plumbing system switches on.</h1>
+    <p class="hero-sub">No lymphatic vessels. No drain pipes. Just fluid, pressure, and a shrinking cell. The brain has been quietly washing itself while you slept — and science only caught it in 2012.</p>
+    <div class="scroll-hint">Scroll to descend into the wash</div>
+  </div>
+</section>
+
+<!-- LOOP 1 -->
+<section id="loop1">
+  <div class="section-wrap">
+    <div class="loop-marker">Open loop 01 / 03</div>
+    <h2 class="section-title">Your brain has no lymphatic vessels. So where does the waste go?</h2>
+    <p class="section-intro">Every other organ in your body uses lymphatic vessels — a network of drain pipes — to flush out cellular waste. The brain is sealed off behind the blood-brain barrier, locked in a rigid skull with no room for plumbing. <strong>Yet somehow, it stays clean.</strong></p>
+    <button class="reveal-trigger" data-target="reveal1">
+      <span class="reveal-text">Tap to see what your head is hiding</span>
+      <span class="arrow">↓</span>
+    </button>
+    <div class="reveal-content" id="reveal1">
+      <div class="viz-frame">
+        <div class="viz-canvas-wrap">
+          <canvas id="glymphCanvas" class="viz-canvas"></canvas>
+        </div>
+        <div class="viz-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--cyan)"></span>Cerebrospinal fluid (inflow)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--pink)"></span>Amyloid-β (toxic waste, picked up)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--text-dim)"></span>Glial cells / neurons</div>
+        </div>
+        <p class="viz-caption">The <strong>glymphatic system</strong> — named for the glial cells that power it — was discovered in 2012 by Maiken Nedergaard's lab at the University of Rochester. Cerebrospinal fluid rushes along the outside of arteries, then <em>forces itself through</em> brain tissue, picking up metabolic waste before draining out along veins. The brain invented its own washing machine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOOP 2 -->
+<section id="loop2">
+  <div class="section-wrap">
+    <div class="loop-marker">Open loop 02 / 03</div>
+    <h2 class="section-title">Why does the wash switch on only at night?</h2>
+    <p class="section-intro">Glymphatic flow is <strong>up to ten times more active during sleep</strong> than during wakefulness. Slide through the night and watch the interstitial channels — the gaps between your brain cells — open up.</p>
+
+    <div class="viz-frame">
+      <div class="time-slider-wrap">
+        <div class="time-display" id="timeDisplay">22:00</div>
+        <div class="time-label" id="timeLabel">Bedtime. Cells at full size. Channels at resting width.</div>
+        <input type="range" class="slider" id="nightSlider" min="0" max="100" value="0">
+      </div>
+      <div class="viz-canvas-wrap" style="margin-top:20px;">
+        <canvas id="shrinkCanvas" class="viz-canvas"></canvas>
+      </div>
+      <div class="scale-readout">
+        <div class="readout-cell">
+          <div class="readout-value" id="interstitial">14.0%</div>
+          <div class="readout-label">Interstitial space</div>
+        </div>
+        <div class="readout-cell">
+          <div class="readout-value" id="flowRate">1.0×</div>
+          <div class="readout-label">Glymphatic flow</div>
+        </div>
+        <div class="readout-cell">
+          <div class="readout-value" id="clearance">0%</div>
+          <div class="readout-label">Waste cleared tonight</div>
+        </div>
+      </div>
+      <p class="viz-caption">At peak slow-wave sleep, glial cells (especially astrocytes) contract, expanding the interstitial space by <strong>up to 60%</strong>. The wider channel lets cerebrospinal fluid flood through, sweeping amyloid-β, tau, and α-synuclein out toward the meningeal lymphatics at the skull boundary. Discovered by Xie et al., <em>Science</em> 2013.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LOOP 3 -->
+<section id="loop3">
+  <div class="section-wrap">
+    <div class="loop-marker">Open loop 03 / 03</div>
+    <h2 class="section-title">What if Alzheimer's isn't just a disease — but a slow drainage failure?</h2>
+    <p class="section-intro">Amyloid-β is cleared primarily through the glymphatic system. <strong>One night of sleep deprivation measurably raises amyloid-β in the human brain</strong> (reported by Shokri-Kojori et al., PNAS 2018). Pull the sliders and watch what chronic sleep loss does to the same neurons over time.</p>
+
+    <div class="viz-frame">
+      <div class="waste-frame">
+        <div class="waste-canvas-wrap">
+          <canvas id="wasteCanvas" class="viz-canvas"></canvas>
+        </div>
+        <div class="waste-controls">
+          <div class="control-group">
+            <label>Avg sleep per night <span class="value" id="sleepVal">7.0 hrs</span></label>
+            <input type="range" class="slider" id="sleepSlider" min="3" max="9" value="7" step="0.5">
+          </div>
+          <div class="control-group">
+            <label>Years of this pattern <span class="value" id="yearsVal">10 yrs</span></label>
+            <input type="range" class="slider" id="yearsSlider" min="1" max="40" value="10">
+          </div>
+          <div class="waste-status-box" id="wasteStatusBox">
+            <strong class="waste-status-title" id="wasteStatus" style="color:var(--green);">Brain washes itself nightly</strong>
+            <span id="wasteDetail">Amyloid clearance efficiency near 100%. Long-term Alzheimer's risk profile: baseline.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PATTERN BREAK / PEAK -->
+<section class="pattern-break">
+  <canvas class="pattern-break-canvas" id="peakCanvas"></canvas>
+  <p class="pattern-break-text">You don't sleep to rest. <em>You sleep so your brain can be washed.</em><br>Consciousness is a state of controlled pollution.</p>
+</section>
+
+<!-- PERSONAL CALCULATOR -->
+<section id="calc">
+  <div class="section-wrap">
+    <div class="loop-marker">Your personalized wash</div>
+    <h2 class="section-title">Calculate your Brain Wash Score</h2>
+    <p class="section-intro">Adjust the variables to match your actual sleep pattern. The score reflects how efficiently your glymphatic system is clearing amyloid-β tonight — and the projected long-term cost if nothing changes.</p>
+
+    <div class="calc-grid">
+      <div class="calc-inputs">
+        <div class="calc-input">
+          <label>Typical bedtime</label>
+          <div class="bedtime-grid" id="bedtimeGrid">
+            <div class="bedtime-option" data-time="20">20:00</div>
+            <div class="bedtime-option" data-time="21">21:00</div>
+            <div class="bedtime-option" data-time="22">22:00</div>
+            <div class="bedtime-option active" data-time="23">23:00</div>
+            <div class="bedtime-option" data-time="0">00:00</div>
+            <div class="bedtime-option" data-time="1">01:00</div>
+          </div>
+        </div>
+
+        <div class="calc-input">
+          <label>Hours in bed <span class="value" id="hoursVal">7.0</span></label>
+          <input type="range" class="slider" id="hoursSlider" min="4" max="10" value="7" step="0.5">
+        </div>
+
+        <div class="calc-input">
+          <label>Sleep quality</label>
+          <div class="quality-options" id="qualityGrid">
+            <div class="quality-option" data-q="0.5">Poor</div>
+            <div class="quality-option" data-q="0.75">Fair</div>
+            <div class="quality-option active" data-q="1">Good</div>
+            <div class="quality-option" data-q="1.2">Excellent</div>
+          </div>
+        </div>
+
+        <div class="calc-input">
+          <label>Screen use in last hour <span class="value" id="screenVal">20 min</span></label>
+          <input type="range" class="slider" id="screenSlider" min="0" max="60" value="20">
+        </div>
+      </div>
+
+      <div class="score-card">
+        <div class="score-label">Your Brain Wash Score</div>
+        <div class="score-display">
+          <span class="score-number" id="scoreNumber">72</span>
+          <span class="score-suffix">/ 100</span>
+        </div>
+        <div class="score-bar">
+          <div class="score-bar-fill" id="scoreBarFill" style="width:72%"></div>
+        </div>
+        <div class="score-tiers">
+          <span>Toxic</span>
+          <span>Marginal</span>
+          <span>Optimal</span>
+        </div>
+        <div class="score-insights">
+          <div class="insight-row">
+            <span class="insight-label">Deep-sleep window hit</span>
+            <span class="insight-value good" id="deepWindow">00:00–02:00 ✓</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-label">Glymphatic efficiency</span>
+            <span class="insight-value" id="efficiency">82%</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-label">Amyloid clearance tonight</span>
+            <span class="insight-value" id="clearance2">76%</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-label">10-year Alzheimer's risk multiplier</span>
+            <span class="insight-value warn" id="riskMult">1.3×</span>
+          </div>
+          <div class="insight-row">
+            <span class="insight-label">Wash cycle nickname</span>
+            <span class="insight-value" id="nickname">The Light Rinse</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHARE ENGINE -->
+<section class="share-section" id="share">
+  <div class="section-wrap">
+    <h2 class="share-title">Hand this to someone who needs to read it.</h2>
+    <p class="share-sub">Your score and insight, tailored for each platform.</p>
+
+    <div class="share-preview" id="sharePreview"></div>
+
+    <div class="platform-tabs" id="platformTabs">
+      <button class="platform-tab active" data-platform="x">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X
+      </button>
+      <button class="platform-tab" data-platform="linkedin">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8.339 18.337V9.677H5.667v8.66zM7 8.578a1.55 1.55 0 1 0 0-3.1 1.55 1.55 0 0 0 0 3.1zm11.337 9.76v-4.749c0-2.537-1.354-3.716-3.16-3.716-1.46 0-2.113.804-2.477 1.368v-1.174h-2.752c.036.776 0 8.66 0 8.66h2.752v-4.836c0-.437.03-.874.16-1.187.354-.874 1.158-1.778 2.51-1.778 1.768 0 2.477 1.347 2.477 3.32v4.481z"/></svg>
+        LinkedIn
+      </button>
+      <button class="platform-tab" data-platform="whatsapp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.5 2 12.04 2m0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.264 8.264 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.24-8.24 8.24m4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43-.14-.01-.31-.01-.48-.01-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+        WhatsApp
+      </button>
+      <button class="platform-tab" data-platform="reddit">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0m5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.562.467-.487 1.117-.789 1.847-.789 1.44 0 2.609 1.169 2.609 2.608 0 1.085-.67 2.012-1.611 2.391.07.292.115.586.115.889 0 3.098-3.559 5.613-7.944 5.613-4.386 0-7.945-2.515-7.945-5.613 0-.314.051-.61.124-.911a2.6 2.6 0 0 1-1.617-2.391c0-1.439 1.168-2.608 2.607-2.608.732 0 1.382.302 1.85.79 1.214-.945 2.897-1.507 4.747-1.562l.896-4.183a.35.35 0 0 1 .41-.272zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.248 0-.688-.561-1.249-1.248-1.249m5.5 0c-.687 0-1.248.561-1.248 1.249 0 .687.561 1.248 1.248 1.248.688 0 1.249-.561 1.249-1.248 0-.687-.561-1.249-1.249-1.249m-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.071 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.197-2.513-.73a.326.326 0 0 0-.231-.094z"/></svg>
+        Reddit
+      </button>
+      <button class="platform-tab" data-platform="threads">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.781 3.631 2.695 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.745-.267-.584-.71-.991-1.292-1.221-.205 1.4-.727 2.498-1.557 3.278-1.067 1.001-2.453 1.41-4.124 1.41-1.27 0-2.484-.327-3.42-.92-1.09-.69-1.65-1.654-1.65-2.816 0-2.243 1.952-3.079 3.792-3.524 1.65-.4 3.494-.476 4.577-.515.027-.292.054-.6.054-.922 0-.853-.18-1.498-.526-1.91-.36-.427-.95-.643-1.749-.643-1.083 0-1.86.298-2.31.887-.4.522-.6 1.03-.6 1.55 0 .286.057.554.165.77l-1.93.227c-.118-.27-.178-.617-.178-1.026 0-1.014.453-1.974 1.275-2.704.815-.725 1.953-1.094 3.379-1.094 1.316 0 2.32.317 2.984.94.66.62.995 1.518.995 2.668v4.063c0 .69.067 1.214.207 1.602.135.376.343.635.617.77.064.03.13.054.2.073-.298.276-.66.43-1.066.43-.46 0-.853-.183-1.146-.528-.123-.144-.23-.314-.314-.502-.297.27-.638.487-1.014.644-.438.183-.95.276-1.523.276-1.124 0-2.07-.298-2.815-.885-.78-.617-1.176-1.453-1.176-2.486 0-1.027.396-1.847 1.176-2.438.745-.564 1.79-.948 3.103-1.142.486-.073.96-.122 1.41-.146zm-.276 4.18c-.486.043-.95.117-1.387.222-.95.18-1.716.426-2.21.715-.492.287-.74.654-.74 1.094 0 .42.157.752.47 1.027.31.27.71.41 1.184.41.6 0 1.122-.158 1.555-.47.43-.31.713-.71.85-1.193.07-.243.105-.587.105-1.027v-.829z"/></svg>
+        Threads
+      </button>
+    </div>
+
+    <div class="share-actions">
+      <button class="btn-primary" id="shareBtn">Open in platform</button>
+      <button class="btn-secondary" id="copyBtn">Copy text</button>
+    </div>
+  </div>
+</section>
+
+<!-- ENDING -->
+<section class="ending" id="ending">
+  <canvas class="ending-canvas" id="endingCanvas"></canvas>
+  <div class="ending-content">
+    <h2 class="ending-title">Tonight, about <em>90 minutes</em> after you fall asleep, your brain will open up. Don't be awake for it.</h2>
+    <p class="ending-text">The deepest phase of glymphatic flow happens in slow-wave sleep — the slow, dreamless kind that arrives 1–2 hours after sleep onset and is concentrated in the first third of the night. Miss it, and the wash is incomplete.</p>
+
+    <div class="ritual-card">
+      <div class="ritual-time" id="ritualTime">22:00</div>
+      <div class="ritual-label">Your wash cycle begins</div>
+      <ul class="ritual-list">
+        <li>Dim screens one hour before — melatonin needs darkness</li>
+        <li>Bedroom temperature: 18–19°C (cooler than you think)</li>
+        <li>Last caffeine: before 14:00 (half-life ~6 hours)</li>
+        <li>Aim for 7.5–8.5 hours — full slow-wave cycles complete</li>
+      </ul>
+    </div>
+
+    <div class="return-hook">
+      <div class="return-hook-title">Why come back</div>
+      <div class="return-hook-text">After one full week of your new routine, return and recalculate. The score moves fast when the wash runs deep — and so does the long-term risk curve. Your future brain is being washed tonight.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built on research from Xie et al., <em>Science</em> (2013); Iliff et al., <em>J Clinical Investigation</em> (2012); Shokri-Kojori et al., <em>PNAS</em> (2018); Holth et al., <em>Science Advances</em> (2019). Read the original papers, then go to sleep.
+</footer>
+
+</main>
+
+<div class="toast" id="toast">Copied to clipboard</div>
+
+<script>
+// === HERO CANVAS: pulsing brain with fluid particles ===
+(function heroCanvas() {
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let particles = [];
+  let time = 0;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function initParticles() {
+    particles = [];
+    const count = Math.min(80, Math.floor((w * h) / 12000));
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r: Math.random() * 1.5 + 0.4,
+        opacity: Math.random() * 0.6 + 0.2,
+        hue: Math.random() < 0.7 ? 'cyan' : 'pink',
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function drawBrain(cx, cy, scale) {
+    const r = Math.max(20, 130 * scale);
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // Brain outline - organic shape using bezier
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.9, -r * 0.15);
+    ctx.bezierCurveTo(-r * 1.15, -r * 0.5, -r * 0.95, -r * 1.05, -r * 0.45, -r * 0.95);
+    ctx.bezierCurveTo(-r * 0.25, -r * 1.2, r * 0.25, -r * 1.2, r * 0.45, -r * 0.95);
+    ctx.bezierCurveTo(r * 0.95, -r * 1.05, r * 1.15, -r * 0.5, r * 0.9, -r * 0.15);
+    ctx.bezierCurveTo(r * 1.1, r * 0.15, r * 1.0, r * 0.55, r * 0.6, r * 0.75);
+    ctx.bezierCurveTo(r * 0.4, r * 1.0, -r * 0.4, r * 1.0, -r * 0.6, r * 0.75);
+    ctx.bezierCurveTo(-r * 1.0, r * 0.55, -r * 1.1, r * 0.15, -r * 0.9, -r * 0.15);
+    ctx.closePath();
+
+    const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.3);
+    grad.addColorStop(0, 'rgba(34, 211, 238, 0.10)');
+    grad.addColorStop(0.6, 'rgba(34, 211, 238, 0.04)');
+    grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.28)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Internal gyri (wavy lines radiating from center)
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.12)';
+    ctx.lineWidth = 0.7;
+    for (let i = 0; i < 14; i++) {
+      ctx.beginPath();
+      const angle = (i / 14) * Math.PI * 2;
+      const startR = r * 0.15;
+      const endR = r * 0.85;
+      ctx.moveTo(Math.cos(angle) * startR, Math.sin(angle) * startR);
+      const steps = 12;
+      for (let s = 1; s <= steps; s++) {
+        const t = s / steps;
+        const rr = startR + (endR - startR) * t;
+        const wave = Math.sin(t * 9 + time * 0.4 + i) * 5;
+        const ang = angle + (wave / (rr + 1)) * 0.6;
+        ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+      }
+      ctx.stroke();
+    }
+
+    // Central fissure
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 0.95);
+    ctx.bezierCurveTo(r * 0.05, -r * 0.3, -r * 0.05, r * 0.3, 0, r * 0.85);
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w / 2;
+    const cy = h / 2;
+    const scale = Math.min(w, h) / 380;
+
+    // Glow halo
+    const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.55);
+    glowGrad.addColorStop(0, 'rgba(34, 211, 238, 0.10)');
+    glowGrad.addColorStop(0.5, 'rgba(34, 211, 238, 0.02)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    drawBrain(cx, cy, scale);
+
+    // Particles drifting around brain
+    for (const p of particles) {
+      const dx = cx - p.x;
+      const dy = cy - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 80) {
+        p.vx += dx / dist * 0.003;
+        p.vy += dy / dist * 0.003;
+      }
+      p.vx *= 0.985;
+      p.vy *= 0.985;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+      if (p.y < -10) p.y = h + 10;
+      if (p.y > h + 10) p.y = -10;
+
+      const flicker = 0.7 + Math.sin(time * 2 + p.phase) * 0.3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      if (p.hue === 'cyan') {
+        ctx.fillStyle = `rgba(103, 232, 249, ${p.opacity * flicker})`;
+        ctx.shadowColor = 'rgba(103, 232, 249, 0.6)';
+      } else {
+        ctx.fillStyle = `rgba(244, 114, 182, ${p.opacity * flicker})`;
+        ctx.shadowColor = 'rgba(244, 114, 182, 0.5)';
+      }
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    time += 0.01;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+    initParticles();
+  });
+
+  resize();
+  initParticles();
+  draw();
+})();
+
+// === GLYMPHATIC CANVAS: fluid flowing through brain tissue ===
+(function glymphCanvas() {
+  const canvas = document.getElementById('glymphCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let particles = [];
+  let time = 0;
+  let active = false;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < 35; i++) {
+      particles.push({
+        type: 'csf',
+        x: -10,
+        y: h * 0.2 + Math.random() * h * 0.6,
+        vx: 0.6 + Math.random() * 0.8,
+        vy: (Math.random() - 0.5) * 0.2,
+        r: Math.random() * 1.6 + 0.6,
+        opacity: Math.random() * 0.5 + 0.4,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+    for (let i = 0; i < 30; i++) {
+      particles.push({
+        type: 'waste',
+        x: w * 0.3 + Math.random() * w * 0.4,
+        y: Math.random() * h,
+        vx: 0.2 + Math.random() * 0.4,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.5 + 1,
+        opacity: Math.random() * 0.6 + 0.4,
+        phase: Math.random() * Math.PI * 2,
+        picked: false
+      });
+    }
+  }
+
+  function drawTissue() {
+    const cols = 8, rows = 5;
+    const padX = 30, padY = 24;
+    const cellW = (w - padX * 2) / cols;
+    const cellH = (h - padY * 2) / rows;
+
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const x = padX + (i + 0.5) * cellW;
+        const y = padY + (j + 0.5) * cellH;
+        const pulse = 1 + Math.sin(time * 0.4 + i * 0.5 + j * 0.7) * 0.05;
+        const r = Math.min(cellW, cellH) * 0.35 * pulse;
+
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(138, 150, 196, 0.07)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(138, 150, 196, 0.22)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // Nucleus
+        ctx.beginPath();
+        ctx.arc(x, y, r * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(103, 232, 249, 0.15)';
+        ctx.fill();
+      }
+    }
+
+    // Artery (left, inflow)
+    const arteryGrad = ctx.createLinearGradient(0, h / 2 - 12, 0, h / 2 + 12);
+    arteryGrad.addColorStop(0, 'rgba(244, 114, 182, 0)');
+    arteryGrad.addColorStop(0.5, 'rgba(244, 114, 182, 0.45)');
+    arteryGrad.addColorStop(1, 'rgba(244, 114, 182, 0)');
+    ctx.fillStyle = arteryGrad;
+    ctx.fillRect(0, h / 2 - 12, w * 0.04, 24);
+
+    // Vein (right, outflow)
+    const veinGrad = ctx.createLinearGradient(0, h / 2 - 12, 0, h / 2 + 12);
+    veinGrad.addColorStop(0, 'rgba(103, 232, 249, 0)');
+    veinGrad.addColorStop(0.5, 'rgba(103, 232, 249, 0.5)');
+    veinGrad.addColorStop(1, 'rgba(103, 232, 249, 0)');
+    ctx.fillStyle = veinGrad;
+    ctx.fillRect(w * 0.96, h / 2 - 12, w * 0.04, 24);
+
+    // Labels
+    ctx.fillStyle = 'rgba(138, 150, 196, 0.65)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('ARTERY · inflow', 8, h - 12);
+    ctx.textAlign = 'right';
+    ctx.fillText('VEIN · outflow', w - 8, h - 12);
+  }
+
+  function draw() {
+    if (!active) return;
+    ctx.fillStyle = 'rgba(5, 8, 23, 0.18)';
+    ctx.fillRect(0, 0, w, h);
+
+    drawTissue();
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy + Math.sin(time * 1.5 + p.phase) * 0.3;
+
+      if (p.type === 'csf') {
+        if (p.x > w + 10) {
+          p.x = -10;
+          p.y = h * 0.2 + Math.random() * h * 0.6;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(103, 232, 249, ${p.opacity})`;
+        ctx.shadowColor = 'rgba(103, 232, 249, 0.7)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      } else {
+        // waste - accelerates as it drifts right (picked up by CSF)
+        if (p.x > w * 0.5) p.vx = Math.max(p.vx, 0.5);
+        if (p.x > w + 10) {
+          p.x = w * 0.3 + Math.random() * w * 0.4;
+          p.y = Math.random() * h;
+          p.vx = 0.2 + Math.random() * 0.4;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(244, 114, 182, ${p.opacity})`;
+        ctx.shadowColor = 'rgba(244, 114, 182, 0.6)';
+        ctx.shadowBlur = 5;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    time += 0.02;
+    requestAnimationFrame(draw);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        active = true;
+        resize();
+        initParticles();
+        draw();
+      } else {
+        active = false;
+      }
+    });
+  }, { threshold: 0.15 });
+  observer.observe(canvas);
+
+  window.addEventListener('resize', () => {
+    if (active) {
+      resize();
+      initParticles();
+    }
+  });
+})();
+
+// === SHRINK CANVAS: brain tissue expanding at night ===
+(function shrinkCanvas() {
+  const canvas = document.getElementById('shrinkCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let time = 0;
+  let active = false;
+  let progress = 0;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function draw() {
+    if (!active) return;
+    ctx.clearRect(0, 0, w, h);
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, 'rgba(13, 20, 48, 0.5)');
+    bgGrad.addColorStop(1, 'rgba(5, 8, 23, 0.5)');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    const cols = 9;
+    const rows = 5;
+    const padX = 32;
+    const padY = 28;
+    const cellW = (w - padX * 2) / cols;
+    const cellH = (h - padY * 2) / rows;
+
+    const baseR = Math.min(cellW, cellH) * 0.4;
+    const shrinkFactor = 1 - progress * 0.4;
+    const r = Math.max(2, baseR * shrinkFactor);
+
+    const gapOpacity = 0.05 + progress * 0.3;
+
+    // Fluid channels (vertical & horizontal lines)
+    if (progress > 0.05) {
+      for (let i = 0; i <= cols; i++) {
+        const x = padX + i * cellW;
+        const grad = ctx.createLinearGradient(x - 5, 0, x + 5, 0);
+        grad.addColorStop(0, 'rgba(34, 211, 238, 0)');
+        grad.addColorStop(0.5, `rgba(34, 211, 238, ${gapOpacity})`);
+        grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x - 5, padY, 10, h - padY * 2);
+      }
+      for (let j = 0; j <= rows; j++) {
+        const y = padY + j * cellH;
+        const grad = ctx.createLinearGradient(0, y - 5, 0, y + 5);
+        grad.addColorStop(0, 'rgba(34, 211, 238, 0)');
+        grad.addColorStop(0.5, `rgba(34, 211, 238, ${gapOpacity})`);
+        grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(padX, y - 5, w - padX * 2, 10);
+      }
+    }
+
+    // Cells
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+        const cx = padX + (i + 0.5) * cellW;
+        const cy = padY + (j + 0.5) * cellH;
+        const pulse = 1 + Math.sin(time * 0.5 + i * 0.3 + j * 0.4) * 0.03;
+        const rr = Math.max(2, r * pulse);
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(138, 150, 196, ${0.18 - progress * 0.06})`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(138, 150, 196, ${0.4 - progress * 0.1})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr * 0.32, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(103, 232, 249, ${0.5 - progress * 0.15})`;
+        ctx.fill();
+      }
+    }
+
+    // Fluid particles flowing through expanded channels
+    const particleCount = Math.floor(progress * 50);
+    for (let i = 0; i < particleCount; i++) {
+      const t = (time * 0.6 + i * 0.137) % 1;
+      const horizontal = i % 2 === 0;
+      let px, py;
+      if (horizontal) {
+        px = padX + t * (w - padX * 2);
+        py = padY + ((i * 7) % (rows + 1)) * cellH;
+      } else {
+        px = padX + ((i * 11) % (cols + 1)) * cellW;
+        py = padY + t * (h - padY * 2);
+      }
+
+      ctx.beginPath();
+      ctx.arc(px, py, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(103, 232, 249, 0.85)';
+      ctx.shadowColor = 'rgba(103, 232, 249, 0.8)';
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Phase label
+    ctx.fillStyle = 'rgba(138, 150, 196, 0.7)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    let phaseLabel;
+    if (progress < 0.15) phaseLabel = 'AWAKE';
+    else if (progress < 0.4) phaseLabel = 'LIGHT SLEEP';
+    else if (progress < 0.75) phaseLabel = 'DEEP SLOW-WAVE SLEEP';
+    else phaseLabel = 'PEAK GLYMPHATIC FLOW';
+    ctx.fillText(phaseLabel, 12, 20);
+
+    time += 0.016;
+    requestAnimationFrame(draw);
+  }
+
+  window.setShrinkProgress = function (p) {
+    progress = Math.min(1, Math.max(0, p));
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        active = true;
+        resize();
+        draw();
+      } else {
+        active = false;
+      }
+    });
+  }, { threshold: 0.1 });
+  observer.observe(canvas);
+
+  window.addEventListener('resize', () => {
+    if (active) resize();
+  });
+})();
+
+// Night slider control
+(function nightSlider() {
+  const slider = document.getElementById('nightSlider');
+  const display = document.getElementById('timeDisplay');
+  const label = document.getElementById('timeLabel');
+  const interstitial = document.getElementById('interstitial');
+  const flowRate = document.getElementById('flowRate');
+  const clearance = document.getElementById('clearance');
+
+  const labels = [
+    { t: '22:00', l: 'Bedtime. Cells at full size. Channels at resting width.' },
+    { t: '22:30', l: 'Light sleep (N1, N2). Cells beginning to contract.' },
+    { t: '23:00', l: 'First slow-wave sleep. Glymphatic flow accelerating.' },
+    { t: '23:30', l: 'Deep slow-wave sleep. Interstitial space expanding rapidly.' },
+    { t: '00:00', l: 'Peak glymphatic flow. Wash cycle in full operation.' },
+    { t: '00:30', l: 'Continued deep sleep. Maximum waste clearance.' },
+    { t: '01:00', l: 'Second sleep cycle. Channels beginning to narrow.' },
+    { t: '02:00', l: 'Slow-wave tapering. REM cycles increasing.' },
+    { t: '04:00', l: 'REM-dominant. Glymphatic flow much reduced.' },
+    { t: '06:30', l: 'Waking. Cells re-expand. Consciousness returns.' }
+  ];
+
+  slider.addEventListener('input', e => {
+    const val = parseInt(e.target.value);
+    const idx = Math.min(labels.length - 1, Math.floor((val / 100) * labels.length));
+    const data = labels[idx];
+    display.textContent = data.t;
+    label.textContent = data.l;
+
+    // Bell curve peaking around 40-50% (peak slow-wave sleep around midnight)
+    const p = val / 100;
+    const bell = Math.exp(-Math.pow((p - 0.45) * 3.2, 2));
+    const expansion = bell;
+    const interstitialPct = 14 + expansion * 8.4;
+    const flowMult = 1 + expansion * 9;
+    const clearPct = Math.min(98, Math.floor(expansion * 95));
+
+    interstitial.textContent = interstitialPct.toFixed(1) + '%';
+    flowRate.textContent = flowMult.toFixed(1) + '×';
+    clearance.textContent = clearPct + '%';
+
+    if (window.setShrinkProgress) {
+      window.setShrinkProgress(bell);
+    }
+  });
+})();
+
+// === WASTE CANVAS: amyloid accumulation ===
+(function wasteCanvas() {
+  const canvas = document.getElementById('wasteCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let time = 0;
+  let active = false;
+  let wasteLevel = 0.25;
+  let particles = [];
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function drawBrain() {
+    const cx = w / 2;
+    const cy = h / 2;
+    const r = Math.max(20, Math.min(w, h) * 0.42);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    const fillAlpha = Math.max(0, 0.05 - wasteLevel * 0.03);
+    ctx.fillStyle = `rgba(34, 211, 238, ${fillAlpha})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(103, 232, 249, ${0.35 - wasteLevel * 0.2})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Internal texture - radial lines
+    for (let i = 0; i < 8; i++) {
+      ctx.beginPath();
+      const ang = i / 8 * Math.PI * 2;
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(ang) * r, cy + Math.sin(ang) * r);
+      ctx.strokeStyle = `rgba(103, 232, 249, 0.08)`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    // Cross-section indicator (brain outline)
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.7, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(103, 232, 249, ${0.15 - wasteLevel * 0.08})`;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    return { cx, cy, r };
+  }
+
+  function draw() {
+    if (!active) return;
+    ctx.fillStyle = 'rgba(5, 8, 23, 0.25)';
+    ctx.fillRect(0, 0, w, h);
+
+    const brain = drawBrain();
+
+    // Maintain particle count based on waste level
+    const targetCount = Math.floor(wasteLevel * 90);
+    while (particles.length < targetCount) {
+      particles.push({
+        x: brain.cx + (Math.random() - 0.5) * brain.r * 1.5,
+        y: brain.cy + (Math.random() - 0.5) * brain.r * 1.5,
+        vx: (Math.random() - 0.5) * 0.1,
+        vy: (Math.random() - 0.5) * 0.1,
+        r: Math.random() * 2.5 + 0.8,
+        opacity: Math.random() * 0.5 + 0.4,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+    while (particles.length > targetCount) {
+      particles.pop();
+    }
+
+    for (const p of particles) {
+      p.x += p.vx + Math.sin(time + p.phase) * 0.15;
+      p.y += p.vy + Math.cos(time + p.phase * 1.3) * 0.15;
+
+      const dx = p.x - brain.cx;
+      const dy = p.y - brain.cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > brain.r * 0.9) {
+        const ang = Math.atan2(dy, dx);
+        p.x = brain.cx + Math.cos(ang) * brain.r * 0.9;
+        p.y = brain.cy + Math.sin(ang) * brain.r * 0.9;
+        p.vx *= -0.4;
+        p.vy *= -0.4;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      const r = Math.round(244 - wasteLevel * 50);
+      const g = Math.round(114 - wasteLevel * 40);
+      const b = Math.round(182 - wasteLevel * 60);
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${p.opacity})`;
+      ctx.shadowColor = 'rgba(244, 114, 182, 0.5)';
+      ctx.shadowBlur = 4;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Status label
+    ctx.fillStyle = 'rgba(138, 150, 196, 0.7)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    let status;
+    if (wasteLevel < 0.3) status = 'CLEAR · efficient nightly wash';
+    else if (wasteLevel < 0.5) status = 'MILD ACCUMULATION';
+    else if (wasteLevel < 0.75) status = 'SIGNIFICANT BURDEN';
+    else status = 'PATHOLOGICAL ACCUMULATION';
+    ctx.fillText(status, 12, 20);
+
+    time += 0.02;
+    requestAnimationFrame(draw);
+  }
+
+  window.setWasteLevel = function (level) {
+    wasteLevel = Math.min(0.95, Math.max(0, level));
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        active = true;
+        resize();
+        draw();
+      } else {
+        active = false;
+      }
+    });
+  }, { threshold: 0.1 });
+  observer.observe(canvas);
+
+  window.addEventListener('resize', () => {
+    if (active) resize();
+  });
+})();
+
+// Waste sliders control
+(function wasteSliders() {
+  const sleepSlider = document.getElementById('sleepSlider');
+  const yearsSlider = document.getElementById('yearsSlider');
+  const sleepVal = document.getElementById('sleepVal');
+  const yearsVal = document.getElementById('yearsVal');
+  const status = document.getElementById('wasteStatus');
+  const detail = document.getElementById('wasteDetail');
+  const statusBox = document.getElementById('wasteStatusBox');
+
+  function update() {
+    const sleep = parseFloat(sleepSlider.value);
+    const years = parseInt(yearsSlider.value);
+    sleepVal.textContent = sleep.toFixed(1) + ' hrs';
+    yearsVal.textContent = years + ' yrs';
+
+    const sleepDeficit = Math.max(0, 8 - sleep);
+    let level = sleepDeficit * 0.15;
+    const yearFactor = 1 + (years - 1) * 0.045;
+    level *= yearFactor;
+    level = Math.min(0.92, level);
+
+    if (window.setWasteLevel) window.setWasteLevel(level);
+
+    let statusText, detailText, color, boxClass;
+    if (level < 0.18) {
+      statusText = 'Brain washes itself nightly';
+      detailText = `Amyloid clearance efficiency ~95%. ${years}-year Alzheimer's risk profile: baseline.`;
+      color = 'var(--green)';
+      boxClass = '';
+    } else if (level < 0.35) {
+      statusText = 'Mild nightly shortfall';
+      detailText = `Estimated ${Math.round((1 - level) * 100)}% clearance. ${years}-year risk: ${(1 + level * 0.8).toFixed(2)}× baseline.`;
+      color = 'var(--gold)';
+      boxClass = 'warn';
+    } else if (level < 0.6) {
+      statusText = 'Significant accumulation';
+      detailText = `Estimated ${Math.round((1 - level) * 100)}% clearance. ${years}-year risk: ${(1 + level * 1.5).toFixed(2)}× baseline.`;
+      color = 'var(--gold)';
+      boxClass = 'warn';
+    } else {
+      statusText = 'Pathological pattern';
+      detailText = `Only ~${Math.round((1 - level) * 100)}% cleared nightly. ${years}-year risk: ${(1 + level * 2.5).toFixed(2)}× baseline.`;
+      color = 'var(--red)';
+      boxClass = 'bad';
+    }
+    status.textContent = statusText;
+    status.style.color = color;
+    detail.textContent = detailText;
+    statusBox.className = 'waste-status-box ' + boxClass;
+  }
+
+  sleepSlider.addEventListener('input', update);
+  yearsSlider.addEventListener('input', update);
+  update();
+})();
+
+// === PEAK CANVAS: single neuron with fluid flow (pattern break) ===
+(function peakCanvas() {
+  const canvas = document.getElementById('peakCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let time = 0;
+  let active = false;
+  let particles = [];
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < 35; i++) {
+      particles.push({
+        x: -10,
+        y: h / 2 + (Math.random() - 0.5) * 80,
+        vx: 1 + Math.random() * 1.5,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 1.3 + 0.5,
+        opacity: Math.random() * 0.5 + 0.5,
+        offset: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  function drawNeuron() {
+    const cx = w / 2;
+    const cy = h / 2;
+
+    // Dendrites
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.35)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) {
+      const angle = (i / 7) * Math.PI * 2 + Math.PI / 7;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      const len = Math.min(w, h) * 0.35;
+      const segs = 6;
+      for (let s = 1; s <= segs; s++) {
+        const t = s / segs;
+        const baseX = cx + Math.cos(angle) * len * t;
+        const baseY = cy + Math.sin(angle) * len * t;
+        const wobble = Math.sin(time + s + i) * 5;
+        const perpX = -Math.sin(angle) * wobble;
+        const perpY = Math.cos(angle) * wobble;
+        ctx.lineTo(baseX + perpX, baseY + perpY);
+      }
+      ctx.stroke();
+
+      // Branch tips
+      const tipX = cx + Math.cos(angle) * len;
+      const tipY = cy + Math.sin(angle) * len;
+      ctx.beginPath();
+      ctx.arc(tipX, tipY, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(103, 232, 249, 0.6)';
+      ctx.fill();
+    }
+
+    // Cell body glow
+    const bodyR = Math.min(w, h) * 0.08;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, bodyR * 1.4);
+    grad.addColorStop(0, 'rgba(103, 232, 249, 0.95)');
+    grad.addColorStop(0.6, 'rgba(34, 211, 238, 0.4)');
+    grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, bodyR * 1.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nucleus
+    ctx.beginPath();
+    ctx.arc(cx, cy, bodyR * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fill();
+
+    // Pulse ring
+    const pulse = 1 + Math.sin(time * 1.5) * 0.2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, bodyR * 1.6 * pulse, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(103, 232, 249, ${0.4 / pulse})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function draw() {
+    if (!active) return;
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillRect(0, 0, w, h);
+
+    drawNeuron();
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy + Math.sin(time * 2 + p.offset) * 0.5;
+      if (p.x > w + 10) {
+        p.x = -10;
+        p.y = h / 2 + (Math.random() - 0.5) * 80;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(103, 232, 249, ${p.opacity})`;
+      ctx.shadowColor = 'rgba(103, 232, 249, 0.8)';
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    time += 0.02;
+    requestAnimationFrame(draw);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        active = true;
+        resize();
+        initParticles();
+        draw();
+      } else {
+        active = false;
+      }
+    });
+  }, { threshold: 0.25 });
+  observer.observe(canvas);
+
+  window.addEventListener('resize', () => {
+    if (active) {
+      resize();
+      initParticles();
+    }
+  });
+})();
+
+// === SHARE ENGINE ===
+(function shareEngine() {
+  let currentPlatform = 'x';
+  const tabs = document.querySelectorAll('.platform-tab');
+  const preview = document.getElementById('sharePreview');
+  const shareBtn = document.getElementById('shareBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const toast = document.getElementById('toast');
+
+  const shareUrl = 'https://brainwash.example.com'; // placeholder; replace with real URL when deployed
+
+  function generateCopy(platform) {
+    const score = window.brainWashScore != null ? window.brainWashScore : 72;
+    const nick = window.brainWashNickname || 'The Light Rinse';
+
+    const copies = {
+      x: `Your brain's interstitial space expands 60% every night — cerebrospinal fluid floods through, flushing out the amyloid-β that causes Alzheimer's.\n\nI scored ${score}/100 on the Brain Wash Index ("${nick}").\n\nThe wash cycle is real.`,
+      linkedin: `Most professionals treat sleep as lost productivity. Neuroscience says the opposite: every night, your brain's interstitial space expands by up to 60%, opening channels for cerebrospinal fluid to flush out metabolic waste — including amyloid-β, the protein whose accumulation defines Alzheimer's disease.\n\nThis "glymphatic system" was only discovered in 2012. Its flow is up to 10× more active during deep slow-wave sleep than during wakefulness. Missing the deep-sleep window (which arrives 1–2 hours after sleep onset) leaves the wash incomplete.\n\nI calculated my Brain Wash Score: ${score}/100 ("${nick}"). The model accounts for bedtime, hours in bed, sleep quality, and pre-sleep screen exposure.\n\nThree takeaways worth remembering:\n1. Sleep is not rest. It is active maintenance.\n2. The deep-sleep window matters more than total hours.\n3. Chronic shortfall compounds — Alzheimer's risk scales multiplicatively across years.\n\nCalculate yours:`,
+      whatsapp: `Hey — did you know your brain's interstitial space expands 60% at night so cerebrospinal fluid can wash out the amyloid-β linked to Alzheimer's? I just took a 30-second test and scored ${score}/100 ("${nick}"). Worth checking yours:`,
+      reddit: `I just discovered the glymphatic system — your brain physically expands its interstitial space by up to 60% during deep sleep so cerebrospinal fluid can flush out amyloid-β. Sleep isn't rest, it's active maintenance. The system was only discovered in 2012 (Nedergaard lab).\n\nI scored ${score}/100 on a "Brain Wash Index" calculator ("${nick}") that models bedtime, hours, quality, and screen exposure. Curious what others get — anyone want to compare scores?`,
+      threads: `Your brain shrinks at night so it can be washed.\n\nThe interstitial space expands 60%. Cerebrospinal fluid floods through, sweeping out the same protein that causes Alzheimer's.\n\nI scored ${score}/100 on the Brain Wash Index ("${nick}").`
+    };
+
+    return copies[platform];
+  }
+
+  function getShareUrl(platform) {
+    const text = encodeURIComponent(generateCopy(platform));
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const urls = {
+      x: `https://twitter.com/intent/tweet?text=${text}&url=${encodedUrl}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+      whatsapp: `https://wa.me/?text=${text}%20${encodedUrl}`,
+      reddit: `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodeURIComponent('Your brain expands 60% at night to wash itself — I scored ' + (window.brainWashScore || 72) + '/100 on the Brain Wash Index')}`,
+      threads: `https://threads.net/intent/post?text=${text}`
+    };
+    return urls[platform];
+  }
+
+  window.updateSharePreview = function () {
+    preview.textContent = generateCopy(currentPlatform);
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentPlatform = tab.dataset.platform;
+      updateSharePreview();
+    });
+  });
+
+  shareBtn.addEventListener('click', () => {
+    window.open(getShareUrl(currentPlatform), '_blank', 'noopener,noreferrer');
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const text = generateCopy(currentPlatform);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(ta);
+    }
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+
+  updateSharePreview();
+})();
+
+// === CALCULATOR ===
+(function calculator() {
+  let bedtime = 23;
+  let hours = 7;
+  let quality = 1;
+  let screen = 20;
+
+  const hoursSlider = document.getElementById('hoursSlider');
+  const hoursVal = document.getElementById('hoursVal');
+  const screenSlider = document.getElementById('screenSlider');
+  const screenVal = document.getElementById('screenVal');
+  const scoreNumber = document.getElementById('scoreNumber');
+  const scoreBarFill = document.getElementById('scoreBarFill');
+  const deepWindow = document.getElementById('deepWindow');
+  const efficiency = document.getElementById('efficiency');
+  const clearance2 = document.getElementById('clearance2');
+  const riskMult = document.getElementById('riskMult');
+  const nickname = document.getElementById('nickname');
+  const ritualTime = document.getElementById('ritualTime');
+
+  function fmtTime(h) {
+    return String(h).padStart(2, '0') + ':00';
+  }
+
+  function update() {
+    hoursVal.textContent = hours.toFixed(1);
+    screenVal.textContent = screen + ' min';
+
+    // Bedtime score: optimal 22-23 (hits deep sleep 23:00-01:00)
+    let bedtimeScore;
+    if (bedtime >= 22 && bedtime <= 23) bedtimeScore = 100;
+    else if (bedtime === 21 || bedtime === 0) bedtimeScore = 78;
+    else if (bedtime === 20) bedtimeScore = 60;
+    else bedtimeScore = 42;
+
+    let hoursScore;
+    if (hours >= 7.5 && hours <= 8.5) hoursScore = 100;
+    else if (hours >= 7 && hours <= 9) hoursScore = 86;
+    else if (hours >= 6 && hours <= 9.5) hoursScore = 64;
+    else if (hours >= 5) hoursScore = 40;
+    else hoursScore = 18;
+
+    const qualityScore = Math.min(100, quality * 88);
+    const screenScore = Math.max(0, 100 - screen * 1.3);
+
+    const score = Math.round(
+      bedtimeScore * 0.22 +
+      hoursScore * 0.34 +
+      qualityScore * 0.28 +
+      screenScore * 0.16
+    );
+
+    scoreNumber.textContent = score;
+    scoreBarFill.style.width = score + '%';
+
+    // Deep sleep window: 1-3 hours after bedtime
+    const deepStart = (bedtime + 1) % 24;
+    const deepEnd = (bedtime + 3) % 24;
+    const deepHit = (deepStart >= 22 || deepStart <= 2) && (deepEnd >= 0 && deepEnd <= 4);
+    deepWindow.textContent = `${fmtTime(deepStart)}–${fmtTime(deepEnd)} ${deepHit ? '✓' : '✗'}`;
+    deepWindow.className = 'insight-value ' + (deepHit ? 'good' : 'warn');
+
+    efficiency.textContent = Math.round(score * 0.95) + '%';
+    clearance2.textContent = Math.round(score * 0.92) + '%';
+
+    const risk = (1 + (100 - score) / 55).toFixed(2);
+    riskMult.textContent = risk + '×';
+    if (parseFloat(risk) > 1.6) riskMult.className = 'insight-value bad';
+    else if (parseFloat(risk) > 1.25) riskMult.className = 'insight-value warn';
+    else riskMult.className = 'insight-value good';
+
+    let nick;
+    if (score >= 90) nick = 'The Deep Soak';
+    else if (score >= 75) nick = 'The Steady Rinse';
+    else if (score >= 60) nick = 'The Light Rinse';
+    else if (score >= 45) nick = 'The Surface Mist';
+    else nick = 'The Dry Run';
+    nickname.textContent = nick;
+
+    const ritual = (bedtime - 1 + 24) % 24;
+    ritualTime.textContent = fmtTime(ritual);
+
+    window.brainWashScore = score;
+    window.brainWashNickname = nick;
+    if (typeof window.updateSharePreview === 'function') {
+      window.updateSharePreview();
+    }
+  }
+
+  hoursSlider.addEventListener('input', e => {
+    hours = parseFloat(e.target.value);
+    update();
+  });
+
+  screenSlider.addEventListener('input', e => {
+    screen = parseInt(e.target.value);
+    update();
+  });
+
+  document.querySelectorAll('.bedtime-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.bedtime-option').forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      bedtime = parseInt(opt.dataset.time);
+      update();
+    });
+  });
+
+  document.querySelectorAll('.quality-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.quality-option').forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      quality = parseFloat(opt.dataset.q);
+      update();
+    });
+  });
+
+  update();
+})();
+
+// === REVEAL BUTTONS ===
+(function reveals() {
+  document.querySelectorAll('.reveal-trigger').forEach(btn => {
+    const originalText = btn.querySelector('.reveal-text').textContent;
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const textEl = btn.querySelector('.reveal-text');
+      if (target.classList.contains('open')) {
+        target.classList.remove('open');
+        btn.classList.remove('revealed');
+        textEl.textContent = originalText;
+      } else {
+        target.classList.add('open');
+        btn.classList.add('revealed');
+        textEl.textContent = 'Close';
+      }
+    });
+  });
+})();
+
+// === ENDING CANVAS ===
+(function endingCanvas() {
+  const canvas = document.getElementById('endingCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let time = 0;
+  let particles = [];
+  let active = false;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    canvas.width = Math.max(1, w * dpr);
+    canvas.height = Math.max(1, h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < 110; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r: Math.random() * 1.2 + 0.3,
+        opacity: Math.random() * 0.5 + 0.1,
+        phase: Math.random() * Math.PI * 2,
+        type: Math.random() < 0.7 ? 'cyan' : 'pink'
+      });
+    }
+  }
+
+  function draw() {
+    if (!active) return;
+    ctx.clearRect(0, 0, w, h);
+
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(5, 8, 23, 0.7)');
+    grad.addColorStop(1, 'rgba(5, 8, 23, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy + Math.sin(time + p.phase) * 0.1;
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+
+      const flicker = 0.5 + Math.sin(time + p.phase) * 0.3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      if (p.type === 'cyan') {
+        ctx.fillStyle = `rgba(103, 232, 249, ${p.opacity * flicker})`;
+      } else {
+        ctx.fillStyle = `rgba(244, 114, 182, ${p.opacity * flicker})`;
+      }
+      ctx.fill();
+    }
+
+    time += 0.01;
+    requestAnimationFrame(draw);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        active = true;
+        resize();
+        initParticles();
+        draw();
+      } else {
+        active = false;
+      }
+    });
+  }, { threshold: 0.05 });
+  observer.observe(canvas);
+
+  window.addEventListener('resize', () => {
+    if (active) {
+      resize();
+      initParticles();
+    }
+  });
+})();
+
+// === SKIM PATH ===
+(function skimPath() {
+  const btn = document.getElementById('skimPath');
+  let skimMode = false;
+
+  btn.addEventListener('click', () => {
+    skimMode = !skimMode;
+    if (skimMode) {
+      document.querySelectorAll('.reveal-content').forEach(el => el.classList.add('open'));
+      document.querySelectorAll('.reveal-trigger').forEach(btn => {
+        btn.classList.add('revealed');
+        btn.querySelector('.reveal-text').textContent = 'Revealed';
+      });
+      document.getElementById('calc').scrollIntoView({ behavior: 'smooth' });
+      btn.textContent = '↯ Reset view';
+    } else {
+      document.querySelectorAll('.reveal-content').forEach(el => el.classList.remove('open'));
+      document.querySelectorAll('.reveal-trigger').forEach(btn => {
+        btn.classList.remove('revealed');
+        btn.querySelector('.reveal-text').textContent = 'Tap to see what your head is hiding';
+      });
+      btn.textContent = '↯ 30-second skim';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+})();
+
+// === FADE-IN ON SCROLL ===
+(function fadeIns() {
+  const elements = document.querySelectorAll('.section-title, .section-intro, .loop-marker, .viz-frame, .calc-inputs, .score-card, .ritual-card, .ending-content, .share-title, .share-sub, .pattern-break-text');
+  elements.forEach(el => el.classList.add('fade-in'));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  elements.forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>
