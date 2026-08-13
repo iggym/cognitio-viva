@@ -248,6 +248,21 @@
     "theOneIdea": "Growth is not about maximizing expected value — it's about maximizing the geometric growth rate, which means never losing the ability to play the next round.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "working-memory-chunk-capacity",
+  "title": "The Magic Number Everyone Knows Is Wrong",
+  "subtitle": "Why real working memory capacity is closer to 4 chunks than the famous '7±2', and how experts cheat the limit",
+  "slug": "working-memory-chunk-capacity",
+  "topic": "Cognitive Load & Working Memory Limits",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/working-memory-chunk-capacity.html",
+  "tags": ["working-memory", "cognitive-load", "chunking", "psychology", "learning-science"],
+  "readTimeMinutes": 4,
+  "neuroParameters": {
+    "interactivityCeiling": "make",
+    "theOneIdea": "You don't get more working memory slots with practice — you get better boxes to put things in. The same four slots, holding more per slot.",
+    "peakEmotion": "Surprise / Reframe"
+  }
 }
 
 
