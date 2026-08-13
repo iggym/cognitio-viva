@@ -167,7 +167,29 @@
     "theOneIdea": "Non-action is not cognitive rest; it is an energy-intensive, unconstrained neural search across distant memory domains that powers structural eureka breakthroughs.",
     "peakEmotion": "Awe"
   }
+},{
+  "id": "phantom-limb-plasticity-remapped-self",
+  "title": "Phantom Limb Plasticity: The Remapped Self",
+  "subtitle": "How face inputs invade silent cortical territory after amputation and how optical illusions rewrite phantom paralysis.",
+  "slug": "phantom-limb-plasticity-remapped-self",
+  "topic": "Phantom Limb Plasticity: How the brain rewires sensory maps after structural loss.",
+  "publishedAt": "2026-08-13",
+  "artifactUrl": "artifacts/phantom-limb-plasticity-remapped-self.html",
+  "tags": [
+    "neuroscience",
+    "neuroplasticity",
+    "somatosensory",
+    "ramachandran",
+    "interactive-simulation"
+  ],
+  "readTimeMinutes": 3,
+  "neuroParameters": {
+    "interactivityCeiling": "tune",
+    "theOneIdea": "Your body image is an internal brain projection: when sensory input stops, neighboring cortical territories invade the silent space and visual feedback can instantly unbind physical memory.",
+    "peakEmotion": "Awe"
+  }
 }
+
 
 
 
