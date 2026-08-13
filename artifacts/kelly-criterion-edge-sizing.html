@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>The Bet That Wins Every Time and Still Ruins You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE7D6;
+    --paper-2:#E2DAC0;
+    --paper-3:#D9CFB2;
+    --ink:#1F3327;
+    --ink-soft:#4A5D4C;
+    --ink-faint:#7C8A78;
+    --brass:#A8791D;
+    --brass-bright:#C99A2E;
+    --oxblood:#7A2E2A;
+    --oxblood-bright:#9C3A34;
+    --rule: rgba(31,51,39,0.18);
+    --rule-strong: rgba(31,51,39,0.35);
+    --font-display: 'Instrument Serif', serif;
+    --font-body: 'Newsreader', serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:18px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:0 24px;}
+  .rule{border:none; border-top:1px solid var(--rule); margin:0;}
+  .rule-strong{border:none; border-top:2px solid var(--ink); margin:0;}
+  .ledger-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--ink-faint); padding:14px 0; border-bottom:1px solid var(--rule);
+  }
+  section{padding:64px 0;}
+  h1,h2,h3{font-family:var(--font-display); font-weight:400; margin:0 0 0.3em 0; line-height:1.05;}
+  h1{font-size:clamp(40px,8vw,68px); font-style:italic;}
+  h2{font-size:clamp(30px,5.5vw,44px);}
+  h3{font-size:clamp(22px,4vw,28px); font-style:italic;}
+  p{margin:0 0 1em 0;}
+  .lede{font-size:1.15em; color:var(--ink-soft);}
+  .num{font-family:var(--font-mono);}
+  a{color:var(--brass); text-decoration-color: rgba(168,121,29,0.4);}
+
+  /* skim box */
+  .skim{
+    background:var(--paper-2); border:1px solid var(--rule-strong);
+    border-radius:2px; padding:18px 20px; margin:28px 0 0 0;
+    font-family:var(--font-mono); font-size:13px; color:var(--ink-soft);
+  }
+  .skim b{color:var(--ink);}
+  .skim a{display:inline-block; margin-top:6px; font-weight:700;}
+
+  /* HERO */
+  .hero{padding-top:40px; text-align:left;}
+  .coin-row{display:flex; align-items:center; gap:22px; margin:28px 0;}
+  .coin{
+    width:64px; height:64px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass) 70%, #7a5716 100%);
+    border:2px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:700; color:var(--paper);
+    animation: flip 1.8s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes flip{
+    0%{transform:rotateY(0deg);}
+    45%{transform:rotateY(720deg);}
+    55%{transform:rotateY(720deg);}
+    100%{transform:rotateY(1440deg);}
+  }
+  .hero-stat{font-family:var(--font-mono); font-size:14px; color:var(--ink-soft); line-height:1.6;}
+  .hero-stat b{color:var(--oxblood); font-size:1.1em;}
+
+  /* LOOPS */
+  .loop-item{
+    display:flex; gap:14px; padding:18px 0; border-bottom:1px solid var(--rule);
+  }
+  .loop-item:first-child{border-top:1px solid var(--rule);}
+  .loop-num{font-family:var(--font-mono); font-size:13px; color:var(--brass); flex-shrink:0; width:26px; padding-top:3px;}
+  .loop-text{flex:1;}
+  .loop-tag{font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.08em;}
+  .pending{color:var(--oxblood-bright); font-family:var(--font-mono); font-size:12px;}
+  .resolved{color:var(--brass); font-family:var(--font-mono); font-size:12px;}
+
+  /* CONTROLS */
+  .panel{
+    background:var(--paper-2); border:1px solid var(--rule-strong); border-radius:2px;
+    padding:24px; margin:24px 0;
+  }
+  .control-row{margin-bottom:20px;}
+  .control-row:last-child{margin-bottom:0;}
+  .control-label{
+    display:flex; justify-content:space-between; font-family:var(--font-mono);
+    font-size:12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .control-label .val{color:var(--ink); font-weight:700; font-size:14px;}
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:4px;
+    background:var(--rule-strong); border-radius:2px; outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:var(--brass); border:2px solid var(--paper); cursor:pointer;
+    box-shadow:0 0 0 1px var(--ink);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%; background:var(--brass);
+    border:2px solid var(--paper); cursor:pointer; box-shadow:0 0 0 1px var(--ink);
+  }
+  canvas{width:100%; display:block; border-radius:2px;}
+  .readout{
+    display:flex; gap:24px; flex-wrap:wrap; margin-top:16px;
+    font-family:var(--font-mono); font-size:13px;
+  }
+  .readout div{flex:1; min-width:130px;}
+  .readout .k{color:var(--ink-faint); font-size:11px; text-transform:uppercase; letter-spacing:0.06em;}
+  .readout .v{font-size:20px; font-weight:700; margin-top:2px;}
+  .v.pos{color:var(--brass);}
+  .v.neg{color:var(--oxblood-bright);}
+
+  .zone-note{font-family:var(--font-mono); font-size:12px; padding:10px 12px; border-radius:2px; margin-top:12px; transition:background 0.3s, color 0.3s;}
+  .zone-safe{background:rgba(168,121,29,0.12); color:var(--brass);}
+  .zone-danger{background:rgba(122,46,42,0.14); color:var(--oxblood-bright);}
+
+  /* presets */
+  .presets{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 4px 0;}
+  .preset-btn{
+    font-family:var(--font-mono); font-size:12px; padding:8px 12px; border:1px solid var(--ink);
+    background:transparent; color:var(--ink); border-radius:2px; cursor:pointer;
+    transition:background 0.2s, color 0.2s;
+  }
+  .preset-btn:hover, .preset-btn.active{background:var(--ink); color:var(--paper);}
+
+  .double-btn{
+    font-family:var(--font-mono); font-size:13px; padding:12px 18px; border:2px solid var(--oxblood);
+    background:transparent; color:var(--oxblood); border-radius:2px; cursor:pointer; font-weight:700;
+    margin-top:14px; transition:all 0.2s;
+  }
+  .double-btn:hover{background:var(--oxblood); color:var(--paper);}
+
+  /* peak */
+  .peak{
+    background:var(--ink); color:var(--paper); padding:56px 32px; border-radius:2px;
+    text-align:center; margin:20px 0;
+  }
+  .peak h2{color:var(--paper);}
+  .peak .idea{font-family:var(--font-display); font-style:italic; font-size:clamp(24px,4.5vw,32px); color:var(--brass-bright); margin-top:16px;}
+
+  /* comparison bars */
+  .bar-row{display:flex; align-items:center; gap:12px; margin-bottom:14px; font-family:var(--font-mono); font-size:13px;}
+  .bar-label{width:110px; flex-shrink:0; color:var(--ink-soft);}
+  .bar-track{flex:1; background:var(--paper-3); border-radius:2px; height:22px; position:relative; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:2px; transition:width 0.6s ease;}
+  .bar-val{width:70px; text-align:right; flex-shrink:0;}
+
+  /* artifact card */
+  .artifact-card{
+    background:var(--paper); border:2px solid var(--ink); border-radius:3px; padding:30px;
+    text-align:center; margin:24px 0;
+  }
+  .artifact-badge{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);}
+  .artifact-num{font-family:var(--font-display); font-size:clamp(56px,12vw,90px); color:var(--brass); line-height:1; margin:6px 0;}
+  .artifact-tier{font-family:var(--font-mono); font-size:14px; font-weight:700; padding:6px 14px; border-radius:20px; display:inline-block; margin-top:8px;}
+
+  .share-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; justify-content:center;}
+  .share-btn{
+    font-family:var(--font-mono); font-size:12px; padding:10px 16px; border-radius:20px; border:1px solid var(--ink);
+    background:var(--paper); color:var(--ink); cursor:pointer; transition:all 0.2s;
+  }
+  .share-btn:hover{background:var(--ink); color:var(--paper);}
+
+  .return-hook{
+    text-align:center; padding:60px 0 40px 0;
+  }
+  .return-hook .cta{
+    font-family:var(--font-mono); font-size:13px; color:var(--ink-faint); margin-top:10px;
+  }
+
+  footer{padding:30px 0 60px 0; font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); text-align:center;}
+
+  .disclaimer{font-family:var(--font-mono); font-size:11px; color:var(--ink-faint); font-style:normal; margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HERO / OPEN -->
+  <section class="hero">
+    <div class="ledger-head"><span>Stake / Edge / Outcome</span><span>Entry No. 001</span></div>
+    <h1>You have a mathematical edge.<br>Bet it forever, and you go broke anyway.</h1>
+    <div class="coin-row">
+      <div class="coin">56%</div>
+      <div class="hero-stat">
+        A coin that lands your way <b>56% of the time</b>, even money.<br>
+        Positive expected value on every single flip.<br>
+        Bet everything, every time — probability of eventual ruin: <b>100%</b>.
+      </div>
+    </div>
+    <p class="lede">That's not a trick question. It's what happens to almost every gambler, trader, and investor who has an edge and no idea how much of their stack to risk on it.</p>
+    <div class="skim">
+      <b>30-second version:</b> There is one exact fraction of your bankroll to bet that grows your money fastest over time. Bet less, you leave growth on the table. Bet more — even a little more — and you don't just grow slower. Past a certain point, the same winning bet guarantees you end up at zero.
+      <br><a href="#peak">Skip to the one idea ↓</a>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- OPEN LOOPS -->
+  <section>
+    <div class="ledger-head"><span>Open Entries</span><span>Entry No. 002</span></div>
+    <h2>Three things that don't add up yet.</h2>
+    <div class="loop-item">
+      <div class="loop-num">01</div>
+      <div class="loop-text">
+        <div class="loop-tag">The Sizing Cliff</div>
+        <p>There's a bet size where doubling it doesn't double your winnings. It guarantees your ruin instead. <span class="pending">— unresolved</span></p>
+      </div>
+    </div>
+    <div class="loop-item">
+      <div class="loop-num">02</div>
+      <div class="loop-text">
+        <div class="loop-tag">The Half Measure</div>
+        <p>Professional bettors who know the exact optimal formula deliberately bet <em>less</em> than it tells them to. Being "wrong" on purpose, on purpose. <span class="pending">— unresolved</span></p>
+      </div>
+    </div>
+    <div class="loop-item">
+      <div class="loop-num">03</div>
+      <div class="loop-text">
+        <div class="loop-tag">Your Number</div>
+        <p>Somewhere in the math below is a single percentage that's correct for your exact edge — and only yours. <span class="pending">— unresolved</span></p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- INTERACTIVE EXPLORER -->
+  <section>
+    <div class="ledger-head"><span>Live Calculation</span><span>Entry No. 003</span></div>
+    <h2>Drag the size of your bet.</h2>
+    <p>Start with a coin that favors you 60% of the time, even money. The curve below is your <em>growth rate</em> — not your winnings, your compounding rate — at every possible bet size, from 0% of your bankroll to all of it.</p>
+
+    <div class="panel">
+      <div class="control-row">
+        <div class="control-label"><span>Win probability</span><span class="val" id="pVal">60%</span></div>
+        <input type="range" id="pSlider" min="51" max="90" value="60" step="1">
+      </div>
+      <div class="control-row">
+        <div class="control-label"><span>Payout odds (b : 1)</span><span class="val" id="bVal">1.0</span></div>
+        <input type="range" id="bSlider" min="5" max="30" value="10" step="1">
+      </div>
+      <div class="control-row">
+        <div class="control-label"><span>Your bet size (fraction of bankroll)</span><span class="val" id="fVal">20%</span></div>
+        <input type="range" id="fSlider" min="0" max="100" value="20" step="1">
+      </div>
+
+      <canvas id="growthChart" height="220"></canvas>
+
+      <div class="readout">
+        <div><div class="k">Growth rate at this size</div><div class="v" id="gRateOut">—</div></div>
+        <div><div class="k">Optimal size (Kelly f*)</div><div class="v pos" id="fStarOut">—</div></div>
+        <div><div class="k">Zero-growth threshold</div><div class="v neg" id="zeroOut">—</div></div>
+      </div>
+      <div class="zone-note zone-safe" id="zoneNote">You're growing your bankroll at this size.</div>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- PATTERN BREAK -->
+  <section>
+    <div class="ledger-head"><span>Stress Test</span><span>Entry No. 004</span></div>
+    <h2>Loop 01, resolved.</h2>
+    <p>Set your slider to the exact optimal size above, then push this. It doubles your bet fraction and replays the same edge, the same odds, the same 60% coin.</p>
+    <button class="double-btn" id="doubleBtn">Double the optimal bet →</button>
+    <p id="doubleResult" style="font-family:var(--font-mono); font-size:14px; margin-top:16px; min-height:24px;"></p>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- PEAK / ONE IDEA -->
+  <section id="peak">
+    <div class="peak">
+      <div class="ledger-head" style="border-color:rgba(237,231,214,0.2); color:rgba(237,231,214,0.5);"><span>The Peak</span><span>Entry No. 005</span></div>
+      <h2>The edge was never the variable that mattered.</h2>
+      <div class="idea">The exact same 20% edge compounds into a fortune or a guaranteed zero — depending only on how much of your stack you risk each time.</div>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- LOOP 2 RESOLUTION -->
+  <section>
+    <div class="ledger-head"><span>Practice, Not Theory</span><span>Entry No. 006</span></div>
+    <h2>Loop 02, resolved: why pros undersize on purpose.</h2>
+    <p>Full Kelly maximizes long-run growth — but it's a rollercoaster, because your bankroll swings are proportional to your bet size squared. Half of the optimal size gives up surprisingly little growth for a lot less stomach-churn.</p>
+    <div class="panel">
+      <div class="bar-row"><div class="bar-label">Full Kelly</div><div class="bar-track"><div class="bar-fill" id="barFull" style="background:var(--brass); width:100%;"></div></div><div class="bar-val">growth 100%</div></div>
+      <div class="bar-row"><div class="bar-label">Half Kelly</div><div class="bar-track"><div class="bar-fill" id="barHalf" style="background:var(--brass-bright); width:75%;"></div></div><div class="bar-val">growth ~75%</div></div>
+      <div class="bar-row"><div class="bar-label">Full Kelly</div><div class="bar-track"><div class="bar-fill" style="background:var(--oxblood); width:100%;"></div></div><div class="bar-val">swings 100%</div></div>
+      <div class="bar-row"><div class="bar-label">Half Kelly</div><div class="bar-track"><div class="bar-fill" style="background:var(--oxblood-bright); width:25%;"></div></div><div class="bar-val">swings ~25%</div></div>
+      <p style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); margin-top:10px;">Half the bet size ≈ three-quarters of the growth, at roughly a quarter of the volatility. That trade is why "fractional Kelly" is the default in most real trading and betting desks.</p>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- PERSONAL CALCULATOR -->
+  <section>
+    <div class="ledger-head"><span>Loop 03, Resolved</span><span>Entry No. 007</span></div>
+    <h2>Your number.</h2>
+    <p>Pick the shape of edge closest to a real decision you're weighing, or leave the sliders above where you set them.</p>
+    <div class="presets">
+      <button class="preset-btn" data-p="55" data-b="10">Even-money bet, small edge</button>
+      <button class="preset-btn" data-p="58" data-b="10">Skill game, modest edge</button>
+      <button class="preset-btn" data-p="30" data-b="40">Long-shot, big payout</button>
+      <button class="preset-btn" data-p="45" data-b="25">Asymmetric trade</button>
+    </div>
+    <p class="disclaimer">Illustrative math, not financial advice — real trades and investments carry costs, uncertainty in your true edge, and risks this simple model doesn't capture.</p>
+
+    <div class="artifact-card">
+      <div class="artifact-badge">Your Kelly Number</div>
+      <div class="artifact-num" id="artifactNum">20%</div>
+      <div class="artifact-badge">of bankroll, per bet — at your current edge</div>
+      <div class="artifact-tier" id="artifactTier">Optimal Zone</div>
+      <div style="font-family:var(--font-mono); font-size:12px; color:var(--ink-faint); margin-top:14px;">
+        Conservative pick: <b id="halfKellyNum" style="color:var(--ink);">10%</b> (half-Kelly)
+      </div>
+
+      <div class="share-row">
+        <button class="share-btn" data-platform="x">Share on X</button>
+        <button class="share-btn" data-platform="linkedin">Share on LinkedIn</button>
+        <button class="share-btn" data-platform="whatsapp">Send on WhatsApp</button>
+        <button class="share-btn" data-platform="reddit">Post to Reddit</button>
+        <button class="share-btn" data-platform="threads">Share on Threads</button>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule-strong">
+
+  <!-- RETURN HOOK -->
+  <section class="return-hook">
+    <h3>This only works with your real numbers.</h3>
+    <p>The formula doesn't care whether the bet is a coin flip, a poker hand, a trade, or a slice of savings into something risky. It only needs your honest win probability and your real payout odds.</p>
+    <div class="cta">Come back with a real decision and run it through the sliders above.</div>
+  </section>
+
+  <footer>
+    Kelly Criterion · f* = p − q/b · maximize E[ln(wealth)], not E[wealth]
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  const pSlider = document.getElementById('pSlider');
+  const bSlider = document.getElementById('bSlider');
+  const fSlider = document.getElementById('fSlider');
+  const pVal = document.getElementById('pVal');
+  const bVal = document.getElementById('bVal');
+  const fVal = document.getElementById('fVal');
+  const canvas = document.getElementById('growthChart');
+  const ctx = canvas.getContext('2d');
+  const gRateOut = document.getElementById('gRateOut');
+  const fStarOut = document.getElementById('fStarOut');
+  const zeroOut = document.getElementById('zeroOut');
+  const zoneNote = document.getElementById('zoneNote');
+
+  function growth(f,p,b){
+    if(f<=-1/b || f>=1) return NaN;
+    const q = 1-p;
+    return p*Math.log(1+b*f) + q*Math.log(1-f);
+  }
+
+  function kellyFraction(p,b){
+    const q=1-p;
+    return p - q/b;
+  }
+
+  // find positive zero crossing of growth(f) beyond f* via bisection
+  function findZeroCrossing(p,b,fStar){
+    let lo = fStar, hi = Math.min(0.999, fStar*4+0.05);
+    // ensure hi actually crosses negative; expand search if needed
+    let tries=0;
+    while(growth(hi,p,b) > 0 && hi < 0.999 && tries<50){ hi = Math.min(0.999, hi*1.3); tries++; }
+    if(growth(hi,p,b) > 0) return null; // never crosses within domain
+    for(let i=0;i<60;i++){
+      const mid=(lo+hi)/2;
+      const g=growth(mid,p,b);
+      if(g>0) lo=mid; else hi=mid;
+    }
+    return (lo+hi)/2;
+  }
+
+  function fmtPct(x){ return (x*100).toFixed(1)+'%'; }
+
+  function draw(){
+    const p = parseFloat(pSlider.value)/100;
+    const b = parseFloat(bSlider.value)/10;
+    const f = parseFloat(fSlider.value)/100;
+
+    pVal.textContent = Math.round(p*100)+'%';
+    bVal.textContent = b.toFixed(1);
+    fVal.textContent = Math.round(f*100)+'%';
+
+    const fStar = kellyFraction(p,b);
+    const zero = fStar>0 ? findZeroCrossing(p,b,fStar) : null;
+
+    fStarOut.textContent = fStar>0 ? fmtPct(fStar) : 'no edge';
+    zeroOut.textContent = zero ? fmtPct(zero) : '—';
+
+    const g = growth(f,p,b);
+    gRateOut.textContent = isFinite(g) ? (g*100).toFixed(2)+'%' : '—';
+    gRateOut.className = 'v ' + (g>=0 ? 'pos':'neg');
+
+    if(g>=0){
+      zoneNote.className = 'zone-note zone-safe';
+      zoneNote.textContent = "You're growing your bankroll at this size.";
+    } else {
+      zoneNote.className = 'zone-note zone-danger';
+      zoneNote.textContent = "This size shrinks your bankroll toward zero over time — even though every single bet still has positive expected value.";
+    }
+
+    // ---- canvas plot ----
+    const W = canvas.width = canvas.clientWidth * (window.devicePixelRatio||1);
+    const H = canvas.height = 220 * (window.devicePixelRatio||1);
+    const dpr = window.devicePixelRatio||1;
+    ctx.clearRect(0,0,W,H);
+
+    const maxF = zero ? Math.min(0.999, zero*1.4) : 0.9;
+    const pad = 30*dpr;
+    const plotW = W - pad*2;
+    const plotH = H - pad*1.6;
+
+    // sample curve
+    const N = 140;
+    let pts = [];
+    let minG=0, maxG=0;
+    for(let i=0;i<=N;i++){
+      const ff = (i/N)*maxF;
+      const gg = growth(ff,p,b);
+      pts.push([ff,gg]);
+      if(gg<minG) minG=gg;
+      if(gg>maxG) maxG=gg;
+    }
+    minG = Math.min(minG, -0.01);
+    maxG = Math.max(maxG, 0.01);
+
+    function X(ff){ return pad + (ff/maxF)*plotW; }
+    function Y(gg){ return pad*0.7 + (1 - (gg-minG)/(maxG-minG))*plotH; }
+
+    // zero line
+    ctx.strokeStyle = 'rgba(31,51,39,0.35)';
+    ctx.lineWidth = 1*dpr;
+    ctx.beginPath();
+    ctx.moveTo(pad, Y(0));
+    ctx.lineTo(W-pad, Y(0));
+    ctx.stroke();
+
+    // curve, colored by sign
+    ctx.lineWidth = 2.5*dpr;
+    for(let i=1;i<pts.length;i++){
+      const [f0,g0]=pts[i-1], [f1,g1]=pts[i];
+      ctx.strokeStyle = g1>=0 ? '#A8791D' : '#9C3A34';
+      ctx.beginPath();
+      ctx.moveTo(X(f0),Y(g0));
+      ctx.lineTo(X(f1),Y(g1));
+      ctx.stroke();
+    }
+
+    // f* marker
+    if(fStar>0 && fStar<=maxF){
+      ctx.fillStyle = '#1F3327';
+      ctx.beginPath();
+      ctx.arc(X(fStar), Y(growth(fStar,p,b)), 4*dpr, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // current f marker
+    if(f<=maxF && isFinite(g)){
+      ctx.fillStyle = g>=0 ? '#C99A2E' : '#9C3A34';
+      ctx.beginPath();
+      ctx.arc(X(f), Y(g), 6*dpr, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = '#1F3327';
+      ctx.lineWidth = 1.5*dpr;
+      ctx.stroke();
+    }
+
+    ctx.font = (11*dpr)+'px Space Mono, monospace';
+    ctx.fillStyle = 'rgba(31,51,39,0.55)';
+    ctx.fillText('0%', pad-6*dpr, H-6*dpr);
+    ctx.fillText((maxF*100).toFixed(0)+'% of bankroll', W-pad-90*dpr, H-6*dpr);
+  }
+
+  [pSlider,bSlider,fSlider].forEach(s=>s.addEventListener('input', draw));
+  window.addEventListener('resize', draw);
+  draw();
+
+  // ---- double the bet ----
+  document.getElementById('doubleBtn').addEventListener('click', function(){
+    const p = parseFloat(pSlider.value)/100;
+    const b = parseFloat(bSlider.value)/10;
+    const fStar = kellyFraction(p,b);
+    const doubled = Math.min(0.99, fStar*2);
+    fSlider.value = Math.round(doubled*100);
+    draw();
+    const g2 = growth(doubled,p,b);
+    const result = document.getElementById('doubleResult');
+    document.body.style.transition = 'background 0.4s';
+    document.body.style.background = '#3a1512';
+    setTimeout(()=>{ document.body.style.background = ''; }, 500);
+    result.style.color = g2<0 ? '#7A2E2A' : '#A8791D';
+    result.textContent = g2<0
+      ? 'At '+Math.round(doubled*100)+'% of bankroll, growth rate is '+(g2*100).toFixed(2)+'% — negative. Same edge, same odds, guaranteed long-run ruin.'
+      : 'At '+Math.round(doubled*100)+'% of bankroll, growth rate has collapsed to '+(g2*100).toFixed(2)+'% — barely positive, all that risk for almost nothing.';
+  });
+
+  // ---- presets & artifact card ----
+  const presetBtns = document.querySelectorAll('.preset-btn');
+  const artifactNum = document.getElementById('artifactNum');
+  const artifactTier = document.getElementById('artifactTier');
+  const halfKellyNum = document.getElementById('halfKellyNum');
+
+  function updateArtifact(){
+    const p = parseFloat(pSlider.value)/100;
+    const b = parseFloat(bSlider.value)/10;
+    const fStar = kellyFraction(p,b);
+    if(fStar<=0){
+      artifactNum.textContent = 'No edge';
+      artifactTier.textContent = "Don't bet";
+      artifactTier.style.background = 'rgba(122,46,42,0.15)';
+      artifactTier.style.color = '#7A2E2A';
+      halfKellyNum.textContent = '—';
+      return;
+    }
+    artifactNum.textContent = fmtPct(fStar);
+    halfKellyNum.textContent = fmtPct(fStar/2);
+    let tier, bg, col;
+    if(fStar < 0.10){ tier='Thin Edge'; bg='rgba(168,121,29,0.15)'; col='#A8791D'; }
+    else if(fStar < 0.25){ tier='Optimal Zone'; bg='rgba(168,121,29,0.2)'; col='#A8791D'; }
+    else { tier='High Stakes'; bg='rgba(122,46,42,0.15)'; col='#7A2E2A'; }
+    artifactTier.textContent = tier;
+    artifactTier.style.background = bg;
+    artifactTier.style.color = col;
+  }
+  [pSlider,bSlider].forEach(s=>s.addEventListener('input', updateArtifact));
+  updateArtifact();
+
+  presetBtns.forEach(btn=>{
+    btn.addEventListener('click', function(){
+      presetBtns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      pSlider.value = btn.dataset.p;
+      bSlider.value = btn.dataset.b;
+      draw();
+      updateArtifact();
+      document.querySelector('.artifact-card').scrollIntoView({behavior:'smooth', block:'center'});
+    });
+  });
+
+  // ---- share engine ----
+  function shareText(){
+    const p = parseFloat(pSlider.value)/100;
+    const b = parseFloat(bSlider.value)/10;
+    const fStar = kellyFraction(p,b);
+    return {
+      num: fStar>0 ? fmtPct(fStar) : 'no edge',
+      url: window.location.href
+    };
+  }
+
+  document.querySelectorAll('.share-btn').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const {num,url} = shareText();
+      const platform = btn.dataset.platform;
+      let shareUrl = '';
+      const baseMsg = 'My Kelly number just came out to '+num+' of bankroll per bet. Turns out "how big should I bet" has an exact answer:';
+      if(platform==='x'){
+        shareUrl = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(baseMsg)+'&url='+encodeURIComponent(url);
+      } else if(platform==='linkedin'){
+        shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(url);
+      } else if(platform==='whatsapp'){
+        shareUrl = 'https://wa.me/?text='+encodeURIComponent(baseMsg+' '+url);
+      } else if(platform==='reddit'){
+        shareUrl = 'https://www.reddit.com/submit?url='+encodeURIComponent(url)+'&title='+encodeURIComponent('The bet-sizing formula that turns the same edge into a fortune or a guaranteed zero');
+      } else if(platform==='threads'){
+        shareUrl = 'https://www.threads.net/intent/post?text='+encodeURIComponent(baseMsg+' '+url);
+      }
+      window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=500');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
